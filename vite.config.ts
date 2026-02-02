@@ -8,6 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
+  base: '/leafer-htmltext-edit-website/',
   plugins: [vue(), vueJsx(), tailwindcss()],
   resolve: {
     alias: {
