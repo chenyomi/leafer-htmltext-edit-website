@@ -22,7 +22,6 @@ export function useStars() {
       }
 
       const count = await getStarsCount();
-
       localStorage.setItem(
         CACHE_KEY,
         JSON.stringify({

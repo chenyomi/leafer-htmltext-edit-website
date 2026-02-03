@@ -1,12 +1,6 @@
-/**
- * Fetches the star count for a GitHub repository
- * @param repo - Repository in format "owner/repo"
- * @returns Promise<number> - The star count
- */
-export const getStarsCount = async (repo: string = 'DavidHDev/vue-bits'): Promise<number> => {
+export const getStarsCount = async (): Promise<number> => {
   try {
-    const response = await fetch(`https://api.github.com/repos/${repo}`);
-
+    const response = await fetch(`https://api.github.com/repos/chenyomi/leafer-htmltext-edit-view`);
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.status}`);
     }

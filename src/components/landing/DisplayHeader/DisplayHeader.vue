@@ -17,10 +17,14 @@
               Docs
             </a>
           </router-link>
-          <router-link class="nav-link" to="" custom>
-            <a class="nav-link" href="https://github.com/chenyomi/leafer-htmltext-edit-view" target="_blank">github</a>
-          </router-link>
         </nav>
+        <button class="cta-button" @click="openGitHub">
+          Star On GitHub
+          <span ref="starCountRef">
+            <img :src="starIcon" alt="Star Icon" />
+            {{ stars || 0 }}
+          </span>
+        </button>
       </div>
     </div>
   </header>
@@ -31,6 +35,7 @@ import { watch, useTemplateRef } from 'vue';
 import { gsap } from 'gsap';
 import VueBitsLogo from '@/components/common/Logo.vue';
 import { useStars } from '@/composables/useStars';
+import starIcon from '@/assets/common/star.svg';
 import './DisplayHeader.css';
 
 interface Props {
@@ -41,6 +46,10 @@ defineProps<Props>();
 
 const starCountRef = useTemplateRef<HTMLElement>('starCountRef');
 const stars = useStars();
+
+const openGitHub = () => {
+  window.open('https://github.com/chenyomi/leafer-htmltext-edit-view', '_blank');
+};
 const goCase = () => {
   document.getElementById('case')?.scrollIntoView({
     behavior: 'smooth'
