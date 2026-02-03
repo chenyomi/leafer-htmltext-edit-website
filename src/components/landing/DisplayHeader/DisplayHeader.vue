@@ -7,8 +7,11 @@
 
       <div class="nav-cta-group">
         <nav class="landing-nav-items">
-          <router-link class="nav-link" :class="{ 'active-link': activeItem === 'home' }" to="/">Home</router-link>
-
+          <router-link class="nav-link" :class="{ 'active-link': activeItem === 'home' }" to="" @click="goHome">
+            Home
+          </router-link>
+          <router-link class="nav-link" to="" @click="goCase">Case</router-link>
+          <router-link class="nav-link" to="" @click="goPrice">Price</router-link>
           <router-link class="nav-link" to="" custom>
             <a class="nav-link" href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit" target="_blank">
               Docs
@@ -35,7 +38,21 @@ defineProps<Props>();
 
 const starCountRef = useTemplateRef<HTMLElement>('starCountRef');
 const stars = useStars();
-
+const goCase = () => {
+  document.getElementById('case')?.scrollIntoView({
+    behavior: 'smooth'
+  });
+};
+const goPrice = () => {
+  document.getElementById('price')?.scrollIntoView({
+    behavior: 'smooth'
+  });
+};
+const goHome = () => {
+  document.getElementById('home')?.scrollIntoView({
+    behavior: 'smooth'
+  });
+};
 watch(
   stars,
   newStars => {

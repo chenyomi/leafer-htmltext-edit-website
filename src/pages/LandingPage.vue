@@ -21,7 +21,6 @@
       />
     </div>
     <Hero />
-    <FeatureCards />
     <StartBuilding />
     <Footer />
   </section>
@@ -32,7 +31,6 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import Hero from '../components/landing/Hero/Hero.vue';
 import FloatingLines from '@/components/landing/FloatingLines/FloatingLines.vue';
 import Footer from '@/components/landing/Footer/Footer.vue';
-import FeatureCards from '@/components/landing/FeatureCards/FeatureCards.vue';
 import StartBuilding from '@/components/landing/StartBuilding/StartBuilding.vue';
 import heroImage from '@/assets/common/hero.webp';
 const isMobile = ref(false);

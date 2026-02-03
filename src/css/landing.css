@@ -10,7 +10,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 100dvh;
+  height: 85dvh;
   max-width: calc(1200px + 6em);
   margin: 0 auto;
   padding: 0 4em;
@@ -353,6 +353,7 @@
   flex-direction: column;
   align-items: center;
   max-width: 100%;
+  padding-top: 150px;
 }
 
 @media (max-width: 1440px) {

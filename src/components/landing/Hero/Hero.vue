@@ -1,5 +1,5 @@
 <template>
-  <div class="landing-content">
+  <div class="landing-content" id="home">
     <img
       :src="landingBlur"
       alt=""

@@ -20,8 +20,6 @@
   background: #000000;
   border-radius: 50px;
   padding: 4rem 3rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 135, 99, 0.5);
-  /* backdrop-filter: blur(10px); */
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
