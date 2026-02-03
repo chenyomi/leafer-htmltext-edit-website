@@ -13,7 +13,7 @@
         />
         <h2 class="start-building-title">Video</h2>
         <p class="start-building-subtitle">操作简介</p>
-        <video src="@/assets/video/video.mov" controls class="w-200"></video>
+        <video src="@/assets/video/video.mov" controls class="w-200" style="border-radius: 20px"></video>
         <router-link custom to="" class="start-building-button">
           <a href="https://chenyomi.github.io/leafer-htmltext-edit-view/" target="_blank">Just Trying Now</a>
         </router-link>
