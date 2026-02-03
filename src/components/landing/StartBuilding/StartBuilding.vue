@@ -138,6 +138,7 @@
 import './StartBuilding.css';
 import { ref, onMounted, onUnmounted } from 'vue';
 import Squares from '@/content/Backgrounds/Squares/Squares.vue';
+import '../FeatureCards/FeatureCards.css';
 import GradientText from '@/content/TextAnimations/GradientText/GradientText.vue';
 import ElectricBorder from '@/content/Animations/ElectricBorder/ElectricBorder.vue';
 const isMobile = ref(false);
