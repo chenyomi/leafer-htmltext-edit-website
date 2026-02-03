@@ -17,6 +17,9 @@
               Docs
             </a>
           </router-link>
+          <router-link class="nav-link" to="" custom>
+            <a class="nav-link" href="https://github.com/chenyomi/leafer-htmltext-edit-view" target="_blank">github</a>
+          </router-link>
         </nav>
       </div>
     </div>
