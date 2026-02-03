@@ -17,12 +17,11 @@
   max-width: 1200px;
   user-select: none;
   margin: 0 auto;
-  background: linear-gradient(135deg, rgb(30, 160, 63), rgba(24, 47, 255, 1));
-  background-size: 200% 200%;
+  background: #000000;
   border-radius: 50px;
   padding: 4rem 3rem;
   box-shadow: 0 8px 32px 0 rgba(31, 135, 99, 0.5);
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -40,14 +39,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/assets/grain.webp');
-  filter: brightness(3);
-  background-size: 500px 500px;
-  mix-blend-mode: lighten;
-  background-repeat: repeat;
-  opacity: 1;
-  pointer-events: none;
-  z-index: 1;
 }
 
 .start-building-card > * {

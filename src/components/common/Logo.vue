@@ -5,6 +5,7 @@
     :pauseDuration="1500"
     :showCursor="true"
     cursorCharacter="|"
+    style="font-weight: bold"
   />
 </template>
 

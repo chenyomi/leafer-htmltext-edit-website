@@ -3,7 +3,7 @@
     <footer class="landing-footer">
       <div class="footer-content">
         <div class="footer-left">
-          <ShinyText text="Leafer HtmlText-Edit" :disabled="false" :speed="2" class-name="footer-logo" />
+          <ShinyText text="Leafer HtmlText Edit" :disabled="false" :speed="2" class-name="footer-logo" />
           <p class="footer-description">
             A plugins website created with
             <i class="pi pi-heart-fill footer-heart"></i>
