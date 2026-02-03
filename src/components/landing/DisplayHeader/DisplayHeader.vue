@@ -9,16 +9,12 @@
         <nav class="landing-nav-items">
           <router-link class="nav-link" :class="{ 'active-link': activeItem === 'home' }" to="/">Home</router-link>
 
-          <router-link class="nav-link" to="/text-animations/split-text">Docs</router-link>
+          <router-link class="nav-link" to="" custom>
+            <a class="nav-link" href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit" target="_blank">
+              Docs
+            </a>
+          </router-link>
         </nav>
-
-        <button class="cta-button" @click="openGitHub">
-          Star On GitHub
-          <span ref="starCountRef" :style="{ opacity: 0 }">
-            <img :src="starIcon" alt="Star Icon" />
-            {{ stars }}
-          </span>
-        </button>
       </div>
     </div>
   </header>
@@ -29,7 +25,6 @@ import { watch, useTemplateRef } from 'vue';
 import { gsap } from 'gsap';
 import VueBitsLogo from '@/components/common/Logo.vue';
 import { useStars } from '@/composables/useStars';
-import starIcon from '@/assets/common/star.svg';
 import './DisplayHeader.css';
 
 interface Props {
@@ -40,10 +35,6 @@ defineProps<Props>();
 
 const starCountRef = useTemplateRef<HTMLElement>('starCountRef');
 const stars = useStars();
-
-const openGitHub = () => {
-  window.open('https://github.com/DavidHDev/vue-bits', '_blank');
-};
 
 watch(
   stars,

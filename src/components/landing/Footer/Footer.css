@@ -27,6 +27,7 @@
 
 .footer-logo {
   height: 28px;
+  font-size: 24px;
   width: auto;
   opacity: 0.9;
   transition: opacity 0.2s ease;

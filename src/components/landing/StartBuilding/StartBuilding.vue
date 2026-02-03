@@ -5,7 +5,7 @@
         <h2 class="start-building-title">Start Exploring</h2>
         <p class="start-building-subtitle">Animations, Components, Backgrounds - One Click Away</p>
 
-        <router-link to="/text-animations/split-text" class="start-building-button">Browse Components</router-link>
+        <router-link to="" class="start-building-button">Browse Components</router-link>
       </div>
     </div>
   </section>

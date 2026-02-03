@@ -9,7 +9,17 @@
       />
     </div>
 
-    <PlasmaWaveV2 :yOffset="0" :xOffset="40" :rotationDeg="-45" />
+    <div class="fixed h-full w-full z-0">
+      <FloatingLines
+        :enabled-waves="['top', 'middle', 'bottom']"
+        :line-count="[10, 15, 20]"
+        :line-distance="[8, 6, 4]"
+        :bend-radius="5.0"
+        :bend-strength="-0.5"
+        :interactive="true"
+        :parallax="true"
+      />
+    </div>
     <Hero />
     <FeatureCards />
     <StartBuilding />
@@ -20,7 +30,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import Hero from '../components/landing/Hero/Hero.vue';
-import PlasmaWaveV2 from '@/components/landing/PlasmaWave/PlasmaWaveV2.vue';
+import FloatingLines from '@/components/landing/FloatingLines/FloatingLines.vue';
 import Footer from '@/components/landing/Footer/Footer.vue';
 import FeatureCards from '@/components/landing/FeatureCards/FeatureCards.vue';
 import StartBuilding from '@/components/landing/StartBuilding/StartBuilding.vue';
@@ -32,7 +42,6 @@ const checkIsMobile = () => {
 };
 
 onMounted(() => {
-  document.title = 'Vue Bits - Animated UI Components For Vue';
   window.scrollTo(0, 0);
   checkIsMobile();
   window.addEventListener('resize', checkIsMobile);
