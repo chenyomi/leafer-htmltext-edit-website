@@ -1,6 +1,6 @@
 <template>
   <TextType
-    :text="['Hey, I\'m Yoomi.', 'A solo developer making cool stuff.']"
+    :text="['Hey, I\'m Chenyomi.', 'A solo developer making cool stuff.']"
     :typingSpeed="75"
     :pauseDuration="1500"
     :showCursor="true"
