@@ -15,8 +15,8 @@
         </div>
 
         <div class="footer-links">
-          <a href="javascript:void(0)" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
-
+          <a href="https://github.com/chenyomi" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
+          <a href="https://chenyomi.github.io/" target="_blank" rel="noopener noreferrer" class="footer-link">Blog</a>
           <a href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit" target="_blank" class="footer-link">
             Docs
           </a>
