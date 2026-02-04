@@ -16,10 +16,7 @@
         <p class="start-building-subtitle">功能介绍</p>
         <video src="@/assets/video/video.mov" controls class="w-200" style="border-radius: 20px"></video>
         <router-link custom to="" class="start-building-button">
-          <a
-            href="https://stackblitz.com/~/github.com/chenyomi/leafer-htmltext-edit-view?file=src/components/HelloWorld.vue"
-            target="_blank"
-          >
+          <a href="https://stackblitz.com/~/github.com/chenyomi/leafer-htmltext-edit-view" target="_blank">
             Just Trying Now
           </a>
         </router-link>
