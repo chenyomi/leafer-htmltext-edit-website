@@ -16,23 +16,21 @@
         <p class="start-building-subtitle mt-4">基础付费版功能介绍</p>
         <video src="@/assets/video/video.mov" controls class="w-200" style="border-radius: 20px"></video>
         <p class="start-building-subtitle mt-10">高级进阶版（暂不开放）</p>
-        <div class="flex w-200 gap-20 items-end">
-          <div class="flex-1" style="background: #ffffff; border-radius: 20px">
-            <img style="border-radius: 20px" src="@/assets/shu.png" alt="" />
+        <div class="text-center">
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+            <img style="border-radius: 20px; width: 100%" src="@/assets/shu.png" alt="" />
+            <p class="flex-1 w-full absolute">竖排文字</p>
           </div>
-          <div class="flex-1" style="background: #ffffff; border-radius: 20px">
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
               controls
               src="@/assets/video/cir_.mp4"
               :autoplay="true"
               :loop="true"
-              style="border-radius: 20px"
+              style="border-radius: 20px; width: 100%"
             ></video>
+            <p class="flex-1 w-full absolute">弧形文字</p>
           </div>
-        </div>
-        <div class="flex w-200 gap-20">
-          <p class="flex-1">竖排文字</p>
-          <p class="flex-1">弧形文字</p>
         </div>
         <p class="start-building-subtitle mt-10">Playground</p>
         <p class="start-building-subtitle">基础付费版功能在线体验入口（不包含进阶高级版）</p>
@@ -97,7 +95,16 @@
           />
           <p>请备注来意</p>
           <div style="padding: 20px; border-radius: 20px; text-align: center">
-            <img src="@/assets/qrcode.jpg" alt="" style="width: 200px; display: inline-block; border-radius: 10px" />
+            <img
+              src="@/assets/qrcode.jpg"
+              alt=""
+              style="max-width: 180px; display: inline-block; border-radius: 10px; margin: 5px"
+            />
+            <img
+              src="@/assets/tg.jpg"
+              alt=""
+              style="max-width: 200px; display: inline-block; border-radius: 10px; margin: 5px"
+            />
           </div>
         </ParticleCard>
 
