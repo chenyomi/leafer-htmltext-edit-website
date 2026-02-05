@@ -64,6 +64,7 @@
             style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
           />
           <div style="padding: 20px; border-radius: 20px">
+            <p>基础版本功能</p>
             <p>1个域名</p>
             <p>本地开发环境</p>
             <p>支持离线永久授权</p>
@@ -117,6 +118,7 @@
             style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
           />
           <div style="padding: 20px; border-radius: 20px">
+            <p>基础版本功能</p>
             <p>3个域名</p>
             <p>本地开发环境</p>
             <p>支持离线永久授权</p>
