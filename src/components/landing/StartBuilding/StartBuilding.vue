@@ -189,7 +189,7 @@
             </div>
             <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">📊 成本对比</p>
             <div class="pl-6">
-              <table style="border-collapse: collapse; border: 1px solid white">
+              <table style="border-collapse: collapse; border: 1px solid white; min-width: 100%">
                 <thead>
                   <tr>
                     <th>指标</th>
@@ -289,7 +289,7 @@
             </div>
             <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">开发周期长</p>
             <div class="pl-6">
-              <table style="border-collapse: collapse; border: 1px solid white">
+              <table style="border-collapse: collapse; border: 1px solid white; min-width: 100%">
                 <thead>
                   <tr>
                     <th>阶段</th>
