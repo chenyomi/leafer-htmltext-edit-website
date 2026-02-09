@@ -15,11 +15,24 @@
         <h4 class="start-building-title">Case</h4>
         <p class="start-building-subtitle mt-4">基础付费版功能介绍</p>
         <video src="@/assets/video/video.mov" controls class="w-200" style="border-radius: 20px"></video>
-        <p class="start-building-subtitle mt-10">高级进阶版（暂不开放）</p>
+
         <div class="text-center">
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <img style="border-radius: 20px; width: 100%" src="@/assets/shu.png" alt="" />
-            <p class="flex-1 w-full absolute">竖排文字</p>
+            <p class="flex-1 w-full absolute">一键竖排文字/段落竖排</p>
+          </div>
+        </div>
+        <p class="start-building-subtitle mt-10">其他功能（暂未开放）</p>
+        <div class="text-center">
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+            <video
+              controls
+              src="@/assets/video/br.mov"
+              :autoplay="true"
+              :loop="true"
+              style="border-radius: 20px; width: 100%"
+            ></video>
+            <p class="flex-1 w-full absolute">括号</p>
           </div>
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
@@ -31,6 +44,44 @@
             ></video>
             <p class="flex-1 w-full absolute">弧形文字</p>
           </div>
+        </div>
+        <div class="text-center">
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+            <video
+              controls
+              src="@/assets/video/cirshape.mov"
+              :autoplay="true"
+              :loop="true"
+              style="border-radius: 20px; width: 100%"
+            ></video>
+            <p class="flex-1 w-full absolute">圆</p>
+          </div>
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+            <video
+              controls
+              src="@/assets/video/line.mov"
+              :autoplay="true"
+              :loop="true"
+              style="border-radius: 20px; width: 100%"
+            ></video>
+            <p class="flex-1 w-full absolute">线性圆</p>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+            <video
+              controls
+              src="@/assets/video/star.mov"
+              :autoplay="true"
+              :loop="true"
+              style="border-radius: 20px; width: 100%"
+            ></video>
+            <p class="flex-1 w-full absolute">星星</p>
+          </div>
+          <div
+            class="relative inline-block mx-4 my-6"
+            style="background: #ffffff; border-radius: 20px; width: 400px"
+          ></div>
         </div>
         <p class="start-building-subtitle mt-10">Playground</p>
         <p class="start-building-subtitle">基础付费版功能在线体验入口（不包含进阶高级版）</p>
