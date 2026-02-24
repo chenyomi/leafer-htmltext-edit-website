@@ -21,6 +21,16 @@
             <img style="border-radius: 20px; width: 100%" src="@/assets/shu.png" alt="" />
             <p class="flex-1 w-full absolute">一键竖排文字/段落竖排</p>
           </div>
+          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+            <video
+              controls
+              src="@/assets/video/lunkuo.mov"
+              :autoplay="true"
+              :loop="true"
+              style="border-radius: 20px; width: 100%"
+            ></video>
+            <p class="flex-1 w-full absolute">轮廓线</p>
+          </div>
         </div>
         <p class="start-building-subtitle mt-10">其他功能（暂未开放）</p>
         <div class="text-center">
