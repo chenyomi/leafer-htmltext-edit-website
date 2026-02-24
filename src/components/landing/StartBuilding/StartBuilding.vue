@@ -172,7 +172,7 @@
         <ParticleCard class="feature-card card4" :disable-animations="isMobile">
           <h2>企业版</h2>
           <GradientText
-            text="早鸟价：¥798"
+            text="早鸟价：¥698"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
