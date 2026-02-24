@@ -8,7 +8,7 @@
             A plugins website created with
             <i class="pi pi-heart-fill footer-heart"></i>
             by
-            <a href="https://davidhaz.com/" target="_blank" class="footer-creator-link">chenyomi</a>
+            <a href="https://github.com/chenyomi" target="_blank" class="footer-creator-link">chenyomi</a>
           </p>
           <p class="footer-description">Built on top of the open-source project Vue Bits.</p>
           <p class="footer-copyright">© {{ new Date().getFullYear() }}</p>
