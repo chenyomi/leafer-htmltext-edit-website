@@ -14,7 +14,13 @@
         />
         <h4 class="start-building-title">Case</h4>
         <p class="start-building-subtitle mt-4">基础付费版功能介绍</p>
-        <video src="@/assets/video/video.mov" controls class="w-200" style="border-radius: 20px"></video>
+        <video
+          :poster="posterSrc"
+          src="@/assets/video/video.mov"
+          controls
+          class="w-200"
+          style="border-radius: 20px"
+        ></video>
 
         <div class="text-center">
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
@@ -416,6 +422,7 @@ import Squares from '@/content/Backgrounds/Squares/Squares.vue';
 import '../FeatureCards/FeatureCards.css';
 import GradientText from '@/content/TextAnimations/GradientText/GradientText.vue';
 import ElectricBorder from '@/content/Animations/ElectricBorder/ElectricBorder.vue';
+import posterSrc from '@/assets/video/video.png';
 const isMobile = ref(false);
 const show = ref(false);
 const checkIsMobile = () => {
