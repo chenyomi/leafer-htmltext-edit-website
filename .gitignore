@@ -29,3 +29,4 @@ public/ui
 *.sw?
 
 *.tsbuildinfo
+.dev.vars
