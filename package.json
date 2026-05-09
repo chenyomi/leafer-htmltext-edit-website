@@ -66,6 +66,9 @@
     "vite-plugin-vue-devtools": "^7.7.7",
     "vue-tsc": "^2.2.10"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
   "lint-staged": {
     "src/**/*.{js,ts,jsx,tsx,vue}": [
       "eslint --fix",
