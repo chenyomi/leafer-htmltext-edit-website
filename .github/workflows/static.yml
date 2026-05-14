@@ -22,18 +22,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 安装 pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 25
-
-      # 安装 pnpm
-      - name: Setup pnpm
-        run: npm install -g pnpm
+          cache: 'pnpm'
 
       # 安装依赖
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       # 构建项目
       - name: Build project
