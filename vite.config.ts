@@ -48,10 +48,10 @@ export default defineConfig({
             );
             if (!r.ok) throw new Error(`GitHub API ${r.status}`);
 
-            const commits: Array<{
+            const commits = (await r.json()) as Array<{
               sha: string;
               commit: { message: string; author: { date: string } };
-            }> = await r.json();
+            }>;
 
             const changelog = commits
               .map(c => ({
