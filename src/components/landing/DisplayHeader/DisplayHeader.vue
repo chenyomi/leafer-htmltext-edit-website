@@ -7,11 +7,16 @@
 
       <div class="nav-cta-group">
         <nav class="landing-nav-items">
-          <router-link class="nav-link" :class="{ 'active-link': activeItem === 'home' }" to="" @click="goHome">
+          <router-link
+            class="nav-link"
+            :class="{ 'active-link': activeItem === 'home' }"
+            to="/"
+            @click.prevent="goHome"
+          >
             Home
           </router-link>
-          <router-link class="nav-link" to="" @click="goCase">Case</router-link>
-          <router-link class="nav-link" to="" @click="goPrice">Price</router-link>
+          <router-link class="nav-link" to="/" @click.prevent="goCase">Case</router-link>
+          <router-link class="nav-link" to="/" @click.prevent="goPrice">Price</router-link>
           <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">Docs</router-link>
           <div class="changelog-nav-wrapper" @mouseenter="openChangelog" @mouseleave="closeChangelog">
             <span class="nav-link changelog-trigger">Changelog</span>
@@ -49,7 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, useTemplateRef } from 'vue';
+import { ref, watch, useTemplateRef, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import { gsap } from 'gsap';
 import VueBitsLogo from '@/components/common/Logo.vue';
 import { useStars } from '@/composables/useStars';
@@ -64,6 +70,7 @@ interface Props {
 defineProps<Props>();
 
 const starCountRef = useTemplateRef<HTMLElement>('starCountRef');
+const router = useRouter();
 const stars = useStars();
 const { changelog, loading } = useChangelog();
 
@@ -95,21 +102,21 @@ const stripTag = (message: string) => {
 const openGitHub = () => {
   window.open('https://github.com/chenyomi/leafer-htmltext-edit-view', '_blank');
 };
-const goCase = () => {
-  document.getElementById('case')?.scrollIntoView({
-    behavior: 'smooth'
-  });
+
+const scrollToId = async (id: string) => {
+  const doScroll = () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  if (router.currentRoute.value.path !== '/') {
+    await router.push('/');
+    await nextTick();
+    doScroll();
+  } else {
+    doScroll();
+  }
 };
-const goPrice = () => {
-  document.getElementById('price')?.scrollIntoView({
-    behavior: 'smooth'
-  });
-};
-const goHome = () => {
-  document.getElementById('home')?.scrollIntoView({
-    behavior: 'smooth'
-  });
-};
+
+const goCase = () => scrollToId('case');
+const goPrice = () => scrollToId('price');
+const goHome = () => scrollToId('home');
 watch(
   stars,
   newStars => {
