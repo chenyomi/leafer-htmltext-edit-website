@@ -12,11 +12,7 @@
           </router-link>
           <router-link class="nav-link" to="" @click="goCase">Case</router-link>
           <router-link class="nav-link" to="" @click="goPrice">Price</router-link>
-          <router-link class="nav-link" to="" custom>
-            <a class="nav-link" href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit" target="_blank">
-              Docs
-            </a>
-          </router-link>
+          <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">Docs</router-link>
           <div class="changelog-nav-wrapper" @mouseenter="openChangelog" @mouseleave="closeChangelog">
             <span class="nav-link changelog-trigger">Changelog</span>
             <Transition name="changelog-fade">
