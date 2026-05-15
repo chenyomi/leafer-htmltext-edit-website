@@ -1,0 +1,27 @@
+name: Update External Docs
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天凌晨运行
+  workflow_dispatch: # 支持手动触发
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Run Update Script
+        run: node scripts/updateDocs.js
+        
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add src/content/docs/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: sync external plugin docs [skip ci]" && git push)
