@@ -1059,7 +1059,7 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.4.7',
+    version: '2.4.8',
     date: '2025-05',
     tag: 'latest',
     items: [
