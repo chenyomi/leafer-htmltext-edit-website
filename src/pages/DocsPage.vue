@@ -717,6 +717,7 @@ onMounted(async () => {
     fontSize: 24,
     lineHeight: 1.5,
     content: '双击此处编辑文本',
+    color: '#e74c3c',
     editable: true,
     draggable: true,
   })
@@ -797,6 +798,7 @@ const htmlTextParams = [
   },
   { name: 'draggable', type: 'boolean', required: false, default: 'true', desc: '是否可拖拽移动' },
   { name: 'fill', type: 'string', required: false, default: '—', desc: '节点背景色，支持颜色值或渐变' },
+  { name: 'color', type: 'string', required: false, default: '—', desc: '文字颜色，支持颜色值或渐变' },
   { name: 'opacity', type: 'number', required: false, default: '1', desc: '不透明度，范围 0–1' }
 ];
 
@@ -814,6 +816,7 @@ const htmlTextExample = `const text = new HtmlText({
   alignContent: 'start',
   editable: true,
   draggable: true,
+  color: '#2c3e50',
 })
 app.tree.add(text)`;
 
