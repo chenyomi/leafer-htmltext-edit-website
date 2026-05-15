@@ -161,6 +161,41 @@
   filter: invert(100%);
 }
 
+.docs-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.875rem;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50px;
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.docs-nav-link .pi {
+  font-size: 13px;
+  color: #3cff50;
+}
+
+.docs-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.docs-nav-link.router-link-active {
+  background: rgba(60, 255, 80, 0.08);
+  border-color: rgba(60, 255, 80, 0.2);
+  color: #3cff50;
+}
+
 .cta-button-docs {
   font-weight: 500;
   font-size: 12px;

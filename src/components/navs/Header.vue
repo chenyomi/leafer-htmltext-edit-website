@@ -17,6 +17,13 @@
 
       <div class="desktop-nav">
         <FadeContent blur>
+          <router-link to="/docs" class="docs-nav-link">
+            <i class="pi pi-book"></i>
+            文档
+          </router-link>
+        </FadeContent>
+
+        <FadeContent blur>
           <button class="search-button" @click="openSearch">
             <i class="pi pi-search search-icon"></i>
             <span class="search-text">Search Docs</span>
@@ -97,6 +104,7 @@
           <div class="drawer-section">
             <p class="section-title">Useful Links</p>
 
+            <router-link to="/docs" @click="closeDrawer" class="drawer-link">文档</router-link>
             <router-link to="/text-animations/split-text" @click="closeDrawer" class="drawer-link">Docs</router-link>
             <router-link to="/favorites" @click="closeDrawer" class="drawer-link">Favorites</router-link>
 

@@ -1,0 +1,1163 @@
+<template>
+  <div class="docs-layout">
+    <!-- 左侧导航栏 -->
+    <aside class="docs-sidebar" :class="{ 'sidebar-open': isSidebarOpen }">
+      <div class="sidebar-header">
+        <span class="sidebar-pkg-name">@chenyomi/leafer-htmltext-edit</span>
+        <a
+          class="sidebar-npm-badge"
+          href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="https://img.shields.io/npm/v/@chenyomi/leafer-htmltext-edit.svg?style=flat-square"
+            alt="npm version"
+          />
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group">
+          <p class="nav-group-title">指南</p>
+          <a
+            v-for="item in guideItems"
+            :key="item.id"
+            :href="'#' + item.id"
+            class="nav-item"
+            :class="{ active: activeSection === item.id }"
+            @click.prevent="scrollTo(item.id)"
+          >
+            {{ item.label }}
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-title">API 参考</p>
+          <a
+            v-for="item in apiItems"
+            :key="item.id"
+            :href="'#' + item.id"
+            class="nav-item"
+            :class="{ active: activeSection === item.id }"
+            @click.prevent="scrollTo(item.id)"
+          >
+            {{ item.label }}
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-title">更多</p>
+          <a
+            v-for="item in moreItems"
+            :key="item.id"
+            :href="'#' + item.id"
+            class="nav-item"
+            :class="{ active: activeSection === item.id }"
+            @click.prevent="scrollTo(item.id)"
+          >
+            {{ item.label }}
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 移动端遮罩 -->
+    <div v-if="isSidebarOpen" class="sidebar-overlay" @click="isSidebarOpen = false" />
+
+    <!-- 主内容区 -->
+    <main class="docs-main" ref="mainRef">
+      <!-- 移动端菜单按钮 -->
+      <button class="mobile-menu-btn" @click="isSidebarOpen = !isSidebarOpen">
+        <i class="pi pi-bars"></i>
+        <span>文档导航</span>
+      </button>
+
+      <div class="docs-content">
+        <!-- ─── 介绍 ─── -->
+        <section :id="'introduction'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h1 class="doc-h1">
+              Leafer HTMLText Editor
+              <a :href="'#introduction'" class="anchor-link" @click.prevent="scrollTo('introduction')">#</a>
+            </h1>
+          </div>
+
+          <div class="doc-badges">
+            <a href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit" target="_blank">
+              <img src="https://img.shields.io/npm/v/@chenyomi/leafer-htmltext-edit.svg" alt="npm version" />
+            </a>
+            <a href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit" target="_blank">
+              <img src="https://img.shields.io/npm/dm/@chenyomi/leafer-htmltext-edit.svg" alt="npm downloads" />
+            </a>
+            <img src="https://img.shields.io/npm/l/@chenyomi/leafer-htmltext-edit.svg" alt="license" />
+            <img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" />
+          </div>
+
+          <p class="doc-lead">
+            一个强大的
+            <strong>Leafer UI</strong>
+            富文本编辑器插件，集成 Quill 2.0，支持完整的 HTML 文本编辑和丰富的文本样式控制。
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature-card" v-for="f in features" :key="f.title">
+              <span class="feature-icon">{{ f.icon }}</span>
+              <div>
+                <strong>{{ f.title }}</strong>
+                <p>{{ f.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── 安装 ─── -->
+        <section :id="'installation'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              安装
+              <a :href="'#installation'" class="anchor-link" @click.prevent="scrollTo('installation')">#</a>
+            </h2>
+          </div>
+
+          <div class="callout callout-info">
+            需要
+            <strong>Node.js ≥ 16</strong>
+            ，建议配合 Vite 或 Webpack 使用。
+          </div>
+
+          <p class="doc-p">通过包管理器安装：</p>
+
+          <div class="code-tabs">
+            <div class="code-tab-headers">
+              <button
+                v-for="pm in packageManagers"
+                :key="pm"
+                class="code-tab-btn"
+                :class="{ active: activePackageManager === pm }"
+                @click="activePackageManager = pm"
+              >
+                {{ pm }}
+              </button>
+            </div>
+            <div class="code-block-wrap">
+              <button class="copy-btn" @click="copyCode(installCommands[activePackageManager])">
+                <i class="pi" :class="copiedKey === 'install' ? 'pi-check' : 'pi-copy'"></i>
+              </button>
+              <pre class="code-block"><code>{{ installCommands[activePackageManager] }}</code></pre>
+            </div>
+          </div>
+
+          <h3 class="doc-h3">Peer Dependencies</h3>
+          <p class="doc-p">请确保已安装以下同级依赖：</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(peerDepsInstall, 'peer')">
+              <i class="pi" :class="copiedKey === 'peer' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ peerDepsInstall }}</code></pre>
+          </div>
+        </section>
+
+        <!-- ─── 快速开始 ─── -->
+        <section :id="'quick-start'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              快速开始
+              <a :href="'#quick-start'" class="anchor-link" @click.prevent="scrollTo('quick-start')">#</a>
+            </h2>
+          </div>
+
+          <h3 class="doc-h3" id="vite-config">Vite 项目配置</h3>
+          <p class="doc-p">为确保插件正常工作，需在 Vite 配置中添加以下设置，避免多实例冲突：</p>
+          <div class="code-block-wrap">
+            <div class="code-lang-badge">vite.config.ts</div>
+            <button class="copy-btn" @click="copyCode(viteConfig, 'vite')">
+              <i class="pi" :class="copiedKey === 'vite' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ viteConfig }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3" id="webpack-config">Webpack 项目配置</h3>
+          <div class="code-block-wrap">
+            <div class="code-lang-badge">webpack.config.js</div>
+            <button class="copy-btn" @click="copyCode(webpackConfig, 'webpack')">
+              <i class="pi" :class="copiedKey === 'webpack' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ webpackConfig }}</code></pre>
+          </div>
+        </section>
+
+        <!-- ─── 基础用法 ─── -->
+        <section :id="'basic-usage'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              基础用法
+              <a :href="'#basic-usage'" class="anchor-link" @click.prevent="scrollTo('basic-usage')">#</a>
+            </h2>
+          </div>
+
+          <h3 class="doc-h3" id="vue3-example">Vue 3 示例</h3>
+          <div class="code-block-wrap">
+            <div class="code-lang-badge">App.vue</div>
+            <button class="copy-btn" @click="copyCode(vue3Example, 'vue3')">
+              <i class="pi" :class="copiedKey === 'vue3' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ vue3Example }}</code></pre>
+          </div>
+
+          <div class="callout callout-warning">
+            <strong>注意：</strong>
+            <code>setLicense</code>
+            必须在
+            <code>htmlTextManage.init()</code>
+            <strong>之前</strong>
+            调用。本地开发环境无需授权即可使用，生产环境需要购买授权。
+          </div>
+        </section>
+
+        <!-- ─── API: HtmlText ─── -->
+        <section :id="'api-htmltext'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              API · HtmlText
+              <a :href="'#api-htmltext'" class="anchor-link" @click.prevent="scrollTo('api-htmltext')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            <code>HtmlText</code>
+            继承自 Leafer UI 的
+            <code>Box</code>
+            ，是富文本节点的核心类。 通过
+            <code>@registerUI()</code>
+            注册到 Leafer 系统，可直接添加到画布。
+          </p>
+
+          <div class="code-block-wrap">
+            <button
+              class="copy-btn"
+              @click="copyCode(`import { HtmlText } from '@chenyomi/leafer-htmltext-edit'`, 'import-ht')"
+            >
+              <i class="pi" :class="copiedKey === 'import-ht' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>import { HtmlText } from '@chenyomi/leafer-htmltext-edit'</code></pre>
+          </div>
+
+          <h3 class="doc-h3">
+            构造参数
+            <code>IHtmlTextInputData</code>
+          </h3>
+          <p class="doc-p">所有参数均为可选，以下为完整参数列表：</p>
+
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>默认值</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="p in htmlTextParams" :key="p.name">
+                  <td>
+                    <code>{{ p.name }}</code>
+                  </td>
+                  <td>
+                    <span class="type-badge">{{ p.type }}</span>
+                  </td>
+                  <td>
+                    <span :class="p.required ? 'required-badge' : 'optional-badge'">
+                      {{ p.required ? '必填' : '可选' }}
+                    </span>
+                  </td>
+                  <td>
+                    <code class="default-val">{{ p.default }}</code>
+                  </td>
+                  <td class="param-desc">{{ p.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">示例</h3>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(htmlTextExample, 'ht-example')">
+              <i class="pi" :class="copiedKey === 'ht-example' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ htmlTextExample }}</code></pre>
+          </div>
+        </section>
+
+        <!-- ─── API: HtmlTextManage ─── -->
+        <section :id="'api-manage'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              API · HtmlTextManage
+              <a :href="'#api-manage'" class="anchor-link" @click.prevent="scrollTo('api-manage')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            <code>HtmlTextManage</code>
+            是单例编辑器管理器，负责 Quill 实例的生命周期管理和批量编辑操作。
+          </p>
+
+          <div class="code-block-wrap">
+            <button
+              class="copy-btn"
+              @click="copyCode(`import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'`, 'import-mgr')"
+            >
+              <i class="pi" :class="copiedKey === 'import-mgr' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'</code></pre>
+          </div>
+
+          <div v-for="method in manageMethods" :key="method.name" class="method-block">
+            <h3 class="method-name">
+              <code>{{ method.signature }}</code>
+              <a
+                :href="'#manage-' + method.anchor"
+                class="anchor-link small"
+                @click.prevent="scrollTo('manage-' + method.anchor)"
+              >
+                #
+              </a>
+            </h3>
+            <p class="doc-p">{{ method.desc }}</p>
+
+            <div v-if="method.params && method.params.length" class="params-table-wrap">
+              <table class="params-table">
+                <thead>
+                  <tr>
+                    <th>参数名</th>
+                    <th>类型</th>
+                    <th>必填</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in method.params" :key="p.name">
+                    <td>
+                      <code>{{ p.name }}</code>
+                    </td>
+                    <td>
+                      <span class="type-badge">{{ p.type }}</span>
+                    </td>
+                    <td>
+                      <span :class="p.required ? 'required-badge' : 'optional-badge'">
+                        {{ p.required ? '必填' : '可选' }}
+                      </span>
+                    </td>
+                    <td class="param-desc">{{ p.desc }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div v-if="method.returns" class="returns-block">
+              <span class="returns-label">返回值：</span>
+              <span class="type-badge">{{ method.returns.type }}</span>
+              <span class="returns-desc">{{ method.returns.desc }}</span>
+            </div>
+
+            <div class="code-block-wrap">
+              <button class="copy-btn" @click="copyCode(method.example, 'method-' + method.anchor)">
+                <i class="pi" :class="copiedKey === 'method-' + method.anchor ? 'pi-check' : 'pi-copy'"></i>
+              </button>
+              <pre class="code-block"><code>{{ method.example }}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── API: setHTMLText ─── -->
+        <section :id="'api-sethtml'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              API · setHTMLText
+              <a :href="'#api-sethtml'" class="anchor-link" @click.prevent="scrollTo('api-sethtml')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            <code>setHTMLText</code>
+            是应用文本样式的核心函数。在编辑模式下对选区生效；
+            非编辑模式下对整个节点生效；多选时批量应用到所有选中节点。
+          </p>
+
+          <div class="code-block-wrap">
+            <button
+              class="copy-btn"
+              @click="copyCode(`import { setHTMLText } from '@chenyomi/leafer-htmltext-edit'`, 'import-set')"
+            >
+              <i class="pi" :class="copiedKey === 'import-set' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>import { setHTMLText } from '@chenyomi/leafer-htmltext-edit'</code></pre>
+          </div>
+
+          <h3 class="doc-h3">函数签名</h3>
+          <div class="code-block-wrap">
+            <pre class="code-block"><code>setHTMLText(key: string, value?: any, base64font?: string): void</code></pre>
+          </div>
+
+          <h3 class="doc-h3">参数说明</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>key</code></td>
+                  <td><span class="type-badge">string</span></td>
+                  <td><span class="required-badge">必填</span></td>
+                  <td class="param-desc">样式键名，见下方 key 列表</td>
+                </tr>
+                <tr>
+                  <td><code>value</code></td>
+                  <td><span class="type-badge">any</span></td>
+                  <td><span class="optional-badge">可选</span></td>
+                  <td class="param-desc">样式值，不同 key 接受不同类型的值</td>
+                </tr>
+                <tr>
+                  <td><code>base64font</code></td>
+                  <td><span class="type-badge">string</span></td>
+                  <td><span class="optional-badge">可选</span></td>
+                  <td class="param-desc">
+                    仅 key 为 "font" 时使用，传入 Base64 格式的字体数据（data:font/woff2;base64,...）
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">支持的 key 列表</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>value 类型 / 可选值</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="k in setHtmlTextKeys" :key="k.key">
+                  <td>
+                    <code>{{ k.key }}</code>
+                  </td>
+                  <td>
+                    <span class="type-badge">{{ k.valueType }}</span>
+                  </td>
+                  <td class="param-desc">{{ k.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">示例</h3>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(setHtmlTextExample, 'sethtml-ex')">
+              <i class="pi" :class="copiedKey === 'sethtml-ex' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ setHtmlTextExample }}</code></pre>
+          </div>
+        </section>
+
+        <!-- ─── API: 授权管理 ─── -->
+        <section :id="'api-license'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              API · 授权管理
+              <a :href="'#api-license'" class="anchor-link" @click.prevent="scrollTo('api-license')">#</a>
+            </h2>
+          </div>
+
+          <div class="callout callout-info">
+            本地开发环境（
+            <code>localhost</code>
+            ）不受授权限制，可自由使用全部功能。 部署到生产域名时需购买授权密钥。
+          </div>
+
+          <div v-for="fn in licenseFns" :key="fn.name" class="method-block">
+            <h3 class="method-name">
+              <code>{{ fn.signature }}</code>
+              <a
+                :href="'#license-' + fn.anchor"
+                class="anchor-link small"
+                @click.prevent="scrollTo('license-' + fn.anchor)"
+              >
+                #
+              </a>
+            </h3>
+            <p class="doc-p">{{ fn.desc }}</p>
+
+            <div v-if="fn.params && fn.params.length" class="params-table-wrap">
+              <table class="params-table">
+                <thead>
+                  <tr>
+                    <th>参数名</th>
+                    <th>类型</th>
+                    <th>必填</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in fn.params" :key="p.name">
+                    <td>
+                      <code>{{ p.name }}</code>
+                    </td>
+                    <td>
+                      <span class="type-badge">{{ p.type }}</span>
+                    </td>
+                    <td>
+                      <span :class="p.required ? 'required-badge' : 'optional-badge'">
+                        {{ p.required ? '必填' : '可选' }}
+                      </span>
+                    </td>
+                    <td class="param-desc">{{ p.desc }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div v-if="fn.returns" class="returns-block">
+              <span class="returns-label">返回值：</span>
+              <span class="type-badge">{{ fn.returns.type }}</span>
+              <span class="returns-desc">{{ fn.returns.desc }}</span>
+            </div>
+
+            <div class="code-block-wrap">
+              <button class="copy-btn" @click="copyCode(fn.example, 'fn-' + fn.anchor)">
+                <i class="pi" :class="copiedKey === 'fn-' + fn.anchor ? 'pi-check' : 'pi-copy'"></i>
+              </button>
+              <pre class="code-block"><code>{{ fn.example }}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── 更新日志 ─── -->
+        <section :id="'changelog'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              更新日志
+              <a :href="'#changelog'" class="anchor-link" @click.prevent="scrollTo('changelog')">#</a>
+            </h2>
+          </div>
+
+          <div v-for="entry in changelog" :key="entry.version" class="changelog-entry">
+            <div class="changelog-header">
+              <span class="changelog-version">v{{ entry.version }}</span>
+              <span class="changelog-date">{{ entry.date }}</span>
+              <span v-if="entry.tag" :class="'changelog-tag tag-' + entry.tag">{{ entry.tag }}</span>
+            </div>
+            <ul class="changelog-list">
+              <li v-for="item in entry.items" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ─── 底部链接 ─── -->
+        <section class="doc-footer-links">
+          <a
+            href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit"
+            target="_blank"
+            class="footer-link-card"
+          >
+            <i class="pi pi-box"></i>
+            <div>
+              <strong>npm 包</strong>
+              <span>@chenyomi/leafer-htmltext-edit</span>
+            </div>
+            <i class="pi pi-arrow-up-right"></i>
+          </a>
+          <a href="https://github.com/chenyomi/leafer-htmltext-edit" target="_blank" class="footer-link-card">
+            <i class="pi pi-github"></i>
+            <div>
+              <strong>GitHub 仓库</strong>
+              <span>chenyomi/leafer-htmltext-edit</span>
+            </div>
+            <i class="pi pi-arrow-up-right"></i>
+          </a>
+          <a href="https://github.com/chenyomi/leafer-htmltext-edit-view" target="_blank" class="footer-link-card">
+            <i class="pi pi-play-circle"></i>
+            <div>
+              <strong>在线演示</strong>
+              <span>leafer-htmltext-edit-view</span>
+            </div>
+            <i class="pi pi-arrow-up-right"></i>
+          </a>
+        </section>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
+
+// ─── Sidebar nav items ───────────────────────────────────────────────────────
+const guideItems = [
+  { id: 'introduction', label: '介绍' },
+  { id: 'installation', label: '安装' },
+  { id: 'quick-start', label: '快速开始' },
+  { id: 'basic-usage', label: '基础用法' }
+];
+
+const apiItems = [
+  { id: 'api-htmltext', label: 'HtmlText' },
+  { id: 'api-manage', label: 'HtmlTextManage' },
+  { id: 'api-sethtml', label: 'setHTMLText' },
+  { id: 'api-license', label: '授权管理' }
+];
+
+const moreItems = [{ id: 'changelog', label: '更新日志' }];
+
+// ─── Features ────────────────────────────────────────────────────────────────
+const features = [
+  { icon: '🎨', title: '富文本编辑', desc: '基于 Quill 2.0，支持完整的富文本编辑功能，双击节点即可进入内联编辑' },
+  { icon: '📐', title: '文本样式', desc: '字体、大小、颜色、对齐、行高、字间距、阴影、描边等全面控制' },
+  { icon: '📝', title: '格式化工具', desc: '加粗、斜体、下划线、删除线、上下标、大小写转换' },
+  { icon: '📋', title: '列表支持', desc: '有序列表、无序列表' },
+  { icon: '🔤', title: '自定义字体', desc: '支持传入 Base64 字体文件，实时切换字体族' },
+  { icon: '🎡', title: '弧形文字', desc: '基于 SVG TextPath 将文字沿弧形路径排列' },
+  { icon: '🔍', title: '画布缩放', desc: '内置 zoom API：放大 / 缩小 / 适合屏幕 / 1:1' },
+  { icon: '🔒', title: '锁定比例', desc: '选中元素后启用，拖拽缩放时保持宽高比不变' },
+  { icon: '🔄', title: '旋转 & 缩放', desc: '通过 rotation / scaleX / scaleY 属性控制元素变换' },
+  { icon: '🎯', title: '完美集成', desc: '无缝集成到 Leafer UI 生态系统，支持多选批量编辑' },
+  { icon: '🔐', title: '授权管理', desc: '内置授权系统，本地开发不限制，生产环境需授权' },
+  { icon: '🔧', title: 'TypeScript', desc: '完整的类型定义支持，ESM + CJS 双格式构建' }
+];
+
+// ─── Package install commands ─────────────────────────────────────────────────
+const packageManagers = ['npm', 'pnpm', 'yarn'] as const;
+type PM = (typeof packageManagers)[number];
+const activePackageManager = ref<PM>('npm');
+const installCommands: Record<PM, string> = {
+  npm: 'npm install @chenyomi/leafer-htmltext-edit',
+  pnpm: 'pnpm add @chenyomi/leafer-htmltext-edit',
+  yarn: 'yarn add @chenyomi/leafer-htmltext-edit'
+};
+const peerDepsInstall = `npm install leafer-ui @leafer-ui/core @leafer-in/editor @leafer-in/html quill`;
+
+// ─── Code snippets ────────────────────────────────────────────────────────────
+const viteConfig = `// vite.config.ts
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  resolve: {
+    // 确保使用项目的依赖实例，避免多实例冲突
+    dedupe: [
+      '@leafer-ui/core',
+      '@leafer-in/editor',
+      '@leafer-in/html',
+      'leafer-ui',
+      'quill',
+    ],
+  },
+  optimizeDeps: {
+    // 排除插件的预构建
+    exclude: ['@chenyomi/leafer-htmltext-edit'],
+  },
+})`;
+
+const webpackConfig = `// webpack.config.js
+module.exports = {
+  resolve: {
+    // 确保使用单一实例，避免多实例冲突
+    alias: {
+      quill: require.resolve('quill'),
+      '@leafer-ui/core': require.resolve('@leafer-ui/core'),
+      '@leafer-in/editor': require.resolve('@leafer-in/editor'),
+      '@leafer-in/html': require.resolve('@leafer-in/html'),
+      'leafer-ui': require.resolve('leafer-ui'),
+    },
+  },
+}`;
+
+const vue3Example = `<template>
+  <div id="leafer-view" style="width: 100vw; height: 100vh;"></div>
+</template>
+
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { App } from 'leafer-ui'
+import 'leafer-editor'
+import {
+  htmlTextManage,
+  setLicense,
+  HtmlText,
+} from '@chenyomi/leafer-htmltext-edit'
+
+onMounted(async () => {
+  // 1. 设置 License（必须在 init 之前调用）
+  await setLicense('your-license-key')
+
+  // 2. 创建 Leafer App
+  const app = new App({
+    view: 'leafer-view',
+    fill: '#ffffff',
+    editor: {},
+  })
+
+  // 3. 初始化编辑器管理器
+  await htmlTextManage.init(app)
+
+  // 4. 创建富文本节点并添加到画布
+  const text = new HtmlText({
+    x: 100,
+    y: 100,
+    fontSize: 24,
+    lineHeight: 1.5,
+    content: '双击此处编辑文本',
+    editable: true,
+    draggable: true,
+  })
+
+  app.tree.add(text)
+})
+<\/script>`;
+
+// ─── HtmlText constructor params ──────────────────────────────────────────────
+const htmlTextParams = [
+  { name: 'x', type: 'number', required: false, default: '0', desc: '节点在画布上的 X 轴坐标（像素）' },
+  { name: 'y', type: 'number', required: false, default: '0', desc: '节点在画布上的 Y 轴坐标（像素）' },
+  {
+    name: 'width',
+    type: 'number',
+    required: false,
+    default: 'auto',
+    desc: '节点宽度（像素）。设置后进入固定宽度模式，文字超出宽度时自动换行'
+  },
+  { name: 'height', type: 'number', required: false, default: 'auto', desc: '节点高度（像素）' },
+  {
+    name: 'content',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: '纯文本或简单 HTML 标签（如 <strong>text</strong>），插件会自动套用字体样式生成完整 HTML。与 text 同时传入时，text 优先'
+  },
+  {
+    name: 'text',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。兼容旧版用法'
+  },
+  { name: 'fontSize', type: 'number', required: false, default: '16', desc: '字体大小（像素）' },
+  {
+    name: 'fontFamily',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: '字体族名称，例如 "Arial"、"PingFang SC"'
+  },
+  {
+    name: 'fontWeight',
+    type: 'number | string',
+    required: false,
+    default: '—',
+    desc: '字重，支持数值（100–900）或关键字（"bold"、"normal"）'
+  },
+  {
+    name: 'lineHeight',
+    type: 'number',
+    required: false,
+    default: '1.5',
+    desc: '行高倍数，相对于 fontSize。例如 1.5 表示 1.5 倍行高'
+  },
+  { name: 'letterSpacing', type: 'number', required: false, default: '0', desc: '字间距（像素）' },
+  {
+    name: 'textShadow',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: 'CSS text-shadow 格式的文字阴影，例如 "2px 2px 4px #000000"'
+  },
+  {
+    name: 'alignContent',
+    type: "'start' | 'center' | 'end'",
+    required: false,
+    default: "'start'",
+    desc: '文本垂直对齐方式：顶部对齐 / 居中对齐 / 底部对齐'
+  },
+  {
+    name: 'editable',
+    type: 'boolean',
+    required: false,
+    default: 'true',
+    desc: '是否可编辑，设为 true 后双击节点可进入富文本编辑模式'
+  },
+  { name: 'draggable', type: 'boolean', required: false, default: 'true', desc: '是否可拖拽移动' },
+  { name: 'fill', type: 'string', required: false, default: '—', desc: '节点背景色，支持颜色值或渐变' },
+  { name: 'opacity', type: 'number', required: false, default: '1', desc: '不透明度，范围 0–1' }
+];
+
+const htmlTextExample = `const text = new HtmlText({
+  x: 200,
+  y: 150,
+  width: 400,           // 固定宽度，超出自动换行
+  fontSize: 20,
+  fontFamily: 'PingFang SC',
+  fontWeight: 600,
+  lineHeight: 1.8,
+  letterSpacing: 1,
+  content: '这是一段<strong>加粗</strong>文本',
+  textShadow: '1px 1px 4px rgba(0,0,0,0.3)',
+  alignContent: 'start',
+  editable: true,
+  draggable: true,
+})
+app.tree.add(text)`;
+
+// ─── HtmlTextManage methods ───────────────────────────────────────────────────
+const manageMethods = [
+  {
+    name: 'init',
+    anchor: 'init',
+    signature: 'htmlTextManage.init(app): Promise<Quill>',
+    desc: '初始化 Quill 编辑器并绑定到指定的 Leafer App 实例。通常在创建 App 后立即调用，且仅需调用一次。',
+    params: [{ name: 'app', type: 'App', required: true, desc: 'Leafer App 实例（通过 new App() 创建）' }],
+    returns: { type: 'Promise<Quill>', desc: '返回初始化完成的 Quill 编辑器实例' },
+    example: `import { App } from 'leafer-ui'
+import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
+
+const app = new App({ view: 'leafer-view', editor: {} })
+await htmlTextManage.init(app)`
+  },
+  {
+    name: 'getQuill',
+    anchor: 'get-quill',
+    signature: 'htmlTextManage.getQuill(): Quill | null',
+    desc: '获取当前的 Quill 编辑器实例，可用于调用 Quill 原生 API（如获取 Delta、设置格式等）。未授权时返回 null。',
+    params: [],
+    returns: { type: 'Quill | null', desc: '已初始化的 Quill 实例，授权失败时返回 null' },
+    example: `const quill = htmlTextManage.getQuill()
+if (quill) {
+  // 全选文本
+  quill.setSelection(0, quill.getLength())
+  // 获取当前内容 Delta
+  const delta = quill.getContents()
+}`
+  },
+  {
+    name: 'getCanvas',
+    anchor: 'get-canvas',
+    signature: 'htmlTextManage.getCanvas(): App | null',
+    desc: '获取绑定的 Leafer App 实例。未授权时返回 null。返回的 App 包含 editor（选中控制）和 zoom 方法，可用于画布缩放、批量选中等操作。',
+    params: [],
+    returns: { type: 'App | null', desc: '已绑定的 Leafer App 实例' },
+    example: `const canvas = htmlTextManage.getCanvas()
+
+// 画布缩放
+canvas?.zoom('in')    // 放大
+canvas?.zoom('out')   // 缩小
+canvas?.zoom('fit')   // 适合屏幕
+canvas?.zoom(1)       // 恢复 1:1
+
+// 获取当前选中的节点列表
+const list = canvas?.editor?.list ?? []
+
+// 全选所有节点
+canvas?.editor?.select(frame.children)
+
+// 取消选中
+canvas?.editor?.cancel()
+
+// 锁定选中元素的宽高比
+list.forEach((item) => { item.lockRatio = true })
+
+// 克隆选中元素
+list.forEach((item) => {
+  const copy = item.clone()
+  copy.x += 10; copy.y += 10
+  frame.add(copy)
+})
+
+// 删除选中元素
+const items = [...list]
+items.forEach((item) => item.remove())
+canvas?.editor?.cancel()`
+  },
+  {
+    name: 'isMultiSelect',
+    anchor: 'is-multi-select',
+    signature: 'htmlTextManage.isMultiSelect(): boolean',
+    desc: '判断当前是否处于多选状态（选中了多个画布对象）。常用于工具栏按钮的状态控制。',
+    params: [],
+    returns: { type: 'boolean', desc: '当前是否多选' },
+    example: `if (htmlTextManage.isMultiSelect()) {
+  // 批量修改所有选中节点
+  htmlTextManage.dateEdit((leaf) => {
+    leaf.fontSize = 18
+  })
+}`
+  },
+  {
+    name: 'dateEdit',
+    anchor: 'date-edit',
+    signature: 'htmlTextManage.dateEdit(callback, level?, listNew?): void',
+    desc: '批量编辑当前选中的节点。当选中多个节点时自动批量应用，单选时仅操作当前节点。',
+    params: [
+      {
+        name: 'callback',
+        type: '(leaf: any) => void',
+        required: true,
+        desc: '编辑回调函数，参数为每个被选中的节点对象，可直接修改其属性'
+      },
+      { name: 'level', type: 'number', required: false, desc: '操作层级，传 1 时会深入 Box 子节点操作内部 Text 元素' },
+      { name: 'listNew', type: 'any[]', required: false, desc: '自定义节点列表，不传则使用当前编辑器选中列表' }
+    ],
+    returns: undefined,
+    example: `// 批量修改字体大小
+htmlTextManage.dateEdit((leaf) => {
+  leaf.fontSize = 24
+}, 1)
+
+// 批量修改颜色（针对内部文本元素）
+htmlTextManage.dateEdit((leaf) => {
+  leaf.fill = '#ff5500'
+}, 1)`
+  }
+];
+
+// ─── License functions ────────────────────────────────────────────────────────
+const licenseFns = [
+  {
+    name: 'setLicense',
+    anchor: 'set-license',
+    signature: 'setLicense(licenseKey): Promise<boolean>',
+    desc: '设置并验证授权密钥。必须在 htmlTextManage.init() 之前调用。本地开发环境无需授权。',
+    params: [{ name: 'licenseKey', type: 'string', required: true, desc: '从作者处获取的授权密钥字符串' }],
+    returns: { type: 'Promise<boolean>', desc: '授权验证成功返回 true，失败返回 false' },
+    example: `import { setLicense } from '@chenyomi/leafer-htmltext-edit'
+
+const ok = await setLicense('your-license-key')
+if (!ok) {
+  console.warn('授权验证失败，富文本功能将受限')
+}`
+  },
+  {
+    name: 'checkLicense',
+    anchor: 'check-license',
+    signature: 'checkLicense(): Promise<number>',
+    desc: '检查当前授权状态，返回授权乘数（0 或 1）。内部使用，一般无需直接调用。',
+    params: [],
+    returns: { type: 'Promise<number>', desc: '有效授权返回 1，无效返回 0' },
+    example: `import { checkLicense } from '@chenyomi/leafer-htmltext-edit'
+
+const valid = await checkLicense()
+console.log(valid ? '授权有效' : '授权无效')`
+  }
+];
+
+// ─── setHTMLText key list ─────────────────────────────────────────────────────
+const setHtmlTextKeys = [
+  {
+    key: 'bold',
+    valueType: 'boolean（可省略）',
+    desc: '切换加粗。省略 value 时自动 toggle；也可传 true/false 明确指定'
+  },
+  { key: 'italic', valueType: 'boolean（可省略）', desc: '切换斜体。省略 value 时自动 toggle' },
+  { key: 'underline', valueType: 'boolean（可省略）', desc: '切换下划线。省略 value 时自动 toggle' },
+  { key: 'strike', valueType: 'boolean（可省略）', desc: '切换删除线。省略 value 时自动 toggle' },
+  {
+    key: 'textCase',
+    valueType: '省略 value',
+    desc: '大小写转换。根据当前内容循环切换：小写 → 大写 → 大写，需在编辑模式下有选区才生效'
+  },
+  {
+    key: 'script',
+    valueType: '"super" | "sub"',
+    desc: '上下标。"super" = 上标（X²），"sub" = 下标（H₂O）；再次调用相同值可取消'
+  },
+  {
+    key: 'align',
+    valueType: 'false | "center" | "right"',
+    desc: '水平对齐。false = 左对齐（默认），"center" = 居中，"right" = 右对齐'
+  },
+  {
+    key: 'alignContent',
+    valueType: '"start" | "center" | "end"',
+    desc: '垂直对齐。"start" = 顶部，"center" = 居中，"end" = 底部'
+  },
+  {
+    key: 'color',
+    valueType: 'string（CSS 颜色值）',
+    desc: '文字颜色，例如 "#ff0000"、"rgba(0,0,0,0.5)"；有选区时只改选中文字'
+  },
+  { key: 'fontSize', valueType: 'number', desc: '字体大小（像素）；全局应用，不支持局部选区' },
+  { key: 'fontWeight', valueType: 'number | string', desc: '字重，例如 400、700、"bold"、"normal"；全局应用' },
+  { key: 'lineHeight', valueType: 'number', desc: '行高倍数（相对 fontSize），例如 1.5；全局应用' },
+  { key: 'letterSpacing', valueType: 'number', desc: '字间距（像素）；全局应用' },
+  { key: 'textShadow', valueType: 'string（CSS text-shadow）', desc: '文字阴影，例如 "2px 2px 4px #000"；全局应用' },
+  {
+    key: 'textStroke',
+    valueType: 'string（CSS -webkit-text-stroke）',
+    desc: '文字描边，例如 "1px #333"；编辑模式下支持局部选区'
+  },
+  {
+    key: 'list',
+    valueType: '"ordered" | "bullet"',
+    desc: '列表类型。"ordered" = 有序列表，"bullet" = 无序列表；再次调用可取消'
+  },
+  {
+    key: 'font',
+    valueType: 'string（fontFamily）',
+    desc: '切换字体族。需同时传第三个参数 base64font（字体 woff2 base64 数据）'
+  }
+];
+
+const setHtmlTextExample = `// 1. 基础文字格式（编辑模式下对选区生效）
+setHTMLText('bold')           // 切换加粗
+setHTMLText('italic')         // 切换斜体
+setHTMLText('underline')      // 切换下划线
+setHTMLText('strike')         // 切换删除线
+setHTMLText('textCase')       // 大小写转换（需有选区）
+
+// 2. 上下标
+setHTMLText('script', 'super')  // X²
+setHTMLText('script', 'sub')    // H₂O
+
+// 3. 对齐
+setHTMLText('align', false)         // 左对齐
+setHTMLText('align', 'center')      // 水平居中
+setHTMLText('align', 'right')       // 右对齐
+setHTMLText('alignContent', 'start')  // 垂直顶部
+setHTMLText('alignContent', 'center') // 垂直居中
+setHTMLText('alignContent', 'end')    // 垂直底部
+
+// 4. 颜色
+setHTMLText('color', '#ff5500')   // 改变文字颜色
+
+// 5. 全局属性
+setHTMLText('fontSize', 24)
+setHTMLText('lineHeight', 1.8)
+setHTMLText('letterSpacing', 2)
+setHTMLText('textShadow', '2px 2px 4px rgba(0,0,0,0.4)')
+setHTMLText('textStroke', '1px #333333')
+
+// 6. 列表
+setHTMLText('list', 'ordered')  // 有序列表
+setHTMLText('list', 'bullet')   // 无序列表
+
+// 7. 自定义字体（需传入 Base64 字体数据）
+const fontFamily = '"Dancing Script", cursive'
+const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
+setHTMLText('font', fontFamily, fontBase64)`;
+
+// ─── Changelog ────────────────────────────────────────────────────────────────
+const changelog = [
+  {
+    version: '2.4.7',
+    date: '2025-05',
+    tag: 'latest',
+    items: [
+      '优化固定宽度模式下 SVG 精确测量逻辑，修复斜体文本补偿宽度计算',
+      '改进授权系统，本地开发环境完全无限制',
+      '修复多实例场景下 Quill parchment 冲突导致的 blotClass.create 报错',
+      'TextEditor 支持 textStroke（webkitTextStroke）文字描边效果',
+      '改进 Enter 键换行格式继承，保持当前行 formats 一致'
+    ]
+  },
+  {
+    version: '2.4.0',
+    date: '2025-04',
+    tag: 'minor',
+    items: [
+      '新增 alignContent 垂直对齐属性，支持 start / center / end',
+      '新增 textShadow 文字阴影属性，兼容标准 CSS text-shadow 语法',
+      '支持 fontWeight 内联样式属性器，修复 Quill 注册问题',
+      '优化 extractInnerHtmlForQuill，防止全局 wrapper CSS 被误解析为字符级属性'
+    ]
+  },
+  {
+    version: '2.3.0',
+    date: '2025-03',
+    tag: 'minor',
+    items: [
+      '新增 content 参数，支持传入纯文本或简单标签自动包装 HTML',
+      '固定宽度模式下文字双击编辑保持宽度约束',
+      '优化 getBoundingClientRect 精确测量，消除 SVG 右侧多余空白',
+      '字体注册支持 whitelist 解除限制'
+    ]
+  },
+  {
+    version: '2.0.0',
+    date: '2025-01',
+    tag: 'major',
+    items: [
+      '升级至 Quill 2.0，全面重构编辑器内核',
+      '迁移到 ESM + CJS 双格式构建',
+      '新增完整 TypeScript 类型定义',
+      '重新设计 HtmlTextManage 单例 API'
+    ]
+  }
+];
+
+// ─── Scroll & active section tracking ────────────────────────────────────────
+const activeSection = ref('introduction');
+const isSidebarOpen = ref(false);
+const mainRef = ref<HTMLElement | null>(null);
+const copiedKey = ref('');
+
+const allSectionIds = [...guideItems.map(i => i.id), ...apiItems.map(i => i.id), ...moreItems.map(i => i.id)];
+
+const scrollTo = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) {
+    const top = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
+    isSidebarOpen.value = false;
+    // Update URL hash without full navigation
+    history.replaceState(null, '', '#' + id);
+  }
+};
+
+const onScroll = () => {
+  let current = allSectionIds[0];
+  for (const id of allSectionIds) {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top <= 120) {
+      current = id;
+    }
+  }
+  activeSection.value = current;
+};
+
+const copyCode = async (code: string, key = 'default') => {
+  try {
+    await navigator.clipboard.writeText(code.trim());
+    copiedKey.value = key;
+    setTimeout(() => {
+      copiedKey.value = '';
+    }, 1500);
+  } catch {
+    // clipboard not available
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Handle direct link to anchor
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    setTimeout(() => scrollTo(hash), 100);
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll);
+});
+</script>
+
+<style scoped>
+@import '../css/docs.css';
+</style>
