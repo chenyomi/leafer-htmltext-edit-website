@@ -946,18 +946,6 @@ const ok = await setLicense('your-license-key')
 if (!ok) {
   console.warn('授权验证失败，富文本功能将受限')
 }`
-  },
-  {
-    name: 'checkLicense',
-    anchor: 'check-license',
-    signature: 'checkLicense(): Promise<number>',
-    desc: '检查当前授权状态，返回授权乘数（0 或 1）。内部使用，一般无需直接调用。',
-    params: [],
-    returns: { type: 'Promise<number>', desc: '有效授权返回 1，无效返回 0' },
-    example: `import { checkLicense } from '@chenyomi/leafer-htmltext-edit'
-
-const valid = await checkLicense()
-console.log(valid ? '授权有效' : '授权无效')`
   }
 ];
 
