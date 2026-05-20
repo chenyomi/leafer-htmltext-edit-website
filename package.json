@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "new:component": "node scripts/generateComponent.js",
     "docs:update": "node scripts/updateDocs.js",
+    "changelog:sync": "node scripts/syncChangelog.js",
     "prepare": "husky"
   },
   "dependencies": {

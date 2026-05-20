@@ -93,6 +93,22 @@
             <img src="https://img.shields.io/npm/l/@chenyomi/leafer-htmltext-edit.svg" alt="license" />
             <img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" />
           </div>
+          <div class="doc-npm-link">
+            <a
+              href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="npm-link-btn"
+            >
+              <svg width="16" height="16" viewBox="0 0 780 250" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M240,250h100v-50h100V0H240V250z M340,50h50v100h-50V50z M480,0v200h100V50h50v150h50V50h50v150h50V0H480z M0,200h100V50h50v150h50V0H0V200z"
+                />
+              </svg>
+              在 npm 查看
+              <i class="pi pi-arrow-up-right" style="font-size: 0.75rem"></i>
+            </a>
+          </div>
 
           <p class="doc-lead">
             一个强大的
@@ -798,7 +814,13 @@ const htmlTextParams = [
   },
   { name: 'draggable', type: 'boolean', required: false, default: 'true', desc: '是否可拖拽移动' },
   { name: 'fill', type: 'string', required: false, default: '—', desc: '节点背景色，支持颜色值或渐变' },
-  { name: 'color', type: 'string', required: false, default: '—', desc: '文字颜色，支持颜色值或渐变' },
+  {
+    name: 'color',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: '初始文字颜色，CSS color 格式（如 "#e74c3c"、"rgba(0,0,0,0.5)"）。会以字符级 color 格式写入 Quill，同时作为编辑时的光标颜色'
+  },
   { name: 'opacity', type: 'number', required: false, default: '1', desc: '不透明度，范围 0–1' }
 ];
 
@@ -988,7 +1010,11 @@ const setHtmlTextKeys = [
   { key: 'fontWeight', valueType: 'number | string', desc: '字重，例如 400、700、"bold"、"normal"；全局应用' },
   { key: 'lineHeight', valueType: 'number', desc: '行高倍数（相对 fontSize），例如 1.5；全局应用' },
   { key: 'letterSpacing', valueType: 'number', desc: '字间距（像素）；全局应用' },
-  { key: 'textShadow', valueType: 'string（CSS text-shadow）', desc: '文字阴影，例如 "2px 2px 4px #000"；全局应用' },
+  {
+    key: 'textShadow',
+    valueType: 'string（CSS text-shadow）',
+    desc: '文字阴影，例如 "2px 2px 4px #000"。编辑模式下支持局部选区（再次传相同值可取消）；非编辑模式为全局应用'
+  },
   {
     key: 'textStroke',
     valueType: 'string（CSS -webkit-text-stroke）',
@@ -1047,49 +1073,96 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.4.8',
-    date: '2025-05',
+    version: '2.4.9',
+    date: '2026-05',
     tag: 'latest',
     items: [
-      '优化固定宽度模式下 SVG 精确测量逻辑，修复斜体文本补偿宽度计算',
-      '改进授权系统，本地开发环境完全无限制',
-      '修复多实例场景下 Quill parchment 冲突导致的 blotClass.create 报错',
-      'TextEditor 支持 textStroke（webkitTextStroke）文字描边效果',
-      '改进 Enter 键换行格式继承，保持当前行 formats 一致'
+      '添加 textShadow 属性器，支持局部文字阴影',
+      '实现斜体检测，优化文字宽度计算',
+      '调整 webkitTextStroke 属性的应用逻辑'
     ]
+  },
+  {
+    version: '2.4.8',
+    date: '2026-05',
+    tag: 'patch',
+    items: [
+      '更新 HtmlText 类，确保 Quill 识别字符级颜色格式',
+      '修改 TextEditor 类，使用文本数据中的颜色作为光标颜色',
+      '更新 README 文档，说明新功能',
+      '添加行内描边效果支持',
+      '添加选区级字重控制功能',
+      '修改初始化方法为异步执行，简化调用方式',
+      '更新样式以支持局部描边的正确渲染',
+      '实现局部和全局描边的逻辑处理'
+    ]
+  },
+  {
+    version: '2.4.7',
+    date: '2026-05',
+    tag: 'patch',
+    items: [
+      '在 HtmlText 中添加 fontWeight 属性支持',
+      '在 TextEditor 中实现字体粗细的动态处理',
+      '提取和清理 HTML 内容以防止样式冲突',
+      '增加提取语义内容的工具函数'
+    ]
+  },
+  {
+    version: '2.4.6',
+    date: '2026-05',
+    tag: 'patch',
+    items: [
+      '在 TextEditTool 中添加 textStroke 属性支持，确保锁定比例缩放时轮廓线宽度同步更新',
+      '在 TextEditor 中调整 webkitTextStroke 的应用位置，确保轮廓线宽度按缩放比例正确渲染'
+    ]
+  },
+  {
+    version: '2.4.5',
+    date: '2026-04',
+    tag: 'patch',
+    items: [
+      '精确测量 HtmlText 的 SVG 尺寸，消除多余空白',
+      '支持在 TextEditTool 中处理 HtmlText 的锁定比例',
+      '优化 utils.ts 中的字符宽度测量和弧形辅助层清理逻辑',
+      '更新 TextEditor 以支持 HtmlText 的相关操作'
+    ]
+  },
+  {
+    version: '2.4.3',
+    date: '2026-04',
+    tag: 'patch',
+    items: [
+      '在 HtmlText 中使用 IUI 类型增强文本元素的类型安全',
+      '在 HtmlTextManage 中添加选择范围管理功能',
+      '在 TextEditTool 中优化事件处理和文本缩放逻辑',
+      '在 TextEditor 中增强文本样式同步和输入处理',
+      '在 utils 中添加字母间距和垂直布局同步功能'
+    ]
+  },
+  {
+    version: '2.4.2',
+    date: '2026-02',
+    tag: 'patch',
+    items: ['version']
+  },
+  {
+    version: '2.4.1',
+    date: '2026-02',
+    tag: 'patch',
+    items: ['更新', '更新轮廓']
   },
   {
     version: '2.4.0',
-    date: '2025-04',
-    tag: 'minor',
-    items: [
-      '新增 alignContent 垂直对齐属性，支持 start / center / end',
-      '新增 textShadow 文字阴影属性，兼容标准 CSS text-shadow 语法',
-      '支持 fontWeight 内联样式属性器，修复 Quill 注册问题',
-      '优化 extractInnerHtmlForQuill，防止全局 wrapper CSS 被误解析为字符级属性'
-    ]
+    date: '2026-02',
+    tag: 'patch',
+    items: ['更新']
   },
   {
     version: '2.3.0',
-    date: '2025-03',
+    date: '2026-02',
     tag: 'minor',
-    items: [
-      '新增 content 参数，支持传入纯文本或简单标签自动包装 HTML',
-      '固定宽度模式下文字双击编辑保持宽度约束',
-      '优化 getBoundingClientRect 精确测量，消除 SVG 右侧多余空白',
-      '字体注册支持 whitelist 解除限制'
-    ]
-  },
-  {
-    version: '2.0.0',
-    date: '2025-01',
-    tag: 'major',
-    items: [
-      '升级至 Quill 2.0，全面重构编辑器内核',
-      '迁移到 ESM + CJS 双格式构建',
-      '新增完整 TypeScript 类型定义',
-      '重新设计 HtmlTextManage 单例 API'
-    ]
+    items: ['更新', '添加aes', '更新混淆', '授权更新res', '2', '11', '1', 'pack', '2.0.1', '优化', 'init']
   }
 ];
 

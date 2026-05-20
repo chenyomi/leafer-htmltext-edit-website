@@ -1,0 +1,227 @@
+/**
+ * scripts/syncChangelog.js
+ *
+ * 从本地 @chenyomi-leafer-htmltext-edit 源码仓库的 git log 自动提取版本变更，
+ * 更新 DocsPage.vue 中的 changelog 数据。
+ *
+ * 用法：
+ *   pnpm run changelog:sync
+ *   # 或指定源码路径
+ *   HTMLTEXT_SRC=~/Desktop/cym/@chenyomi-leafer-htmltext-edit pnpm run changelog:sync
+ */
+
+import { execSync } from 'child_process';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const WEBSITE_ROOT = resolve(__dirname, '..');
+const DOCS_PAGE = resolve(WEBSITE_ROOT, 'src/pages/DocsPage.vue');
+
+// ─── 查找源码仓库路径 ────────────────────────────────────────────────────────────
+function findSourceRepo() {
+  const candidates = [
+    process.env.HTMLTEXT_SRC,
+    resolve(WEBSITE_ROOT, '../@chenyomi-leafer-htmltext-edit'),
+    resolve(WEBSITE_ROOT, '../../@chenyomi-leafer-htmltext-edit'),
+  ].filter(Boolean);
+
+  for (const p of candidates) {
+    if (existsSync(p + '/.git')) return p;
+  }
+
+  console.error([
+    '❌ 找不到源码仓库 @chenyomi-leafer-htmltext-edit',
+    '   请通过环境变量指定路径：',
+    '   HTMLTEXT_SRC=/path/to/source pnpm run changelog:sync',
+  ].join('\n'));
+  process.exit(1);
+}
+
+// ─── git 工具函数 ────────────────────────────────────────────────────────────────
+function run(cmd, cwd) {
+  return execSync(cmd, { cwd, encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 }).trim();
+}
+
+// ─── 获取版本历史：读取每个修改 package.json 的提交，提取版本号 ─────────────────
+function getVersionHistory(srcRepo) {
+  const shas = run('git log --format="%H|%ad" --date=format:"%Y-%m" -- package.json', srcRepo)
+    .split('\n')
+    .filter(Boolean)
+    .map(l => {
+      const [sha, date] = l.split('|');
+      return { sha, date };
+    });
+
+  const versions = [];
+  let lastVer = null;
+
+  for (const { sha, date } of shas) {
+    let pkg;
+    try {
+      pkg = JSON.parse(run(`git show ${sha}:package.json`, srcRepo));
+    } catch {
+      continue;
+    }
+    if (pkg.version && pkg.version !== lastVer) {
+      versions.push({ version: pkg.version, sha, date });
+      lastVer = pkg.version;
+    }
+  }
+
+  // versions 当前是 newest-first（git log 默认），保持不变
+  return versions;
+}
+
+// ─── 提取某个版本区间内的 feat/fix 提交 ──────────────────────────────────────────
+function getItemsInRange(srcRepo, fromSha, toSha) {
+  // fromSha..toSha = 比 fromSha 新、不超过 toSha 的提交（不含 fromSha）
+  const range = fromSha ? `${fromSha}..${toSha}` : toSha;
+  const log = run(`git log ${range} --format="%s|%b---END---"`, srcRepo);
+
+  const items = [];
+  for (const block of log.split('---END---')) {
+    const trimmed = block.trim();
+    if (!trimmed) continue;
+
+    const [subject, ...bodyLines] = trimmed.split('\n');
+    const subj = (subject || '').split('|')[0].trim();
+    if (!/^(feat|fix|refactor|perf)/i.test(subj)) continue;
+
+    const body = bodyLines.join('\n');
+
+    // 优先用 commit body 中的 bullet points（- 开头，去掉版本号行）
+    const bullets = body
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.startsWith('-'))
+      .map(l => l.replace(/^-\s*/, '').trim())
+      .filter(l => l && !/^更新版本号/i.test(l));
+
+    if (bullets.length > 0) {
+      items.push(...bullets);
+    } else {
+      // 无 body 则用 subject（去掉 feat:/fix: 前缀）
+      const clean = subj.replace(/^(feat|fix|refactor|perf):\s*/i, '').trim();
+      if (clean) items.push(clean);
+    }
+  }
+
+  // 去重
+  return [...new Set(items)];
+}
+
+// ─── 确定版本 tag ─────────────────────────────────────────────────────────────
+function getTag(version, newerVersion) {
+  if (!newerVersion) return 'latest';
+  const [M, m] = version.split('.').map(Number);
+  const [nM, nm] = newerVersion.split('.').map(Number);
+  if (M < nM) return 'major';
+  if (m < nm) return 'minor';
+  return 'patch';
+}
+
+// ─── 构建 changelog ───────────────────────────────────────────────────────────
+function buildChangelog(srcRepo, versions, maxEntries = 10) {
+  // versions 是 newest-first
+  const result = [];
+  const limited = versions.slice(0, maxEntries);
+
+  for (let i = 0; i < limited.length; i++) {
+    const { version, sha, date } = limited[i];
+    const olderSha = limited[i + 1]?.sha ?? null;
+    const newerVersion = i === 0 ? null : limited[i - 1].version;
+
+    const items = getItemsInRange(srcRepo, olderSha, sha);
+    const tag = getTag(version, newerVersion);
+
+    // items 为空时用一个默认描述
+    const finalItems = items.length > 0 ? items : [`发布 v${version}`];
+
+    result.push({ version, date, tag, items: finalItems });
+  }
+
+  return result;
+}
+
+// ─── 序列化为 JS 代码 ─────────────────────────────────────────────────────────
+function serialize(releases) {
+  const entries = releases.map(r => {
+    const escaped = r.items.map(s => `      '${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`);
+    return (
+      `  {\n` +
+      `    version: '${r.version}',\n` +
+      `    date: '${r.date}',\n` +
+      `    tag: '${r.tag}',\n` +
+      `    items: [\n${escaped.join(',\n')}\n    ]\n` +
+      `  }`
+    );
+  });
+
+  return `const changelog = [\n${entries.join(',\n')}\n];`;
+}
+
+// ─── 更新 DocsPage.vue ────────────────────────────────────────────────────────
+function updateDocsPage(code) {
+  let content = readFileSync(DOCS_PAGE, 'utf-8');
+
+  // 匹配 changelog 声明块（从注释到末尾的 ];）
+  const HEADER = '// ─── Changelog ────────────────────────────────────────────────────────────────';
+  const start = content.indexOf(HEADER);
+  if (start === -1) {
+    console.error('❌ 在 DocsPage.vue 中找不到 changelog 区块，请确认文件格式正确');
+    process.exit(1);
+  }
+
+  // 从 HEADER 开始，找到 "const changelog = [" 对应的 "];" 结束位置
+  const arrStart = content.indexOf('const changelog = [', start);
+  if (arrStart === -1) {
+    console.error('❌ 找不到 const changelog = [');
+    process.exit(1);
+  }
+
+  // 找到匹配的 ]; 结尾（手动匹配括号深度）
+  let depth = 0;
+  let end = arrStart;
+  for (let i = arrStart; i < content.length; i++) {
+    if (content[i] === '[') depth++;
+    else if (content[i] === ']') {
+      depth--;
+      if (depth === 0) {
+        // 跳过可能紧跟的 ';'
+        end = content[i + 1] === ';' ? i + 2 : i + 1;
+        break;
+      }
+    }
+  }
+
+  content = content.slice(0, start) + HEADER + '\n' + code + content.slice(end);
+  writeFileSync(DOCS_PAGE, content, 'utf-8');
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+const srcRepo = findSourceRepo();
+console.log('📁 源码路径:', srcRepo);
+
+console.log('📊 读取 git 版本历史...');
+const versions = getVersionHistory(srcRepo);
+
+if (versions.length === 0) {
+  console.error('❌ 未找到任何版本提交，请检查源码仓库');
+  process.exit(1);
+}
+
+console.log(`🔖 发现 ${versions.length} 个版本:`, versions.map(v => v.version).join(', '));
+
+console.log('📝 生成 changelog 条目...');
+const releases = buildChangelog(srcRepo, versions, 10);
+
+for (const r of releases) {
+  console.log(`  v${r.version} [${r.tag}] - ${r.items.length} 条`);
+}
+
+const code = serialize(releases);
+updateDocsPage(code);
+
+console.log(`\n✅ DocsPage.vue changelog 已更新（共 ${releases.length} 个版本）`);
