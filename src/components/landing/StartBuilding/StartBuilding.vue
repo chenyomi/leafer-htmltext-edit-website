@@ -16,7 +16,7 @@
         <p class="start-building-subtitle mt-4">基础付费版功能介绍</p>
         <video
           :poster="posterSrc"
-          src="@/assets/video/video.mov"
+          src="@/assets/video/video.mp4"
           controls
           class="w-200"
           style="border-radius: 20px"
