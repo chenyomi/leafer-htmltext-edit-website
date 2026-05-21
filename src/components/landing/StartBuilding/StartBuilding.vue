@@ -167,11 +167,6 @@
               alt=""
               style="max-width: 180px; display: inline-block; border-radius: 10px; margin: 5px"
             />
-            <img
-              src="@/assets/tg.jpg"
-              alt=""
-              style="max-width: 200px; display: inline-block; border-radius: 10px; margin: 5px"
-            />
           </div>
         </ParticleCard>
 
