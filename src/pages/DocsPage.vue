@@ -784,6 +784,13 @@ const htmlTextParams = [
     desc: '字重，支持数值（100–900）或关键字（"bold"、"normal"）'
   },
   {
+    name: 'italic',
+    type: 'boolean',
+    required: false,
+    default: 'false',
+    desc: '是否全局斜体。设为 true 时，初始内容会以 <em> 包裹，并保留斜体字符外溢宽度'
+  },
+  {
     name: 'lineHeight',
     type: 'number',
     required: false,
@@ -831,14 +838,16 @@ const htmlTextExample = `const text = new HtmlText({
   fontSize: 20,
   fontFamily: 'PingFang SC',
   fontWeight: 600,
+  italic: true,
   lineHeight: 1.8,
   letterSpacing: 1,
-  content: '这是一段<strong>加粗</strong>文本',
+  content: 'Hello World!',
   textShadow: '1px 1px 4px rgba(0,0,0,0.3)',
   alignContent: 'start',
   editable: true,
   draggable: true,
   color: '#2c3e50',
+  textStroke: '3px #000'
 })
 app.tree.add(text)`;
 
@@ -1073,9 +1082,34 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.4.9',
+    version: '2.5.1',
     date: '2026-05',
     tag: 'latest',
+    items: [
+      '支持斜体格式的处理，优化文本渲染',
+      '清除节点遗留的宽高约束，提升内容适应性',
+      '精简特性列表，移除冗余描述',
+      '更新安装说明，去除不必要的包管理器示例',
+      '增加快速开始部分，提供更清晰的使用示例',
+      '更新许可证信息，简化商业使用说明'
+    ]
+  },
+  {
+    version: '2.5.0',
+    date: '2026-05',
+    tag: 'patch',
+    items: [
+      '更新版本号至 2.5.0',
+      '修改 IHtmlTextInputData 类型以支持 CSS 字符串值的行高',
+      '更新 handleShowCurve 函数以正确处理行高值类型',
+      '添加 align 属性，支持文本的左对齐、居中和右对齐',
+      '更新相关样式处理，确保新属性生效'
+    ]
+  },
+  {
+    version: '2.4.9',
+    date: '2026-05',
+    tag: 'minor',
     items: [
       '添加 textShadow 属性器，支持局部文字阴影',
       '实现斜体检测，优化文字宽度计算',
@@ -1150,19 +1184,7 @@ const changelog = [
     version: '2.4.1',
     date: '2026-02',
     tag: 'patch',
-    items: ['更新', '更新轮廓']
-  },
-  {
-    version: '2.4.0',
-    date: '2026-02',
-    tag: 'patch',
-    items: ['更新']
-  },
-  {
-    version: '2.3.0',
-    date: '2026-02',
-    tag: 'minor',
-    items: ['更新', '添加aes', '更新混淆', '授权更新res', '2', '11', '1', 'pack', '2.0.1', '优化', 'init']
+    items: ['更新', '更新轮廓', '添加aes', '更新混淆', '授权更新res', '2', '11', '1', 'pack', '2.0.1', '优化', 'init']
   }
 ];
 
