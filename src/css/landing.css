@@ -109,6 +109,15 @@
   overflow: visible !important;
 }
 
+.hero-action-buttons {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .landing-button {
   position: relative;
   background: linear-gradient(135deg, rgb(30, 160, 63), rgba(24, 47, 255, 1));
@@ -225,6 +234,18 @@
 .landing-button:active {
   transform: translateY(-2px) scale(1.02);
   transition: all 0.1s ease;
+}
+
+.landing-button-secondary {
+  background: linear-gradient(135deg, rgba(20, 137, 100, 0.92), rgba(20, 73, 185, 0.95));
+  box-shadow:
+    0 0 30px rgba(56, 186, 148, 0.12),
+    0 0 70px rgba(52, 109, 205, 0.12),
+    0 8px 28px rgba(0, 0, 0, 0.2);
+}
+
+.landing-button-secondary .button-arrow-circle {
+  display: flex;
 }
 
 @keyframes glow-pulse {
@@ -484,6 +505,10 @@
     gap: 1.2rem;
   }
 
+  .hero-action-buttons {
+    gap: 0.8rem;
+  }
+
   .button-arrow-circle {
     width: 32px;
     height: 32px;
@@ -596,6 +621,11 @@
     gap: 1rem;
   }
 
+  .hero-action-buttons {
+    margin-top: 0.4rem;
+    width: 100%;
+  }
+
   .button-arrow-circle {
     width: 28px;
     height: 28px;
@@ -669,6 +699,11 @@
     padding: 0 2em 0 2em;
     font-size: 0.9rem;
     gap: 0.8rem;
+  }
+
+  .hero-action-buttons {
+    flex-direction: column;
+    gap: 0.6rem;
   }
 
   .button-arrow-circle {

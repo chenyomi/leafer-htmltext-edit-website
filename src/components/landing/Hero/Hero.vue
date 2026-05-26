@@ -51,9 +51,26 @@
         text="一个强大的 Leafer UI 富文本编辑器插件，集成 Quill 2.0，支持 HTML 文本编辑和丰富的文本样式控制。"
       />
 
-      <router-link custom to="" class="landing-button">
-        <a href="https://chenyomi.github.io/leafer-htmltext-edit-view/" target="_blank">
-          <span>View Live Demo</span>
+      <div class="hero-action-buttons">
+        <router-link custom to="" class="landing-button">
+          <a href="https://chenyomi.github.io/leafer-htmltext-edit-view/" target="_blank">
+            <span>View Live Demo</span>
+            <div class="button-arrow-circle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M6 12L10 8L6 4"
+                  stroke="#0b0b0b"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </a>
+        </router-link>
+
+        <router-link class="landing-button landing-button-secondary" :to="{ path: '/docs', hash: '#quick-start' }">
+          <span>快速开始</span>
           <div class="button-arrow-circle">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -65,8 +82,8 @@
               />
             </svg>
           </div>
-        </a>
-      </router-link>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
