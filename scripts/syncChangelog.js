@@ -1,26 +1,17 @@
-/**
- * scripts/syncChangelog.js
- *
- * 从本地 @chenyomi-leafer-htmltext-edit 源码仓库的 git log 自动提取版本变更，
- * 更新 DocsPage.vue 中的 changelog 数据。
- *
- * 用法：
- *   pnpm run changelog:sync
- *   # 或指定源码路径
- *   HTMLTEXT_SRC=~/Desktop/cym/@chenyomi-leafer-htmltext-edit pnpm run changelog:sync
- */
-
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEBSITE_ROOT = resolve(__dirname, '..');
 const DOCS_PAGE = resolve(WEBSITE_ROOT, 'src/pages/DocsPage.vue');
+const PACKAGE_NAME = '@chenyomi/leafer-htmltext-edit';
+const DEFAULT_REPOS = ['chenyomi/leafer-htmltext-edit', 'chenyomi/npm-chenyomi-leafer-htmltext-edit'];
 
-// ─── 查找源码仓库路径 ────────────────────────────────────────────────────────────
-function findSourceRepo() {
+// ─── 查找或拉取源码仓库 ───────────────────────────────────────────────────────────
+function getSourceRepo() {
   const candidates = [
     process.env.HTMLTEXT_SRC,
     resolve(WEBSITE_ROOT, '../@chenyomi-leafer-htmltext-edit'),
@@ -28,20 +19,76 @@ function findSourceRepo() {
   ].filter(Boolean);
 
   for (const p of candidates) {
-    if (existsSync(p + '/.git')) return p;
+    if (existsSync(p + '/.git')) {
+      return { path: p, cleanup: null, source: 'local' };
+    }
   }
 
-  console.error([
-    '❌ 找不到源码仓库 @chenyomi-leafer-htmltext-edit',
-    '   请通过环境变量指定路径：',
-    '   HTMLTEXT_SRC=/path/to/source pnpm run changelog:sync',
-  ].join('\n'));
+  const repos = (process.env.HTMLTEXT_GITHUB_REPO || DEFAULT_REPOS.join(','))
+    .split(',')
+    .map(repo => repo.trim())
+    .filter(Boolean);
+
+  for (const repo of repos) {
+    const dir = mkdtempSync(resolve(tmpdir(), 'htmltext-changelog-'));
+    const url = repo.startsWith('http') ? repo : `https://github.com/${repo}.git`;
+
+    try {
+      console.log(`🌐 未找到本地源码仓库，尝试拉取远端: ${url}`);
+      run(`git clone --filter=blob:none --no-checkout --quiet ${url} .`, dir);
+      return {
+        path: dir,
+        cleanup: () => rmSync(dir, { recursive: true, force: true }),
+        source: url
+      };
+    } catch (error) {
+      rmSync(dir, { recursive: true, force: true });
+      console.warn(`⚠️  拉取失败: ${url}`);
+    }
+  }
+
+  console.error('❌ 找不到可用的源码仓库。可通过 HTMLTEXT_SRC 或 HTMLTEXT_GITHUB_REPO 指定。');
   process.exit(1);
 }
 
 // ─── git 工具函数 ────────────────────────────────────────────────────────────────
 function run(cmd, cwd) {
   return execSync(cmd, { cwd, encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 }).trim();
+}
+
+function formatMonth(input) {
+  const date = input ? new Date(input) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString().slice(0, 7);
+  }
+  return date.toISOString().slice(0, 7);
+}
+
+async function getNpmLatest() {
+  const url = `https://registry.npmjs.org/${encodeURIComponent(PACKAGE_NAME)}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'leafer-htmltext-edit-website-docs-sync'
+      }
+    });
+
+    if (!res.ok) throw new Error(`npm registry status ${res.status}`);
+
+    const data = await res.json();
+    const version = data?.['dist-tags']?.latest;
+    if (!version) return null;
+
+    return {
+      version,
+      date: formatMonth(data?.time?.[version])
+    };
+  } catch (error) {
+    console.warn(`⚠️  无法读取 npm 最新版本: ${error.message}`);
+    return null;
+  }
 }
 
 // ─── 获取版本历史：读取每个修改 package.json 的提交，提取版本号 ─────────────────
@@ -78,7 +125,13 @@ function getVersionHistory(srcRepo) {
 function getItemsInRange(srcRepo, fromSha, toSha) {
   // fromSha..toSha = 比 fromSha 新、不超过 toSha 的提交（不含 fromSha）
   const range = fromSha ? `${fromSha}..${toSha}` : toSha;
-  const log = run(`git log ${range} --format="%s|%b---END---"`, srcRepo);
+  let log = '';
+
+  try {
+    log = run(`git log ${range} --format="%s|%b---END---"`, srcRepo);
+  } catch {
+    return [];
+  }
 
   const items = [];
   for (const block of log.split('---END---')) {
@@ -145,6 +198,33 @@ function buildChangelog(srcRepo, versions, maxEntries = 10) {
   return result;
 }
 
+function ensureNpmLatest(srcRepo, releases, versions, npmLatest, maxEntries = 10) {
+  if (!npmLatest?.version || releases[0]?.version === npmLatest.version) {
+    return releases;
+  }
+
+  const currentVersion = releases[0]?.version;
+  const headItems = versions[0]?.sha ? getItemsInRange(srcRepo, versions[0].sha, 'HEAD') : [];
+  const latestItems = headItems.length > 0 ? headItems : [`发布 v${npmLatest.version}`];
+
+  console.log(`📦 npm 最新版本为 v${npmLatest.version}，源码版本历史最新为 ${currentVersion ? `v${currentVersion}` : '空'}`);
+
+  const withLatest = [
+    {
+      version: npmLatest.version,
+      date: npmLatest.date,
+      tag: 'latest',
+      items: latestItems
+    },
+    ...releases.map((release, index) => ({
+      ...release,
+      tag: getTag(release.version, index === 0 ? npmLatest.version : releases[index - 1].version)
+    }))
+  ];
+
+  return withLatest.slice(0, maxEntries);
+}
+
 // ─── 序列化为 JS 代码 ─────────────────────────────────────────────────────────
 function serialize(releases) {
   const entries = releases.map(r => {
@@ -201,27 +281,42 @@ function updateDocsPage(code) {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-const srcRepo = findSourceRepo();
-console.log('📁 源码路径:', srcRepo);
+async function main() {
+  const repo = getSourceRepo();
+  const npmLatest = await getNpmLatest();
 
-console.log('📊 读取 git 版本历史...');
-const versions = getVersionHistory(srcRepo);
+  try {
+    console.log('📁 源码路径:', repo.path);
+    console.log('🔗 数据来源:', repo.source);
 
-if (versions.length === 0) {
-  console.error('❌ 未找到任何版本提交，请检查源码仓库');
+    console.log('📊 读取 git 版本历史...');
+    const versions = getVersionHistory(repo.path);
+
+    if (versions.length === 0) {
+      console.error('❌ 未找到任何版本提交，请检查源码仓库');
+      process.exit(1);
+    }
+
+    console.log(`🔖 发现 ${versions.length} 个源码版本:`, versions.map(v => v.version).join(', '));
+
+    console.log('📝 生成 changelog 条目...');
+    const gitReleases = buildChangelog(repo.path, versions, 10);
+    const releases = ensureNpmLatest(repo.path, gitReleases, versions, npmLatest, 10);
+
+    for (const r of releases) {
+      console.log(`  v${r.version} [${r.tag}] - ${r.items.length} 条`);
+    }
+
+    const code = serialize(releases);
+    updateDocsPage(code);
+
+    console.log(`\n✅ DocsPage.vue changelog 已更新（共 ${releases.length} 个版本）`);
+  } finally {
+    repo.cleanup?.();
+  }
+}
+
+main().catch(error => {
+  console.error(error);
   process.exit(1);
-}
-
-console.log(`🔖 发现 ${versions.length} 个版本:`, versions.map(v => v.version).join(', '));
-
-console.log('📝 生成 changelog 条目...');
-const releases = buildChangelog(srcRepo, versions, 10);
-
-for (const r of releases) {
-  console.log(`  v${r.version} [${r.tag}] - ${r.items.length} 条`);
-}
-
-const code = serialize(releases);
-updateDocsPage(code);
-
-console.log(`\n✅ DocsPage.vue changelog 已更新（共 ${releases.length} 个版本）`);
+});

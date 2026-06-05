@@ -15,13 +15,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          
-      - name: Run Update Script
-        run: node scripts/updateDocs.js
+
+      - name: Run Update Scripts
+        run: npm run docs:sync-all
         
       - name: Commit and Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add src/content/docs/
+          git add src/content/docs/ src/pages/DocsPage.vue
           git diff --quiet && git diff --staged --quiet || (git commit -m "docs: sync external plugin docs [skip ci]" && git push)

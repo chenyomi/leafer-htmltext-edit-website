@@ -116,9 +116,9 @@
             富文本编辑器插件，集成 Quill 2.0，支持完整的 HTML 文本编辑和丰富的文本样式控制。
           </p>
 
-          <div class="feature-grid">
-            <div class="feature-card" v-for="f in features" :key="f.title">
-              <span class="feature-icon">{{ f.icon }}</span>
+          <div class="doc-feature-grid">
+            <div class="doc-feature-card" v-for="f in features" :key="f.title">
+              <span class="doc-feature-icon">{{ f.icon }}</span>
               <div>
                 <strong>{{ f.title }}</strong>
                 <p>{{ f.desc }}</p>
@@ -1194,18 +1194,37 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
+    version: '2.5.3',
+    date: '2026-06',
+    tag: 'latest',
+    items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
+  },
+  {
+    version: '2.5.2',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '更新版本号至 2.5.2 - 将版本号从 2.5.1 更新至 2.5.2',
+      '增加对 HTMLText 节点的解析支持',
+      '更新 `addFontSizeToP` 函数，确保内联样式优先级处理对齐问题',
+      '调整 `TextEditor` 类中的对齐逻辑，避免覆盖段落对齐设置',
+      '扩展 align 属性，支持 "justify" 和 "distribute" 对齐方式',
+      '更新样式以支持新的对齐选项',
+      '更新 CSS，支持分散对齐样式',
+      '在内联样式中添加分散对齐的支持'
+    ]
+  },
+  {
     version: '2.5.1',
     date: '2026-05',
-    tag: 'latest',
+    tag: 'patch',
     items: [
       '支持斜体格式的处理，优化文本渲染',
       '清除节点遗留的宽高约束，提升内容适应性',
       '精简特性列表，移除冗余描述',
       '更新安装说明，去除不必要的包管理器示例',
       '增加快速开始部分，提供更清晰的使用示例',
-      '更新许可证信息，简化商业使用说明',
-      '新增 align "justify" 两端对齐支持（text-align: justify）',
-      '新增 align "distribute" 分散对齐支持（text-align-last: justify）'
+      '更新许可证信息，简化商业使用说明'
     ]
   },
   {
@@ -1285,20 +1304,21 @@ const changelog = [
       '在 HtmlTextManage 中添加选择范围管理功能',
       '在 TextEditTool 中优化事件处理和文本缩放逻辑',
       '在 TextEditor 中增强文本样式同步和输入处理',
-      '在 utils 中添加字母间距和垂直布局同步功能'
+      '在 utils 中添加字母间距和垂直布局同步功能',
+      'version',
+      '更新',
+      '更新轮廓',
+      '添加aes',
+      '更新混淆',
+      '授权更新res',
+      '2',
+      '11',
+      '1',
+      'pack',
+      '2.0.1',
+      '优化',
+      'init'
     ]
-  },
-  {
-    version: '2.4.2',
-    date: '2026-02',
-    tag: 'patch',
-    items: ['version']
-  },
-  {
-    version: '2.4.1',
-    date: '2026-02',
-    tag: 'patch',
-    items: ['更新', '更新轮廓', '添加aes', '更新混淆', '授权更新res', '2', '11', '1', 'pack', '2.0.1', '优化', 'init']
   }
 ];
 
