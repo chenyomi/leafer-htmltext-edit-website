@@ -70,7 +70,7 @@
         </router-link>
 
         <router-link class="landing-button landing-button-secondary" :to="{ path: '/docs', hash: '#quick-start' }">
-          <span>快速开始</span>
+          <span>Quick Start</span>
           <div class="button-arrow-circle">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
               <path

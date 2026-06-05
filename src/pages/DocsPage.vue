@@ -231,6 +231,66 @@
           </div>
         </section>
 
+        <!-- ─── 数据保存与回显 ─── -->
+        <section :id="'data-persistence'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              数据保存与回显
+              <a :href="'#data-persistence'" class="anchor-link" @click.prevent="scrollTo('data-persistence')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            <code>HtmlText</code>
+            本质上是一个注册到 Leafer 体系里的画布节点，所以保存策略建议跟随你的项目数据结构来定：纯 Leafer
+            项目保存整棵画布 JSON，业务系统混合使用时再把文本节点作为业务数据单独存储。
+          </p>
+
+          <h3 class="doc-h3">纯 Leafer 项目：保存整棵画布</h3>
+          <p class="doc-p">
+            如果页面里的图形、图片、文本都由 Leafer 管理，推荐直接把画布导出成 JSON 存储。下次进入页面时先创建
+            <code>App</code>
+            、初始化
+            <code>htmlTextManage</code>
+            ，再用
+            <code>set</code>
+            覆盖画布或用
+            <code>add</code>
+            追加 JSON 数据即可。
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(scenePersistenceExample, 'scene-persistence')">
+              <i class="pi" :class="copiedKey === 'scene-persistence' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ scenePersistenceExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">混合业务项目：文本节点单独存储</h3>
+          <p class="doc-p">
+            如果画布只是页面的一部分，或者文本需要跟业务表单、素材库、模板系统分别加载，建议只保存每个
+            <code>HtmlText</code>
+            的 JSON。回显时每条文本数据都应该创建一个独立节点实例，再添加到画布；如果要更新已有节点，则找到节点后调用
+            <code>set(textJson)</code>
+            同步属性。
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(textPersistenceExample, 'text-persistence')">
+              <i class="pi" :class="copiedKey === 'text-persistence' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ textPersistenceExample }}</code></pre>
+          </div>
+
+          <div class="callout callout-warning">
+            不建议保存 Quill 实例、DOM 或编辑器运行时状态。保存
+            <code>HtmlText.toJSON()</code>
+            或整棵 Leafer JSON 即可；回显前确保已导入
+            <code>HtmlText</code>
+            并完成
+            <code>htmlTextManage.init(app)</code>
+            ，这样双击编辑、选中、缩放等能力才能正常工作。
+          </div>
+        </section>
+
         <!-- ─── API: HtmlText ─── -->
         <section :id="'api-htmltext'" class="doc-section">
           <div class="section-anchor-wrap">
@@ -624,7 +684,8 @@ const guideItems = [
   { id: 'introduction', label: '介绍' },
   { id: 'installation', label: '安装' },
   { id: 'quick-start', label: '快速开始' },
-  { id: 'basic-usage', label: '基础用法' }
+  { id: 'basic-usage', label: '基础用法' },
+  { id: 'data-persistence', label: '数据保存与回显' }
 ];
 
 const apiItems = [
@@ -851,6 +912,55 @@ const htmlTextExample = `const text = new HtmlText({
 })
 app.tree.add(text)`;
 
+const scenePersistenceExample = `import { App } from 'leafer-ui'
+import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
+
+// 保存：纯 Leafer 项目建议保存整棵画布
+const sceneJson = app.tree.toJSON()
+await api.saveDocument({
+  id: documentId,
+  scene: sceneJson,
+})
+
+// 回显：先创建 App 并初始化编辑器能力
+const restoredApp = new App({
+  view: 'leafer-view',
+  fill: '#ffffff',
+  editor: {},
+})
+await htmlTextManage.init(restoredApp)
+
+const { scene } = await api.getDocument(documentId)
+
+// 覆盖当前画布，适合打开一个完整设计稿
+restoredApp.tree.set(scene)
+
+// 如果是模板、素材等追加场景，也可以按需 add JSON
+// scene.children?.forEach((child) => restoredApp.tree.add(child))`;
+
+const textPersistenceExample = `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
+
+// 保存：只保存文本节点自己的 JSON
+const textJson = htmlText.toJSON()
+await api.saveTextElement({
+  id: htmlText.id,
+  data: textJson,
+})
+
+// 回显：每条文本数据创建一个独立实例
+const savedTexts = await api.getTextElements(documentId)
+savedTexts.forEach((item) => {
+  const text = new HtmlText(item.data)
+  app.tree.add(text)
+})
+
+// 更新已有文本：找到节点后直接同步 JSON
+const existingText = app.findId(textId)
+existingText?.set(nextTextJson)
+
+// 如果保存的是 Leafer 原始 JSON，且 HtmlText 已注册，也可以直接 add
+// app.tree.add(textJson)`;
+
 // ─── HtmlTextManage methods ───────────────────────────────────────────────────
 const manageMethods = [
   {
@@ -1002,8 +1112,8 @@ const setHtmlTextKeys = [
   },
   {
     key: 'align',
-    valueType: 'false | "center" | "right"',
-    desc: '水平对齐。false = 左对齐（默认），"center" = 居中，"right" = 右对齐'
+    valueType: 'false | "center" | "right" | "justify" | "distribute"',
+    desc: '水平对齐。false = 左对齐（默认），"center" = 居中，"right" = 右对齐，"justify" = 两端对齐，"distribute" = 分散对齐'
   },
   {
     key: 'alignContent',
@@ -1053,9 +1163,11 @@ setHTMLText('script', 'super')  // X²
 setHTMLText('script', 'sub')    // H₂O
 
 // 3. 对齐
-setHTMLText('align', false)         // 左对齐
-setHTMLText('align', 'center')      // 水平居中
-setHTMLText('align', 'right')       // 右对齐
+setHTMLText('align', false)           // 左对齐
+setHTMLText('align', 'center')        // 水平居中
+setHTMLText('align', 'right')         // 右对齐
+setHTMLText('align', 'justify')       // 两端对齐
+setHTMLText('align', 'distribute')    // 分散对齐
 setHTMLText('alignContent', 'start')  // 垂直顶部
 setHTMLText('alignContent', 'center') // 垂直居中
 setHTMLText('alignContent', 'end')    // 垂直底部
@@ -1091,7 +1203,9 @@ const changelog = [
       '精简特性列表，移除冗余描述',
       '更新安装说明，去除不必要的包管理器示例',
       '增加快速开始部分，提供更清晰的使用示例',
-      '更新许可证信息，简化商业使用说明'
+      '更新许可证信息，简化商业使用说明',
+      '新增 align "justify" 两端对齐支持（text-align: justify）',
+      '新增 align "distribute" 分散对齐支持（text-align-last: justify）'
     ]
   },
   {
