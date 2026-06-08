@@ -1194,9 +1194,23 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.5.3',
+    version: '2.5.4',
     date: '2026-06',
     tag: 'latest',
+    items: [
+      '在 IHtmlTextContentData 接口中添加 fontBase64 属性以支持自定义字体',
+      '在 HtmlText 类中处理 fontBase64 以注入 @font-face',
+      '在 TextEditor 类中根据 fontFamily 设置字体样式',
+      '在 utils.ts 中调整字体处理逻辑以支持单字体模型',
+      '添加新的许可证密钥',
+      '更新许可证信息，包括域名、过期日期、发行日期、邮箱、用户ID、功能和版本',
+      '将许可证有效期延长至 800 天'
+    ]
+  },
+  {
+    version: '2.5.3',
+    date: '2026-06',
+    tag: 'patch',
     items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
   },
   {
@@ -1292,14 +1306,7 @@ const changelog = [
       '精确测量 HtmlText 的 SVG 尺寸，消除多余空白',
       '支持在 TextEditTool 中处理 HtmlText 的锁定比例',
       '优化 utils.ts 中的字符宽度测量和弧形辅助层清理逻辑',
-      '更新 TextEditor 以支持 HtmlText 的相关操作'
-    ]
-  },
-  {
-    version: '2.4.3',
-    date: '2026-04',
-    tag: 'patch',
-    items: [
+      '更新 TextEditor 以支持 HtmlText 的相关操作',
       '在 HtmlText 中使用 IUI 类型增强文本元素的类型安全',
       '在 HtmlTextManage 中添加选择范围管理功能',
       '在 TextEditTool 中优化事件处理和文本缩放逻辑',

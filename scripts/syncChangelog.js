@@ -10,17 +10,35 @@ const DOCS_PAGE = resolve(WEBSITE_ROOT, 'src/pages/DocsPage.vue');
 const PACKAGE_NAME = '@chenyomi/leafer-htmltext-edit';
 const DEFAULT_REPOS = ['chenyomi/leafer-htmltext-edit', 'chenyomi/npm-chenyomi-leafer-htmltext-edit'];
 
+function getGitHubToken() {
+  return process.env.HTMLTEXT_GITHUB_TOKEN || process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
+}
+
+function withGitHubToken(url) {
+  const token = getGitHubToken();
+  if (!token || !url.startsWith('https://github.com/')) return url;
+  return url.replace('https://github.com/', `https://x-access-token:${encodeURIComponent(token)}@github.com/`);
+}
+
+function maskUrl(url) {
+  return url.replace(/x-access-token:[^@]+@/, 'x-access-token:***@');
+}
+
 // ─── 查找或拉取源码仓库 ───────────────────────────────────────────────────────────
 function getSourceRepo() {
-  const candidates = [
-    process.env.HTMLTEXT_SRC,
-    resolve(WEBSITE_ROOT, '../@chenyomi-leafer-htmltext-edit'),
-    resolve(WEBSITE_ROOT, '../../@chenyomi-leafer-htmltext-edit'),
-  ].filter(Boolean);
+  const disableLocal = process.env.HTMLTEXT_DISABLE_LOCAL === '1';
 
-  for (const p of candidates) {
-    if (existsSync(p + '/.git')) {
-      return { path: p, cleanup: null, source: 'local' };
+  if (!disableLocal) {
+    const candidates = [
+      process.env.HTMLTEXT_SRC,
+      resolve(WEBSITE_ROOT, '../@chenyomi-leafer-htmltext-edit'),
+      resolve(WEBSITE_ROOT, '../../@chenyomi-leafer-htmltext-edit'),
+    ].filter(Boolean);
+
+    for (const p of candidates) {
+      if (existsSync(p + '/.git')) {
+        return { path: p, cleanup: null, source: 'local' };
+      }
     }
   }
 
@@ -32,10 +50,11 @@ function getSourceRepo() {
   for (const repo of repos) {
     const dir = mkdtempSync(resolve(tmpdir(), 'htmltext-changelog-'));
     const url = repo.startsWith('http') ? repo : `https://github.com/${repo}.git`;
+    const cloneUrl = withGitHubToken(url);
 
     try {
       console.log(`🌐 未找到本地源码仓库，尝试拉取远端: ${url}`);
-      run(`git clone --filter=blob:none --no-checkout --quiet ${url} .`, dir);
+      run(`git clone --filter=blob:none --no-checkout --quiet ${cloneUrl} .`, dir);
       return {
         path: dir,
         cleanup: () => rmSync(dir, { recursive: true, force: true }),
@@ -43,17 +62,25 @@ function getSourceRepo() {
       };
     } catch (error) {
       rmSync(dir, { recursive: true, force: true });
-      console.warn(`⚠️  拉取失败: ${url}`);
+      console.warn(`⚠️  拉取失败: ${maskUrl(url)}`);
     }
   }
 
-  console.error('❌ 找不到可用的源码仓库。可通过 HTMLTEXT_SRC 或 HTMLTEXT_GITHUB_REPO 指定。');
-  process.exit(1);
+  console.warn('⚠️  找不到可用的源码仓库，将使用 npm latest 和当前页面 changelog 兜底。');
+  return null;
 }
 
 // ─── git 工具函数 ────────────────────────────────────────────────────────────────
 function run(cmd, cwd) {
-  return execSync(cmd, { cwd, encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 }).trim();
+  return execSync(cmd, {
+    cwd,
+    encoding: 'utf-8',
+    maxBuffer: 20 * 1024 * 1024,
+    env: {
+      ...process.env,
+      GIT_TERMINAL_PROMPT: '0'
+    }
+  }).trim();
 }
 
 function formatMonth(input) {
@@ -225,6 +252,19 @@ function ensureNpmLatest(srcRepo, releases, versions, npmLatest, maxEntries = 10
   return withLatest.slice(0, maxEntries);
 }
 
+function compareVersions(a, b) {
+  const left = String(a || '').split('.').map(Number);
+  const right = String(b || '').split('.').map(Number);
+  const len = Math.max(left.length, right.length);
+
+  for (let i = 0; i < len; i++) {
+    const diff = (left[i] || 0) - (right[i] || 0);
+    if (diff !== 0) return diff;
+  }
+
+  return 0;
+}
+
 // ─── 序列化为 JS 代码 ─────────────────────────────────────────────────────────
 function serialize(releases) {
   const entries = releases.map(r => {
@@ -243,40 +283,94 @@ function serialize(releases) {
 }
 
 // ─── 更新 DocsPage.vue ────────────────────────────────────────────────────────
-function updateDocsPage(code) {
-  let content = readFileSync(DOCS_PAGE, 'utf-8');
+const CHANGELOG_HEADER = '// ─── Changelog ────────────────────────────────────────────────────────────────';
 
-  // 匹配 changelog 声明块（从注释到末尾的 ];）
-  const HEADER = '// ─── Changelog ────────────────────────────────────────────────────────────────';
-  const start = content.indexOf(HEADER);
+function getChangelogArrayRange(content) {
+  const start = content.indexOf(CHANGELOG_HEADER);
   if (start === -1) {
-    console.error('❌ 在 DocsPage.vue 中找不到 changelog 区块，请确认文件格式正确');
-    process.exit(1);
+    throw new Error('在 DocsPage.vue 中找不到 changelog 区块，请确认文件格式正确');
   }
 
-  // 从 HEADER 开始，找到 "const changelog = [" 对应的 "];" 结束位置
   const arrStart = content.indexOf('const changelog = [', start);
   if (arrStart === -1) {
-    console.error('❌ 找不到 const changelog = [');
-    process.exit(1);
+    throw new Error('找不到 const changelog = [');
   }
 
-  // 找到匹配的 ]; 结尾（手动匹配括号深度）
+  const bracketStart = content.indexOf('[', arrStart);
   let depth = 0;
-  let end = arrStart;
-  for (let i = arrStart; i < content.length; i++) {
+  let bracketEnd = bracketStart;
+
+  for (let i = bracketStart; i < content.length; i++) {
     if (content[i] === '[') depth++;
     else if (content[i] === ']') {
       depth--;
       if (depth === 0) {
-        // 跳过可能紧跟的 ';'
-        end = content[i + 1] === ';' ? i + 2 : i + 1;
+        bracketEnd = i;
         break;
       }
     }
   }
 
-  content = content.slice(0, start) + HEADER + '\n' + code + content.slice(end);
+  const statementEnd = content[bracketEnd + 1] === ';' ? bracketEnd + 2 : bracketEnd + 1;
+
+  return { start, arrStart, bracketStart, bracketEnd, statementEnd };
+}
+
+function readCurrentChangelog() {
+  const content = readFileSync(DOCS_PAGE, 'utf-8');
+  const range = getChangelogArrayRange(content);
+  const arraySource = content.slice(range.bracketStart, range.bracketEnd + 1);
+
+  try {
+    return Function(`"use strict"; return (${arraySource});`)();
+  } catch (error) {
+    console.warn(`⚠️  当前 changelog 解析失败: ${error.message}`);
+    return [];
+  }
+}
+
+function buildFallbackChangelog(npmLatest, maxEntries = 10) {
+  const existing = readCurrentChangelog();
+
+  if (!npmLatest?.version) {
+    console.warn('⚠️  npm latest 不可用，保持当前 changelog 不变。');
+    return existing.slice(0, maxEntries);
+  }
+
+  const currentVersion = existing[0]?.version;
+  if (currentVersion && compareVersions(currentVersion, npmLatest.version) >= 0) {
+    return existing.slice(0, maxEntries);
+  }
+
+  console.log(`📦 使用 npm latest 兜底补充 v${npmLatest.version}`);
+
+  return [
+    {
+      version: npmLatest.version,
+      date: npmLatest.date,
+      tag: 'latest',
+      items: [`发布 v${npmLatest.version}`]
+    },
+    ...existing.map((entry, index) => ({
+      ...entry,
+      tag: getTag(entry.version, index === 0 ? npmLatest.version : existing[index - 1].version)
+    }))
+  ].slice(0, maxEntries);
+}
+
+function updateDocsPage(code) {
+  let content = readFileSync(DOCS_PAGE, 'utf-8');
+
+  // 匹配 changelog 声明块（从注释到末尾的 ];）
+  let range;
+  try {
+    range = getChangelogArrayRange(content);
+  } catch (error) {
+    console.error('❌ 在 DocsPage.vue 中找不到 changelog 区块，请确认文件格式正确');
+    process.exit(1);
+  }
+
+  content = content.slice(0, range.start) + CHANGELOG_HEADER + '\n' + code + content.slice(range.statementEnd);
   writeFileSync(DOCS_PAGE, content, 'utf-8');
 }
 
@@ -284,6 +378,19 @@ function updateDocsPage(code) {
 async function main() {
   const repo = getSourceRepo();
   const npmLatest = await getNpmLatest();
+
+  if (!repo) {
+    const releases = buildFallbackChangelog(npmLatest, 10);
+    if (releases.length === 0) {
+      console.error('❌ 无法生成 changelog：源码仓库、npm latest 和当前 changelog 均不可用。');
+      process.exit(1);
+    }
+
+    const code = serialize(releases);
+    updateDocsPage(code);
+    console.log(`\n✅ DocsPage.vue changelog 已用兜底数据更新（共 ${releases.length} 个版本）`);
+    return;
+  }
 
   try {
     console.log('📁 源码路径:', repo.path);
