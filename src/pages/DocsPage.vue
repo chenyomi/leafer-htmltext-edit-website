@@ -1211,7 +1211,10 @@ const changelog = [
     version: '2.5.3',
     date: '2026-06',
     tag: 'patch',
-    items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
+    items: [
+      '更新版本号至 2.5.3',
+      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
+    ]
   },
   {
     version: '2.5.2',
