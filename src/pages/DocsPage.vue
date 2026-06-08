@@ -229,6 +229,23 @@
             <strong>之前</strong>
             调用。本地开发环境无需授权即可使用，生产环境需要购买授权。
           </div>
+
+          <h3 class="doc-h3">初始化自定义字体</h3>
+          <p class="doc-p">
+            如果创建节点时就需要使用自定义字体，可以同时传入
+            <code>fontFamily</code>
+            和
+            <code>fontBase64</code>
+            。插件会在初始 HTML 中注入
+            <code>@font-face</code>
+            ，节点回显和双击进入编辑态时都会继续使用同一字体。
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(initialFontExample, 'initial-font')">
+              <i class="pi" :class="copiedKey === 'initial-font' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ initialFontExample }}</code></pre>
+          </div>
         </section>
 
         <!-- ─── 数据保存与回显 ─── -->
@@ -792,6 +809,8 @@ onMounted(async () => {
     x: 100,
     y: 100,
     fontSize: 24,
+    fontFamily: '"Dancing Script", cursive',
+    fontBase64: 'data:font/woff2;charset=utf-8;base64,...',
     lineHeight: 1.5,
     content: '双击此处编辑文本',
     color: '#e74c3c',
@@ -802,6 +821,22 @@ onMounted(async () => {
   app.tree.add(text)
 })
 <\/script>`;
+
+const initialFontExample = `const fontFamily = '"Dancing Script", cursive'
+const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
+
+const text = new HtmlText({
+  x: 100,
+  y: 100,
+  content: '初始化时加载自定义字体',
+  fontFamily,
+  fontBase64,
+  fontSize: 32,
+  editable: true,
+  draggable: true,
+})
+
+app.tree.add(text)`;
 
 // ─── HtmlText constructor params ──────────────────────────────────────────────
 const htmlTextParams = [
@@ -835,7 +870,14 @@ const htmlTextParams = [
     type: 'string',
     required: false,
     default: '—',
-    desc: '字体族名称，例如 "Arial"、"PingFang SC"'
+    desc: '字体族名称，例如 "Arial"、"PingFang SC"。与 fontBase64 一起传入时会初始化自定义字体'
+  },
+  {
+    name: 'fontBase64',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: '自定义字体的 Base64 / data URL（如 data:font/woff2;base64,...）。需配合 fontFamily 使用，插件会自动注入 @font-face'
   },
   {
     name: 'fontWeight',
@@ -898,6 +940,7 @@ const htmlTextExample = `const text = new HtmlText({
   width: 400,           // 固定宽度，超出自动换行
   fontSize: 20,
   fontFamily: 'PingFang SC',
+  fontBase64: undefined, // 自定义字体可传 data:font/woff2;base64,...
   fontWeight: 600,
   italic: true,
   lineHeight: 1.8,
@@ -1147,7 +1190,7 @@ const setHtmlTextKeys = [
   {
     key: 'font',
     valueType: 'string（fontFamily）',
-    desc: '切换字体族。需同时传第三个参数 base64font（字体 woff2 base64 数据）'
+    desc: '运行时切换字体族。需同时传第三个参数 base64font；如果是创建节点时初始化字体，优先使用 HtmlText 的 fontBase64'
   }
 ];
 
@@ -1186,7 +1229,7 @@ setHTMLText('textStroke', '1px #333333')
 setHTMLText('list', 'ordered')  // 有序列表
 setHTMLText('list', 'bullet')   // 无序列表
 
-// 7. 自定义字体（需传入 Base64 字体数据）
+// 7. 运行时切换自定义字体（初始化字体可直接用 HtmlText 的 fontBase64）
 const fontFamily = '"Dancing Script", cursive'
 const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
 setHTMLText('font', fontFamily, fontBase64)`;
