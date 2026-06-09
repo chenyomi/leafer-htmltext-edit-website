@@ -1237,9 +1237,17 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.5.4',
+    version: '2.5.5',
     date: '2026-06',
     tag: 'latest',
+    items: [
+      '发布 v2.5.5'
+    ]
+  },
+  {
+    version: '2.5.4',
+    date: '2026-06',
+    tag: 'patch',
     items: [
       '在 IHtmlTextContentData 接口中添加 fontBase64 属性以支持自定义字体',
       '在 HtmlText 类中处理 fontBase64 以注入 @font-face',
@@ -1342,35 +1350,6 @@ const changelog = [
     items: [
       '在 TextEditTool 中添加 textStroke 属性支持，确保锁定比例缩放时轮廓线宽度同步更新',
       '在 TextEditor 中调整 webkitTextStroke 的应用位置，确保轮廓线宽度按缩放比例正确渲染'
-    ]
-  },
-  {
-    version: '2.4.5',
-    date: '2026-04',
-    tag: 'patch',
-    items: [
-      '精确测量 HtmlText 的 SVG 尺寸，消除多余空白',
-      '支持在 TextEditTool 中处理 HtmlText 的锁定比例',
-      '优化 utils.ts 中的字符宽度测量和弧形辅助层清理逻辑',
-      '更新 TextEditor 以支持 HtmlText 的相关操作',
-      '在 HtmlText 中使用 IUI 类型增强文本元素的类型安全',
-      '在 HtmlTextManage 中添加选择范围管理功能',
-      '在 TextEditTool 中优化事件处理和文本缩放逻辑',
-      '在 TextEditor 中增强文本样式同步和输入处理',
-      '在 utils 中添加字母间距和垂直布局同步功能',
-      'version',
-      '更新',
-      '更新轮廓',
-      '添加aes',
-      '更新混淆',
-      '授权更新res',
-      '2',
-      '11',
-      '1',
-      'pack',
-      '2.0.1',
-      '优化',
-      'init'
     ]
   }
 ];
