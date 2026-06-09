@@ -259,8 +259,10 @@
 
           <p class="doc-p">
             <code>HtmlText</code>
-            本质上是一个注册到 Leafer 体系里的画布节点，所以保存策略建议跟随你的项目数据结构来定：纯 Leafer
-            项目保存整棵画布 JSON，业务系统混合使用时再把文本节点作为业务数据单独存储。
+            本质上是一个注册到 Leafer 体系里的画布节点。推荐优先保存 Leafer JSON，这样节点位置、宽高、子节点、
+            <code>data.textData</code>
+            和编辑状态所需元数据都会一起保留。只有在业务系统已经把文字内容、字体资源、素材模板分开存储时，才建议使用下方的
+            HTML 内容回显方案。
           </p>
 
           <h3 class="doc-h3">纯 Leafer 项目：保存整棵画布</h3>
@@ -297,6 +299,39 @@
             <pre class="code-block"><code>{{ textPersistenceExample }}</code></pre>
           </div>
 
+          <h3 class="doc-h3">特殊场景：只保存 HTML 内容</h3>
+          <p class="doc-p">
+            有些业务不会保存完整 Leafer JSON，而是只保存富文本内容
+            HTML，同时把字体文件交给字体管理器维护。这种情况下，回显时需要把字体
+            <code>@font-face</code>
+            和内容 HTML 拼成一个完整的
+            <code>text</code>
+            字段传给
+            <code>new HtmlText({ text })</code>
+            。
+            <code>text</code>
+            是插件渲染和进入编辑态的 HTML 来源：前面的字体
+            <code>style</code>
+            负责让自定义字体可加载，后面的内容 HTML 负责保留字号、颜色、描边、宽高和对齐等内联样式。插件会自动从内容
+            HTML 里反解
+            <code>width</code>
+            、
+            <code>height</code>
+            、
+            <code>fontSize</code>
+            、
+            <code>fontFamily</code>
+            、
+            <code>textStroke</code>
+            等编辑所需元数据。
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(htmlOnlyPersistenceExample, 'html-only-persistence')">
+              <i class="pi" :class="copiedKey === 'html-only-persistence' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ htmlOnlyPersistenceExample }}</code></pre>
+          </div>
+
           <div class="callout callout-warning">
             不建议保存 Quill 实例、DOM 或编辑器运行时状态。保存
             <code>HtmlText.toJSON()</code>
@@ -304,7 +339,14 @@
             <code>HtmlText</code>
             并完成
             <code>htmlTextManage.init(app)</code>
-            ，这样双击编辑、选中、缩放等能力才能正常工作。
+            ，这样双击编辑、选中、缩放等能力才能正常工作。特殊 HTML 回显方案只适合已有业务存储拆分的场景；若只保存 HTML
+            内容，必须保留
+            <code>&lt;p style="..."&gt;</code>
+            、
+            <code>&lt;span style="..."&gt;</code>
+            等内联样式，并在使用自定义字体时补回对应
+            <code>@font-face</code>
+            。只剩纯文本时无法恢复字号、字体、描边、颜色、宽高和对齐等视觉效果。
           </div>
         </section>
 
@@ -862,7 +904,7 @@ const htmlTextParams = [
     type: 'string',
     required: false,
     default: '—',
-    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。兼容旧版用法'
+    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / textStroke 等元数据，兼容字体 style + 内容 HTML 回显'
   },
   { name: 'fontSize', type: 'number', required: false, default: '16', desc: '字体大小（像素）' },
   {
@@ -1003,6 +1045,33 @@ existingText?.set(nextTextJson)
 
 // 如果保存的是 Leafer 原始 JSON，且 HtmlText 已注册，也可以直接 add
 // app.tree.add(textJson)`;
+
+const htmlOnlyPersistenceExample = `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
+
+// 推荐优先保存 Leafer JSON。只有业务已经拆分存储时，才使用这种方式：
+// 1. contentHtml：保存内容 HTML，必须保留 <p style="..."> / <span style="...">
+// 2. fontStyle：回显时由字体管理器按 font-family 拼回 @font-face
+const contentHtml = '<div style="width:980px;height:294px;display:flex;flex-direction:column;justify-content:flex-start;"><p class="ql-align-center" style="font-size:70px;line-height:1.5;font-family:YouSheBiaoTiHei-2;"><span style="-webkit-text-stroke:6px rgb(0,66,104);color:rgb(253,225,5);font-family:YouSheBiaoTiHei-2;">上海最新人事！</span></p></div>'
+
+// text 是 HtmlText 的完整 HTML 输入：
+// - fontStyle 负责加载自定义字体
+// - contentHtml 负责保留字号、颜色、描边、宽高和对齐等样式
+const fontStyle = '<style>@font-face{font-family:\\'YouSheBiaoTiHei-2\\';src:url(data:font/woff2;base64,...) format(\\'woff2\\');}</style>'
+const text = new HtmlText({
+  x: 100,
+  y: 100,
+  editable: true,
+  draggable: true,
+  text: fontStyle + contentHtml,
+})
+
+app.tree.add(text)
+
+// 注意：
+// 1. 不要把 contentHtml strip 成纯文字，否则无法恢复样式。
+// 2. 使用自定义字体时必须补回对应 @font-face，否则会回退到系统字体。
+// 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/textStroke。
+// 4. 显式传入的 width/fontSize/alignContent 等参数优先级更高。`;
 
 // ─── HtmlTextManage methods ───────────────────────────────────────────────────
 const manageMethods = [
@@ -1262,10 +1331,7 @@ const changelog = [
     version: '2.5.3',
     date: '2026-06',
     tag: 'patch',
-    items: [
-      '更新版本号至 2.5.3',
-      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
-    ]
+    items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
   },
   {
     version: '2.5.2',
