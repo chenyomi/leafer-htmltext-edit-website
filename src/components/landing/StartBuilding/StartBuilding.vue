@@ -114,19 +114,21 @@
       <div class="bento-grid pricing-grid" ref="gridRef">
         <ParticleCard class="feature-card card1" :disable-animations="isMobile">
           <h2>个人版</h2>
+          <p class="pricing-label">早鸟价</p>
           <GradientText
-            text="早鸟价：¥99"
+            text="¥99"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
-            style="font-size: 40px; margin-bottom: 10px"
+            class="pricing-price"
           />
+          <p class="pricing-label pricing-label-muted">原价</p>
           <GradientText
-            text="原价：¥199"
+            text="¥199"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
-            style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
+            class="pricing-price pricing-original-price"
           />
           <div style="padding: 20px; border-radius: 20px">
             <p>基础版本功能</p>
@@ -155,19 +157,21 @@
 
         <ParticleCard class="feature-card card2" :disable-animations="isMobile">
           <h2>专业版</h2>
+          <p class="pricing-label">早鸟价</p>
           <GradientText
-            text="早鸟价：¥399"
+            text="¥399"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
-            style="font-size: 40px; margin-bottom: 10px"
+            class="pricing-price"
           />
+          <p class="pricing-label pricing-label-muted">原价</p>
           <GradientText
-            text="原价：¥599"
+            text="¥599"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
-            style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
+            class="pricing-price pricing-original-price"
           />
           <p style="color: #3cff50; font-weight: 600">推荐商业项目使用</p>
           <div style="padding: 20px; border-radius: 20px">
@@ -195,19 +199,21 @@
 
         <ParticleCard class="feature-card card4" :disable-animations="isMobile">
           <h2>企业版</h2>
+          <p class="pricing-label">早鸟价</p>
           <GradientText
-            text="早鸟价：¥999"
+            text="¥999"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
-            style="font-size: 40px; margin-bottom: 10px"
+            class="pricing-price"
           />
+          <p class="pricing-label pricing-label-muted">原价</p>
           <GradientText
-            text="原价：¥1999"
+            text="¥1999"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
-            style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
+            class="pricing-price pricing-original-price"
           />
           <div style="padding: 20px; border-radius: 20px">
             <p>完整商业授权功能</p>

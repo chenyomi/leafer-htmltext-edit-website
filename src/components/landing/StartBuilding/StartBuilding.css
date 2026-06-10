@@ -82,6 +82,8 @@
 .pricing-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
+  width: min(1180px, calc(100vw - 48px));
+  gap: 1rem;
 }
 
 .pricing-grid .card1,
@@ -107,6 +109,50 @@
 .pricing-grid .card3,
 .pricing-grid .card5 {
   grid-column: 1 / -1;
+}
+
+.pricing-grid .feature-card {
+  min-height: auto;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+}
+
+.pricing-grid .feature-card h2 {
+  margin-bottom: 1rem;
+  font-size: clamp(2rem, 3.2vw, 2.7rem);
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.pricing-grid .feature-card p {
+  line-height: 1.55;
+}
+
+.pricing-label {
+  margin: 0;
+  color: rgba(255, 210, 210, 0.8) !important;
+  font-size: 1rem !important;
+  font-weight: 600;
+  line-height: 1.2 !important;
+}
+
+.pricing-label-muted {
+  margin-top: 0.75rem;
+  opacity: 0.78;
+}
+
+.pricing-price {
+  margin: 0.2rem auto 0.35rem;
+  white-space: nowrap;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  line-height: 1.08;
+}
+
+.pricing-original-price {
+  font-size: clamp(1.45rem, 2.3vw, 2rem);
+  opacity: 0.72;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
 }
 
 .contact-author-button {
@@ -194,6 +240,7 @@
 @media (max-width: 1024px) {
   .pricing-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(760px, calc(100vw - 40px));
   }
 
   .pricing-grid .card1 {
@@ -240,6 +287,7 @@
 
   .pricing-grid {
     grid-template-columns: 1fr;
+    width: min(420px, calc(100vw - 32px));
   }
 
   .pricing-grid .card1,
