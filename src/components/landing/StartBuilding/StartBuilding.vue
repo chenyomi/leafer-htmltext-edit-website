@@ -111,7 +111,7 @@
   </section>
   <section class="start-building-section" id="price">
     <div class="start-building-container">
-      <div class="bento-grid" ref="gridRef">
+      <div class="bento-grid pricing-grid" ref="gridRef">
         <ParticleCard class="feature-card card1" :disable-animations="isMobile">
           <h2>个人版</h2>
           <GradientText
@@ -147,7 +147,7 @@
             :thickness="2"
             :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
           >
-            <div class="py-3">
+            <div class="py-3 contact-author-button" @click="showContactModal = true">
               <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
             </div>
           </ElectricBorder>
@@ -187,7 +187,7 @@
             :thickness="2"
             :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
           >
-            <div class="py-3">
+            <div class="py-3 contact-author-button" @click="showContactModal = true">
               <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
             </div>
           </ElectricBorder>
@@ -227,7 +227,7 @@
             :thickness="2"
             :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
           >
-            <div class="py-3">
+            <div class="py-3 contact-author-button" @click="showContactModal = true">
               <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
             </div>
           </ElectricBorder>
@@ -438,6 +438,15 @@
         </ParticleCard>
       </div>
     </div>
+
+    <div v-if="showContactModal" class="contact-modal-overlay" @click.self="showContactModal = false">
+      <div class="contact-modal">
+        <button class="contact-modal-close" type="button" aria-label="关闭" @click="showContactModal = false">×</button>
+        <h3>联系作者</h3>
+        <p>扫码添加微信，请备注「Leafer 插件授权」。</p>
+        <img src="@/assets/qrcode.jpg" alt="作者微信二维码" />
+      </div>
+    </div>
   </section>
 </template>
 
@@ -451,6 +460,7 @@ import ElectricBorder from '@/content/Animations/ElectricBorder/ElectricBorder.v
 import posterSrc from '@/assets/video/video.png';
 const isMobile = ref(false);
 const show = ref(false);
+const showContactModal = ref(false);
 const checkIsMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };

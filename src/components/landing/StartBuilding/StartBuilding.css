@@ -79,6 +79,107 @@
   transition: all 0.2s ease;
 }
 
+.pricing-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.pricing-grid .card1,
+.pricing-grid .card2,
+.pricing-grid .card4,
+.pricing-grid .card3,
+.pricing-grid .card5 {
+  grid-row: auto;
+}
+
+.pricing-grid .card1 {
+  grid-column: 1;
+}
+
+.pricing-grid .card2 {
+  grid-column: 2;
+}
+
+.pricing-grid .card4 {
+  grid-column: 3;
+}
+
+.pricing-grid .card3,
+.pricing-grid .card5 {
+  grid-column: 1 / -1;
+}
+
+.contact-author-button {
+  cursor: pointer;
+  user-select: none;
+}
+
+.contact-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.contact-modal {
+  position: relative;
+  width: min(360px, 100%);
+  padding: 28px 24px 24px;
+  border: 1px solid rgba(125, 249, 255, 0.35);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(16, 20, 30, 0.96), rgba(8, 8, 12, 0.98));
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.55),
+    0 0 36px rgba(125, 249, 255, 0.16);
+  text-align: center;
+}
+
+.contact-modal h3 {
+  margin: 0 0 10px;
+  color: #3cff50;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.contact-modal p {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.contact-modal img {
+  display: block;
+  width: min(240px, 100%);
+  margin: 0 auto;
+  border-radius: 16px;
+}
+
+.contact-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.contact-modal-close:hover {
+  color: #ffffff;
+  border-color: rgba(125, 249, 255, 0.45);
+}
+
 @media (max-width: 1280px) {
   .start-building-container {
     max-width: 1000px;
@@ -87,6 +188,26 @@
 
   .start-building-card {
     padding: 2.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing-grid .card1 {
+    grid-column: 1;
+  }
+
+  .pricing-grid .card2 {
+    grid-column: 2;
+  }
+
+  .pricing-grid .card4,
+  .pricing-grid .card3,
+  .pricing-grid .card5 {
+    grid-column: 1 / -1;
   }
 }
 
@@ -115,6 +236,18 @@
   .start-building-button {
     padding: 0.875rem 1.75rem;
     font-size: 1rem;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-grid .card1,
+  .pricing-grid .card2,
+  .pricing-grid .card4,
+  .pricing-grid .card3,
+  .pricing-grid .card5 {
+    grid-column: 1;
   }
 }
 
