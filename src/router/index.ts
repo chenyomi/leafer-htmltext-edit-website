@@ -3,6 +3,7 @@ import LandingPage from '@/pages/LandingPage.vue';
 import CategoryPage from '@/pages/CategoryPage.vue';
 import FavoritesPage from '@/pages/FavoritesPage.vue';
 import DocsPage from '@/pages/DocsPage.vue';
+import DownloadPage from '@/pages/DownloadPage.vue';
 import CategoryLayout from '@/components/layouts/CategoryLayout.vue';
 
 const router = createRouter({
@@ -17,6 +18,11 @@ const router = createRouter({
       path: '/docs',
       name: 'docs',
       component: DocsPage
+    },
+    {
+      path: '/download',
+      name: 'download',
+      component: DownloadPage
     },
     {
       path: '/:category/:subcategory',
