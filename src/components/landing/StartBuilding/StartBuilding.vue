@@ -130,7 +130,7 @@
             :show-border="false"
             class="pricing-price pricing-original-price"
           />
-          <div style="padding: 20px; border-radius: 20px">
+          <div class="pricing-features">
             <p>基础版本功能</p>
             <p>1个主域名</p>
             <p>包含 www 子域名</p>
@@ -143,11 +143,12 @@
             <p>专属微信群</p>
           </div>
           <ElectricBorder
+            class="pricing-contact-border"
             :color="'#7df9ff'"
             :speed="1"
             :chaos="0.5"
             :thickness="2"
-            :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
+            :style="{ borderRadius: '16px', width: '150px', margin: '14px auto 0 auto' }"
           >
             <div class="py-3 contact-author-button" @click="showContactModal = true">
               <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
@@ -174,7 +175,7 @@
             class="pricing-price pricing-original-price"
           />
           <p style="color: #3cff50; font-weight: 600">推荐商业项目使用</p>
-          <div style="padding: 20px; border-radius: 20px">
+          <div class="pricing-features">
             <p>完整基础版本功能</p>
             <p>3个域名/子域名</p>
             <p>本地开发环境</p>
@@ -185,11 +186,12 @@
             <p>优先技术支持</p>
           </div>
           <ElectricBorder
+            class="pricing-contact-border"
             :color="'#7df9ff'"
             :speed="1"
             :chaos="0.5"
             :thickness="2"
-            :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
+            :style="{ borderRadius: '16px', width: '150px', margin: '14px auto 0 auto' }"
           >
             <div class="py-3 contact-author-button" @click="showContactModal = true">
               <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
@@ -215,7 +217,7 @@
             :show-border="false"
             class="pricing-price pricing-original-price"
           />
-          <div style="padding: 20px; border-radius: 20px">
+          <div class="pricing-features">
             <p>完整商业授权功能</p>
             <p>10个域名/子域名</p>
             <p>可支持泛域名授权</p>
@@ -227,11 +229,12 @@
             <p>专属微信群/优先支持</p>
           </div>
           <ElectricBorder
+            class="pricing-contact-border"
             :color="'#7df9ff'"
             :speed="1"
             :chaos="0.5"
             :thickness="2"
-            :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
+            :style="{ borderRadius: '16px', width: '150px', margin: '14px auto 0 auto' }"
           >
             <div class="py-3 contact-author-button" @click="showContactModal = true">
               <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
