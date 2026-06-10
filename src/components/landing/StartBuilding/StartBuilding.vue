@@ -115,14 +115,14 @@
         <ParticleCard class="feature-card card1" :disable-animations="isMobile">
           <h2>个人版</h2>
           <GradientText
-            text="早鸟价（测试）：¥29"
+            text="早鸟价：¥99"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
             style="font-size: 40px; margin-bottom: 10px"
           />
           <GradientText
-            text="原价：¥398"
+            text="原价：¥199"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
@@ -130,7 +130,9 @@
           />
           <div style="padding: 20px; border-radius: 20px">
             <p>基础版本功能</p>
-            <p>1个域名</p>
+            <p>1个主域名</p>
+            <p>包含 www 子域名</p>
+            <p>不含泛解析/多子域名</p>
             <p>本地开发环境</p>
             <p>支持离线永久授权</p>
             <p>提供编译包</p>
@@ -152,49 +154,71 @@
         </ParticleCard>
 
         <ParticleCard class="feature-card card2" :disable-animations="isMobile">
-          <h2>定制版</h2>
+          <h2>专业版</h2>
           <GradientText
-            text="联系作者"
+            text="早鸟价：¥399"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
             style="font-size: 40px; margin-bottom: 10px"
           />
-          <p>请备注来意</p>
-          <div style="padding: 20px; border-radius: 20px; text-align: center">
-            <img
-              src="@/assets/qrcode.jpg"
-              alt=""
-              style="max-width: 180px; display: inline-block; border-radius: 10px; margin: 5px"
-            />
+          <GradientText
+            text="原价：¥599"
+            :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
+            :animation-speed="8"
+            :show-border="false"
+            style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
+          />
+          <p style="color: #3cff50; font-weight: 600">推荐商业项目使用</p>
+          <div style="padding: 20px; border-radius: 20px">
+            <p>完整基础版本功能</p>
+            <p>3个域名/子域名</p>
+            <p>本地开发环境</p>
+            <p>支持离线永久授权</p>
+            <p>提供编译包</p>
+            <p>安装包永久授权</p>
+            <p>一年内免费升级</p>
+            <p>优先技术支持</p>
           </div>
+          <ElectricBorder
+            :color="'#7df9ff'"
+            :speed="1"
+            :chaos="0.5"
+            :thickness="2"
+            :style="{ borderRadius: '16px', width: '150px', margin: '20px auto auto auto' }"
+          >
+            <div class="py-3">
+              <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
+            </div>
+          </ElectricBorder>
         </ParticleCard>
 
         <ParticleCard class="feature-card card4" :disable-animations="isMobile">
           <h2>企业版</h2>
           <GradientText
-            text="早鸟价：¥698"
+            text="早鸟价：¥999"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
             style="font-size: 40px; margin-bottom: 10px"
           />
           <GradientText
-            text="原价：¥899"
+            text="原价：¥1999"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
             style="font-size: 40px; margin-bottom: 10px; text-decoration: line-through"
           />
           <div style="padding: 20px; border-radius: 20px">
-            <p>基础版本功能</p>
-            <p>3个域名</p>
+            <p>完整商业授权功能</p>
+            <p>10个域名/子域名</p>
+            <p>可支持泛域名授权</p>
             <p>本地开发环境</p>
             <p>支持离线永久授权</p>
             <p>提供编译包</p>
             <p>安装包永久授权</p>
             <p>一年内免费升级</p>
-            <p>专属微信群</p>
+            <p>专属微信群/优先支持</p>
           </div>
           <ElectricBorder
             :color="'#7df9ff'"
@@ -224,14 +248,21 @@
               4、一个授权仅限
               1个项目使用。如在多个项目中使用，请购买相应数量的授权，批量需求请联系作者。违规使用（未授权跨项目使用）可能触发授权锁定或限制，本人保留追究权利。
             </p>
-            <p style="text-align: left">5、授权主域名后，其下所有二级域名和泛域名（*.example.com）自动获得同等授权。</p>
             <p style="text-align: left">
-              6、安装包与源码包均内嵌了专属 license 水印标识，可用于追踪源用户身份，不可分发使用。
+              5、个人版的 1 个域名指 1 个主域名，例如 example.com，并包含 www.example.com；不包含 *.example.com
+              泛解析，也不包含 admin.example.com、app.example.com 等多个业务子域名。
             </p>
             <p style="text-align: left">
-              7、插件为数字商品，购买后即视为交付使用，暂不支持退款。请在购买前确认功能符合需求，如有疑问欢迎联系本人。
+              6、专业版按域名/子域名单独计数；企业版可按需支持 10 个域名或泛域名授权，适合
+              SaaS、多租户和企业内多个系统。
             </p>
-            <p style="text-align: left">8、购买后享有专属微信交流群支持，企业版优先获得支持。</p>
+            <p style="text-align: left">
+              7、安装包与源码包均内嵌了专属 license 水印标识，可用于追踪源用户身份，不可分发使用。
+            </p>
+            <p style="text-align: left">
+              8、插件为数字商品，购买后即视为交付使用，暂不支持退款。请在购买前确认功能符合需求，如有疑问欢迎联系本人。
+            </p>
+            <p style="text-align: left">9、购买后享有专属微信交流群支持，专业版和企业版优先获得支持。</p>
           </div>
         </ParticleCard>
         <ParticleCard class="feature-card card5" :disable-animations="isMobile">
