@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import https from 'https';
 import { tmpdir } from 'os';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -91,31 +92,81 @@ function formatMonth(input) {
   return date.toISOString().slice(0, 7);
 }
 
+function fetchJson(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      url,
+      {
+        timeout: 20000,
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'leafer-htmltext-edit-website-docs-sync'
+        }
+      },
+      res => {
+        let data = '';
+
+        res.on('data', chunk => {
+          data += chunk;
+        });
+
+        res.on('end', () => {
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(new Error(`status ${res.statusCode}`));
+            return;
+          }
+
+          try {
+            resolve(JSON.parse(data));
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    );
+
+    req.on('timeout', () => {
+      req.destroy(new Error('request timeout'));
+    });
+    req.on('error', reject);
+  });
+}
+
 async function getNpmLatest() {
-  const url = `https://registry.npmjs.org/${encodeURIComponent(PACKAGE_NAME)}`;
+  const encodedName = PACKAGE_NAME.replace('/', '%2F');
+  const metadataUrls = [
+    `https://registry.npmjs.org/${encodedName}`,
+    `https://registry.npmmirror.com/${encodedName}`
+  ];
+
+  for (const url of metadataUrls) {
+    try {
+      const data = await fetchJson(url);
+      const version = data?.['dist-tags']?.latest;
+      if (!version) throw new Error('missing dist-tags.latest');
+
+      return {
+        version,
+        date: formatMonth(data?.time?.[version])
+      };
+    } catch (error) {
+      console.warn(`⚠️  无法通过 ${url} 读取 npm 最新版本: ${error.message}`);
+    }
+  }
 
   try {
-    const res = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'leafer-htmltext-edit-website-docs-sync'
-      }
-    });
-
-    if (!res.ok) throw new Error(`npm registry status ${res.status}`);
-
-    const data = await res.json();
-    const version = data?.['dist-tags']?.latest;
-    if (!version) return null;
+    const version = run(`npm view ${PACKAGE_NAME} version --json`, WEBSITE_ROOT).replace(/^"|"$/g, '');
+    if (!version) throw new Error('empty npm view result');
 
     return {
       version,
-      date: formatMonth(data?.time?.[version])
+      date: formatMonth()
     };
   } catch (error) {
-    console.warn(`⚠️  无法读取 npm 最新版本: ${error.message}`);
-    return null;
+    console.warn(`⚠️  无法通过 npm view 读取最新版本: ${error.message}`);
   }
+
+  throw new Error('无法读取 npm latest，停止同步，避免用旧源码版本覆盖线上文档');
 }
 
 // ─── 获取版本历史：读取每个修改 package.json 的提交，提取版本号 ─────────────────

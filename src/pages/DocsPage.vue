@@ -1306,12 +1306,41 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.5.5',
+    version: '2.5.8',
     date: '2026-06',
     tag: 'latest',
     items: [
-      '发布 v2.5.5'
+      '修改 HtmlText.ts 中的样式规则，增加对 -webkit-text-stroke 的支持',
+      '更新 utils.ts 中的样式生成逻辑，确保 -webkit-text-stroke 正确渲染'
     ]
+  },
+  {
+    version: '2.5.7',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '更新版本号至 2.5.7',
+      '优化 HtmlText 类构造函数，合并解析后的数据',
+      '改进 TextEditor 类的文本加载逻辑，确保正确处理 HtmlText',
+      '扩展 parseHtmlTextData 函数，支持提取宽度和高度',
+      '增加字体规则注入和提取功能，确保样式正确应用'
+    ]
+  },
+  {
+    version: '2.5.6',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '添加 parseHtmlTextData 函数用于从 HTML 字符串中提取文本元数据',
+      '在 HtmlText 组件中集成解析逻辑，确保文本渲染时具备必要的 CSS',
+      '优化文本元素创建时的样式处理'
+    ]
+  },
+  {
+    version: '2.5.5',
+    date: '2026-06',
+    tag: 'patch',
+    items: ['更新版本号至 2.5.5', '移除冗余的样式设置代码', '确保在编辑器加载时应用字体、字号、行高等样式']
   },
   {
     version: '2.5.4',
@@ -1380,14 +1409,7 @@ const changelog = [
     items: [
       '添加 textShadow 属性器，支持局部文字阴影',
       '实现斜体检测，优化文字宽度计算',
-      '调整 webkitTextStroke 属性的应用逻辑'
-    ]
-  },
-  {
-    version: '2.4.8',
-    date: '2026-05',
-    tag: 'patch',
-    items: [
+      '调整 webkitTextStroke 属性的应用逻辑',
       '更新 HtmlText 类，确保 Quill 识别字符级颜色格式',
       '修改 TextEditor 类，使用文本数据中的颜色作为光标颜色',
       '更新 README 文档，说明新功能',
@@ -1395,27 +1417,35 @@ const changelog = [
       '添加选区级字重控制功能',
       '修改初始化方法为异步执行，简化调用方式',
       '更新样式以支持局部描边的正确渲染',
-      '实现局部和全局描边的逻辑处理'
-    ]
-  },
-  {
-    version: '2.4.7',
-    date: '2026-05',
-    tag: 'patch',
-    items: [
+      '实现局部和全局描边的逻辑处理',
       '在 HtmlText 中添加 fontWeight 属性支持',
       '在 TextEditor 中实现字体粗细的动态处理',
       '提取和清理 HTML 内容以防止样式冲突',
-      '增加提取语义内容的工具函数'
-    ]
-  },
-  {
-    version: '2.4.6',
-    date: '2026-05',
-    tag: 'patch',
-    items: [
+      '增加提取语义内容的工具函数',
       '在 TextEditTool 中添加 textStroke 属性支持，确保锁定比例缩放时轮廓线宽度同步更新',
-      '在 TextEditor 中调整 webkitTextStroke 的应用位置，确保轮廓线宽度按缩放比例正确渲染'
+      '在 TextEditor 中调整 webkitTextStroke 的应用位置，确保轮廓线宽度按缩放比例正确渲染',
+      '精确测量 HtmlText 的 SVG 尺寸，消除多余空白',
+      '支持在 TextEditTool 中处理 HtmlText 的锁定比例',
+      '优化 utils.ts 中的字符宽度测量和弧形辅助层清理逻辑',
+      '更新 TextEditor 以支持 HtmlText 的相关操作',
+      '在 HtmlText 中使用 IUI 类型增强文本元素的类型安全',
+      '在 HtmlTextManage 中添加选择范围管理功能',
+      '在 TextEditTool 中优化事件处理和文本缩放逻辑',
+      '在 TextEditor 中增强文本样式同步和输入处理',
+      '在 utils 中添加字母间距和垂直布局同步功能',
+      'version',
+      '更新',
+      '更新轮廓',
+      '添加aes',
+      '更新混淆',
+      '授权更新res',
+      '2',
+      '11',
+      '1',
+      'pack',
+      '2.0.1',
+      '优化',
+      'init'
     ]
   }
 ];
