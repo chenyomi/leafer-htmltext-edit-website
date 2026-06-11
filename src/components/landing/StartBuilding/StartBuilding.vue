@@ -111,8 +111,8 @@
   </section>
   <section class="start-building-section" id="price">
     <div class="start-building-container">
-      <div class="bento-grid pricing-grid" ref="gridRef">
-        <ParticleCard class="feature-card card1" :disable-animations="isMobile">
+      <div class="pricing-cards">
+        <ParticleCard class="feature-card pricing-card" :disable-animations="isMobile">
           <h2>个人版</h2>
           <p class="pricing-label">早鸟价</p>
           <GradientText
@@ -156,7 +156,7 @@
           </ElectricBorder>
         </ParticleCard>
 
-        <ParticleCard class="feature-card card2" :disable-animations="isMobile">
+        <ParticleCard class="feature-card pricing-card pricing-card--featured" :disable-animations="isMobile">
           <h2>专业版</h2>
           <p class="pricing-label">早鸟价</p>
           <GradientText
@@ -199,7 +199,7 @@
           </ElectricBorder>
         </ParticleCard>
 
-        <ParticleCard class="feature-card card4" :disable-animations="isMobile">
+        <ParticleCard class="feature-card pricing-card" :disable-animations="isMobile">
           <h2>企业版</h2>
           <p class="pricing-label">早鸟价</p>
           <GradientText
@@ -241,7 +241,10 @@
             </div>
           </ElectricBorder>
         </ParticleCard>
-        <ParticleCard class="feature-card card3" :disable-animations="isMobile">
+      </div>
+
+      <div class="pricing-extras">
+        <ParticleCard class="feature-card pricing-extra-card" :disable-animations="isMobile">
           <h2>Tips</h2>
           <div style="padding: 20px; border-radius: 20px">
             <p style="text-align: left">
@@ -274,7 +277,7 @@
             <p style="text-align: left">9、购买后享有专属微信交流群支持，专业版和企业版优先获得支持。</p>
           </div>
         </ParticleCard>
-        <ParticleCard class="feature-card card5" :disable-animations="isMobile">
+        <ParticleCard class="feature-card pricing-extra-card" :disable-animations="isMobile">
           <h2>Leafer HTMLText Edit - 投资回报分析</h2>
 
           <div style="padding: 20px; border-radius: 20px">
@@ -460,10 +463,10 @@
 </template>
 
 <script setup lang="ts">
-import './StartBuilding.css';
 import { ref, onMounted, onUnmounted } from 'vue';
 import Squares from '@/content/Backgrounds/Squares/Squares.vue';
 import '../FeatureCards/FeatureCards.css';
+import './StartBuilding.css';
 import GradientText from '@/content/TextAnimations/GradientText/GradientText.vue';
 import ElectricBorder from '@/content/Animations/ElectricBorder/ElectricBorder.vue';
 import posterSrc from '@/assets/video/video.png';
