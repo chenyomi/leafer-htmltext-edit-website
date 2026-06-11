@@ -34,8 +34,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add src/content/docs/ src/pages/DocsPage.vue
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: sync external plugin docs" && git push)
+          git add src/content/docs/ src/pages/DocsPage.vue public/downloads/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: sync external plugin docs and downloads" && git push)
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

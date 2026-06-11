@@ -16,7 +16,8 @@
     "new:component": "node scripts/generateComponent.js",
     "docs:update": "node scripts/updateDocs.js",
     "changelog:sync": "node scripts/syncChangelog.js",
-    "docs:sync-all": "npm run docs:update && npm run changelog:sync",
+    "download:sync": "node scripts/syncDownloads.js",
+    "docs:sync-all": "npm run docs:update && npm run changelog:sync && npm run download:sync",
     "prepare": "husky"
   },
   "dependencies": {
