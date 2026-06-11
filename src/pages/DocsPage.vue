@@ -854,6 +854,7 @@ onMounted(async () => {
     fontFamily: '"Dancing Script", cursive',
     fontBase64: 'data:font/woff2;charset=utf-8;base64,...',
     lineHeight: 1.5,
+    padding: [12, 16],
     content: '双击此处编辑文本',
     color: '#e74c3c',
     editable: true,
@@ -904,7 +905,7 @@ const htmlTextParams = [
     type: 'string',
     required: false,
     default: '—',
-    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / textStroke 等元数据，兼容字体 style + 内容 HTML 回显'
+    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / textStroke / padding 等元数据，兼容字体 style + 内容 HTML 回显'
   },
   { name: 'fontSize', type: 'number', required: false, default: '16', desc: '字体大小（像素）' },
   {
@@ -943,6 +944,13 @@ const htmlTextParams = [
     desc: '行高倍数，相对于 fontSize。例如 1.5 表示 1.5 倍行高'
   },
   { name: 'letterSpacing', type: 'number', required: false, default: '0', desc: '字间距（像素）' },
+  {
+    name: 'padding',
+    type: 'number | string | number[]',
+    required: false,
+    default: '0',
+    desc: '文本内边距，支持单个数字、CSS 字符串（如 "12px 16px"）或数组。数组顺序按 CSS 规则解析：[top]、[top, right]、[top, right, bottom]、[top, right, bottom, left]'
+  },
   {
     name: 'textShadow',
     type: 'string',
@@ -987,6 +995,7 @@ const htmlTextExample = `const text = new HtmlText({
   italic: true,
   lineHeight: 1.8,
   letterSpacing: 1,
+  padding: [12, 16],     // 文本内边距，支持 number / CSS 字符串 / 数组
   content: 'Hello World!',
   textShadow: '1px 1px 4px rgba(0,0,0,0.3)',
   alignContent: 'start',
@@ -1306,10 +1315,26 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.5.8',
+    version: '2.5.9',
     date: '2026-06',
     tag: 'latest',
     items: [
+      '在 HtmlText 组件中添加 padding 属性支持',
+      '实现 applyPaddingToTextHtml 函数以应用内边距样式',
+      '在 TextEditor 中同步内边距样式',
+      '在 utils 中添加 syncInnerEditorPadding 函数',
+      '在 parseHtmlTextData 中解析内边距',
+      '新增 padding.ts 文件，定义 HtmlTextPadding 类型及相关函数'
+    ]
+  },
+  {
+    version: '2.5.8',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '新增 .github/workflows/publish-tgz.yml 文件，实现 TGZ 文件的自动发布',
+      '新增 scripts/create-tgz.mjs 脚本，处理 TGZ 文件的创建和版本管理',
+      '在 package.json 中添加 `pack:tgz` 和 `pack:dry` 脚本',
       '修改 HtmlText.ts 中的样式规则，增加对 -webkit-text-stroke 的支持',
       '更新 utils.ts 中的样式生成逻辑，确保 -webkit-text-stroke 正确渲染'
     ]
@@ -1340,11 +1365,7 @@ const changelog = [
     version: '2.5.5',
     date: '2026-06',
     tag: 'patch',
-    items: [
-      '更新版本号至 2.5.5',
-      '移除冗余的样式设置代码',
-      '确保在编辑器加载时应用字体、字号、行高等样式'
-    ]
+    items: ['更新版本号至 2.5.5', '移除冗余的样式设置代码', '确保在编辑器加载时应用字体、字号、行高等样式']
   },
   {
     version: '2.5.4',
@@ -1364,10 +1385,7 @@ const changelog = [
     version: '2.5.3',
     date: '2026-06',
     tag: 'patch',
-    items: [
-      '更新版本号至 2.5.3',
-      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
-    ]
+    items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
   },
   {
     version: '2.5.2',
@@ -1406,14 +1424,7 @@ const changelog = [
       '修改 IHtmlTextInputData 类型以支持 CSS 字符串值的行高',
       '更新 handleShowCurve 函数以正确处理行高值类型',
       '添加 align 属性，支持文本的左对齐、居中和右对齐',
-      '更新相关样式处理，确保新属性生效'
-    ]
-  },
-  {
-    version: '2.4.9',
-    date: '2026-05',
-    tag: 'minor',
-    items: [
+      '更新相关样式处理，确保新属性生效',
       '添加 textShadow 属性器，支持局部文字阴影',
       '实现斜体检测，优化文字宽度计算',
       '调整 webkitTextStroke 属性的应用逻辑',
