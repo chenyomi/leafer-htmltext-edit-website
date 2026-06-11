@@ -79,13 +79,6 @@
   transition: all 0.2s ease;
 }
 
-#price .start-building-container {
-  max-width: 960px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 32px);
-}
-
 .pricing-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -250,10 +243,6 @@
 }
 
 @media (max-width: 1024px) {
-  #price .start-building-container {
-    max-width: 720px;
-  }
-
   .pricing-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -291,10 +280,6 @@
   .start-building-button {
     padding: 0.875rem 1.75rem;
     font-size: 1rem;
-  }
-
-  #price .start-building-container {
-    max-width: 420px;
   }
 
   .pricing-cards {
