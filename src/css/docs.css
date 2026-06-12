@@ -208,6 +208,40 @@
   z-index: 1;
 }
 
+.doc-ul,
+.doc-ol {
+  margin: 0 0 1rem;
+  padding-left: 1.35rem;
+  color: #aaa;
+  line-height: 1.75;
+  font-size: 0.9375rem;
+}
+
+.doc-ul li,
+.doc-ol li {
+  margin-bottom: 0.45rem;
+}
+
+.doc-ul li:last-child,
+.doc-ol li:last-child {
+  margin-bottom: 0;
+}
+
+.faq-block {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.faq-q {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #e8e8e8;
+  margin: 0 0 0.5rem;
+}
+
 .doc-p code,
 .doc-lead code {
   background: rgba(60, 255, 80, 0.08);

@@ -350,6 +350,250 @@
           </div>
         </section>
 
+        <!-- ─── 编辑原理与常见问题 ─── -->
+        <section :id="'editing-guide'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              编辑原理与常见问题
+              <a :href="'#editing-guide'" class="anchor-link" @click.prevent="scrollTo('editing-guide')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            很多「进不了编辑态」「Quill 没反应」「openInnerEditor 无效」的问题，并不是插件坏了，而是
+            <strong>Leafer 编辑器</strong>
+            和
+            <strong>Quill 内嵌编辑器</strong>
+            是两套机制，需要先理解它们的协作关系，再写自定义交互。
+          </p>
+
+          <h3 class="doc-h3" id="editing-layers">三层结构：画布节点、渲染层、编辑层</h3>
+          <p class="doc-p">一个可编辑的富文本，在运行时其实同时存在三层：</p>
+          <ol class="doc-ol">
+            <li>
+              <strong>
+                外层
+                <code>HtmlText</code>
+                （Leafer Box）
+              </strong>
+              — 你在画布上创建、拖拽、缩放的对象。默认
+              <code>editOuter: 'TextEditTool'</code>
+              ，单击后进入「外框编辑态」。
+            </li>
+            <li>
+              <strong>
+                内层
+                <code>HTMLText</code>
+                （Leafer HTML 渲染）
+              </strong>
+              —
+              <code>HtmlText</code>
+              自动创建的子节点，负责把 HTML 画到画布上。它带有
+              <code>editInner: 'TextEditor'</code>
+              ，是进入 Quill 编辑时的真正目标。
+            </li>
+            <li>
+              <strong>
+                DOM 层
+                <code>#textInnerEditor</code>
+                （Quill 容器）
+              </strong>
+              — 插件在
+              <code>document.body</code>
+              上创建的固定定位 div，双击后显示，承载 Quill 输入。编辑结束会写回内层
+              <code>HTMLText</code>
+              的
+              <code>text</code>
+              字段。
+            </li>
+          </ol>
+
+          <div class="callout callout-info">
+            <strong>记忆口诀：</strong>
+            画布上看的是
+            <code>HtmlText</code>
+            ，富文本内容存在
+            <code>HTMLText.text</code>
+            ，真正打字的是页面上的
+            <code>#textInnerEditor</code>
+            。
+          </div>
+
+          <h3 class="doc-h3" id="editing-interaction">默认交互：单击选中，双击编辑</h3>
+          <p class="doc-p">插件内置的默认行为如下，和常见设计工具一致：</p>
+          <ul class="doc-ul">
+            <li>
+              <strong>单击</strong>
+              文本框 → Leafer Editor 选中
+              <code>HtmlText</code>
+              → 加载外框工具
+              <code>TextEditTool</code>
+              （可拖拽、缩放、旋转）
+            </li>
+            <li>
+              <strong>双击</strong>
+              已选中的文本框 →
+              <code>TextEditTool</code>
+              监听
+              <code>PointerEvent.DOUBLE_TAP</code>
+              → 调用
+              <code>editor.openInnerEditor(htmlText, true)</code>
+              → 打开
+              <code>TextEditor</code>
+              内嵌编辑器
+            </li>
+            <li>
+              <strong>在内嵌编辑态点击画布空白处</strong>
+              → 关闭内嵌编辑器，内容同步回画布
+            </li>
+          </ul>
+
+          <h3 class="doc-h3" id="editing-naming">最容易混淆的三个名字</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>名称</th>
+                  <th>类型</th>
+                  <th>含义</th>
+                  <th>常见误用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>TextEditTool</code></td>
+                  <td>外框编辑工具</td>
+                  <td>
+                    <code>HtmlText.editOuter</code>
+                    的默认值。负责选中框、缩放、旋转，监听双击事件。
+                  </td>
+                  <td>
+                    把它当成内嵌编辑器名称传给
+                    <code>openInnerEditor</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>TextEditor</code></td>
+                  <td>内嵌编辑器</td>
+                  <td>
+                    <code>HTMLText.editInner</code>
+                    的默认值。负责加载 Quill、同步样式、写回 HTML。
+                  </td>
+                  <td>
+                    写成
+                    <code>textInnerEditor</code>
+                    或其他自定义字符串
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>textInnerEditor</code></td>
+                  <td>DOM 元素 id</td>
+                  <td>
+                    Quill 挂载的 div 容器，可用
+                    <code>document.querySelector('#textInnerEditor')</code>
+                    找到。
+                  </td>
+                  <td>
+                    <strong>误传给</strong>
+                    <code>openInnerEditor(node, 'textInnerEditor')</code>
+                    — 这不会打开编辑器
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warning">
+            <strong>重点：</strong>
+            <code>textInnerEditor</code>
+            是页面 DOM 的 id；
+            <code>TextEditor</code>
+            才是 Leafer 内嵌编辑器注册名。两者完全不同。
+          </div>
+
+          <h3 class="doc-h3" id="editing-open-inner">程序化打开内嵌编辑器</h3>
+          <p class="doc-p">
+            如果你想把「双击进入编辑」改成「单击进入编辑」，不要直接照抄网上片段里的
+            <code>openInnerEditor(node, 'textInnerEditor', true)</code>
+            。应按插件内部双击逻辑来写：
+          </p>
+          <div class="code-block-wrap">
+            <div class="code-lang-badge">正确示例</div>
+            <button class="copy-btn" @click="copyCode(openInnerEditorExample, 'open-inner-editor')">
+              <i class="pi" :class="copiedKey === 'open-inner-editor' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ openInnerEditorExample }}</code></pre>
+          </div>
+          <p class="doc-p">上面这段和插件源码里的双击逻辑一致，关键点是：</p>
+          <ul class="doc-ul">
+            <li>
+              操作对象是内层
+              <code>HTMLText</code>
+              ，不是外层
+              <code>HtmlText</code>
+            </li>
+            <li>
+              <code>openInnerEditor(htmlText, true)</code>
+              的第二个参数是
+              <code>boolean</code>
+              ，表示「同时选中该目标」，不是编辑器名称
+            </li>
+            <li>
+              若节点尚未处于外框编辑态，需先
+              <code>app.editor.target = htmlTextBox</code>
+              ，再打开内嵌编辑器
+            </li>
+            <li>
+              <code>htmlTextManage.getQuill()</code>
+              和
+              <code>setSelection</code>
+              应等内嵌编辑器打开后再调用
+            </li>
+          </ul>
+
+          <h3 class="doc-h3" id="editing-quill">Quill 什么时候可用？</h3>
+          <p class="doc-p">
+            <code>htmlTextManage.init(app)</code>
+            会创建全局唯一的 Quill 实例，但它只有在
+            <code>TextEditor</code>
+            内嵌编辑器
+            <code>load()</code>
+            之后，才真正进入可编辑状态：
+          </p>
+          <ul class="doc-ul">
+            <li>
+              <strong>仅选中、未双击</strong>
+              → 可以调用
+              <code>setHTMLText()</code>
+              改样式，但看不到 Quill 光标
+            </li>
+            <li>
+              <strong>已进入内嵌编辑态</strong>
+              → 可以
+              <code>getQuill()</code>
+              、监听
+              <code>text-change</code>
+              、
+              <code>setSelection()</code>
+            </li>
+            <li>
+              <strong>关闭内嵌编辑器后</strong>
+              → Quill 内容会写回
+              <code>HTMLText.text</code>
+              ，画布重新渲染
+            </li>
+          </ul>
+
+          <h3 class="doc-h3" id="editing-faq">常见问题排查</h3>
+          <div v-for="item in editingFaq" :key="item.q" class="faq-block">
+            <h4 class="faq-q">{{ item.q }}</h4>
+            <p class="doc-p">{{ item.a }}</p>
+            <ul v-if="item.tips?.length" class="doc-ul">
+              <li v-for="tip in item.tips" :key="tip">{{ tip }}</li>
+            </ul>
+          </div>
+        </section>
+
         <!-- ─── API: HtmlText ─── -->
         <section :id="'api-htmltext'" class="doc-section">
           <div class="section-anchor-wrap">
@@ -744,7 +988,8 @@ const guideItems = [
   { id: 'installation', label: '安装' },
   { id: 'quick-start', label: '快速开始' },
   { id: 'basic-usage', label: '基础用法' },
-  { id: 'data-persistence', label: '数据保存与回显' }
+  { id: 'data-persistence', label: '数据保存与回显' },
+  { id: 'editing-guide', label: '编辑原理与常见问题' }
 ];
 
 const apiItems = [
@@ -1082,6 +1327,87 @@ app.tree.add(text)
 // 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/textStroke。
 // 4. 显式传入的 width/fontSize/alignContent 等参数优先级更高。`;
 
+const openInnerEditorExample = `import { PointerEvent } from 'leafer-ui'
+import { HtmlText, htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
+
+const text = new HtmlText({
+  x: 200,
+  y: 150,
+  editable: true,
+  draggable: true,
+  content: 'Hello World!',
+})
+
+// 单击进入编辑：逻辑与插件内置双击一致
+text.on(PointerEvent.TAP, () => {
+  const htmlText = text.findOne('HTMLText')
+  if (!htmlText || text.parent?.locked) return
+
+  // 1. 先选中外层 HtmlText，加载 TextEditTool
+  app.editor.target = text
+
+  // 2. 再对内层 HTMLText 打开内嵌编辑器（第二个参数 true = 选中目标）
+  setTimeout(() => {
+    app.editor.openInnerEditor(htmlText, true)
+
+    // 3. 内嵌编辑器 load 后再操作 Quill
+    requestAnimationFrame(() => {
+      htmlTextManage.getQuill()?.setSelection(0, 5)
+    })
+  }, 0)
+})
+
+frame.add(text)`;
+
+const editingFaq = [
+  {
+    q: '调用了 openInnerEditor，但没有进入编辑态？',
+    a: '最常见原因是传错了第二个参数，或目标节点不对。',
+    tips: [
+      '不要写 openInnerEditor(node, "textInnerEditor") — textInnerEditor 只是 DOM id，不是编辑器名',
+      '插件双击实际调用的是 openInnerEditor(htmlTextChild, true)，目标是内层 HTMLText',
+      '若节点还没被选中，先执行 app.editor.target = htmlTextBox，再打开内嵌编辑器',
+      '需要显式指定名称时，应使用 "TextEditor"，不是 "textInnerEditor"'
+    ]
+  },
+  {
+    q: 'getQuill() 返回 null，或 setSelection 没效果？',
+    a: 'Quill 只有在授权通过且内嵌编辑器已打开后才处于可编辑状态。',
+    tips: [
+      '确认 setLicense 成功，且 htmlTextManage.init(app) 已完成',
+      '不要在外框选中态直接 setSelection，应等 TextEditor load 完成',
+      'setSelection 建议放在 requestAnimationFrame 或 setTimeout 中，避免被内嵌编辑器初始化覆盖'
+    ]
+  },
+  {
+    q: 'setHTMLText 改了样式，但画布没变化？',
+    a: 'setHTMLText 作用于当前选中节点；部分格式需要选区或内嵌编辑态才生效。',
+    tips: [
+      '先选中 HtmlText，再调用 setHTMLText',
+      'bold / italic / color 等字符级格式，通常需要在内嵌编辑态选中文字',
+      'fontSize / lineHeight / alignContent 等块级属性，选中节点后即可修改'
+    ]
+  },
+  {
+    q: '双击能编辑，但我写的单击监听不行？',
+    a: '插件的双击监听挂在 TextEditTool 上，前提是外框编辑工具已经加载。',
+    tips: [
+      'PointerEvent.DOWN 触发太早，常在选中完成前就执行了 openInnerEditor',
+      '推荐用 PointerEvent.TAP，并先设置 app.editor.target',
+      '不要只监听外层 HtmlText 就期望自动进入 Quill，需要补齐「选中 → 打开内嵌编辑器」这两步'
+    ]
+  },
+  {
+    q: '编辑后内容丢失，或样式和画布不一致？',
+    a: '画布显示的是 HTMLText.text，不是 Quill DOM 本身。',
+    tips: [
+      '关闭内嵌编辑器时，插件会把 Quill 内容写回 HTMLText.text 并重新渲染',
+      '保存时请用 HtmlText.toJSON() 或整棵 Leafer JSON，不要只保存 Quill 实例',
+      '若只用 HTML 回显，需保留 <p style> / <span style> 等内联样式和 @font-face'
+    ]
+  }
+];
+
 // ─── HtmlTextManage methods ───────────────────────────────────────────────────
 const manageMethods = [
   {
@@ -1101,7 +1427,7 @@ await htmlTextManage.init(app)`
     name: 'getQuill',
     anchor: 'get-quill',
     signature: 'htmlTextManage.getQuill(): Quill | null',
-    desc: '获取当前的 Quill 编辑器实例，可用于调用 Quill 原生 API（如获取 Delta、设置格式等）。未授权时返回 null。',
+    desc: '获取全局 Quill 实例，可调用 Quill 原生 API（如 getContents、setSelection）。未授权时返回 null；字符级操作通常需在内嵌编辑态（TextEditor 已打开）后执行，详见「编辑原理与常见问题」。',
     params: [],
     returns: { type: 'Quill | null', desc: '已初始化的 Quill 实例，授权失败时返回 null' },
     example: `const quill = htmlTextManage.getQuill()
