@@ -4,6 +4,7 @@ import CategoryPage from '@/pages/CategoryPage.vue';
 import FavoritesPage from '@/pages/FavoritesPage.vue';
 import DocsPage from '@/pages/DocsPage.vue';
 import DownloadPage from '@/pages/DownloadPage.vue';
+import CommunityPage from '@/pages/CommunityPage.vue';
 import CategoryLayout from '@/components/layouts/CategoryLayout.vue';
 
 const router = createRouter({
@@ -23,6 +24,16 @@ const router = createRouter({
       path: '/download',
       name: 'download',
       component: DownloadPage
+    },
+    {
+      path: '/community',
+      name: 'community',
+      component: CommunityPage
+    },
+    {
+      path: '/community/:postId',
+      name: 'community-detail',
+      component: CommunityPage
     },
     {
       path: '/:category/:subcategory',

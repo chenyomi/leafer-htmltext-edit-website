@@ -18,12 +18,15 @@
           <router-link class="nav-link" to="/" @click.prevent="goCase">Case</router-link>
           <router-link class="nav-link" to="/" @click.prevent="goPrice">Price</router-link>
           <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">Docs</router-link>
+          <router-link class="nav-link" to="/community" :class="{ 'active-link': activeItem === 'community' }">
+            Community
+          </router-link>
           <div class="changelog-nav-wrapper" @mouseenter="openChangelog" @mouseleave="closeChangelog">
             <span class="nav-link changelog-trigger">Changelog</span>
             <Transition name="changelog-fade">
               <div v-if="changelogOpen" class="changelog-dropdown">
                 <div class="changelog-header">Changelog</div>
-                <div v-if="loading" class="changelog-loading">Loading...</div>
+                <div v-if="changelogLoading" class="changelog-loading">Loading...</div>
                 <div v-else-if="changelog.length === 0" class="changelog-loading">No data yet</div>
                 <ul v-else class="changelog-list">
                   <li v-for="item in changelog" :key="item.sha" class="changelog-item">
@@ -48,6 +51,18 @@
             {{ stars || 0 }}
           </span>
         </button>
+        <div class="auth-actions">
+          <button v-if="!isAuthenticated" class="auth-button" type="button" :disabled="authLoading" @click="login">
+            {{ authLoading ? 'Checking...' : 'GitHub 登录' }}
+          </button>
+          <div v-else class="auth-user">
+            <router-link class="auth-profile" to="/community">
+              <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" />
+              <span>{{ user?.name || user?.login }}</span>
+            </router-link>
+            <button class="auth-logout" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -60,6 +75,7 @@ import { gsap } from 'gsap';
 import VueBitsLogo from '@/components/common/Logo.vue';
 import { useStars } from '@/composables/useStars';
 import { useChangelog } from '@/composables/useChangelog';
+import { useAuth } from '@/composables/useAuth';
 import starIcon from '@/assets/common/star.svg';
 import './DisplayHeader.css';
 
@@ -72,7 +88,8 @@ defineProps<Props>();
 const starCountRef = useTemplateRef<HTMLElement>('starCountRef');
 const router = useRouter();
 const stars = useStars();
-const { changelog, loading } = useChangelog();
+const { changelog, loading: changelogLoading } = useChangelog();
+const { user, loading: authLoading, isAuthenticated, login, logout } = useAuth();
 
 const changelogOpen = ref(false);
 let closeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -101,6 +118,10 @@ const stripTag = (message: string) => {
 
 const openGitHub = () => {
   window.open('https://github.com/chenyomi/leafer-htmltext-edit-view', '_blank');
+};
+
+const handleLogout = async () => {
+  await logout();
 };
 
 const scrollToId = async (id: string) => {
