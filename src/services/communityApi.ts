@@ -46,6 +46,7 @@ export type CommunityStatus = 'open' | 'closed' | 'resolved';
 
 interface RequestOptions extends RequestInit {
   query?: Record<string, string | undefined>;
+  timeoutMs?: number;
 }
 
 function buildUrl(path: string, query?: RequestOptions['query']) {
@@ -57,14 +58,28 @@ function buildUrl(path: string, query?: RequestOptions['query']) {
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const response = await fetch(buildUrl(path, options.query), {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? 8000);
+
+  let response: Response;
+  try {
+    response = await fetch(buildUrl(path, options.query), {
+      ...options,
+      credentials: 'include',
+      signal: options.signal || controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      }
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('请求超时，请稍后重试');
     }
-  });
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {

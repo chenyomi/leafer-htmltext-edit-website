@@ -52,9 +52,7 @@
           </span>
         </button>
         <div class="auth-actions">
-          <button v-if="!isAuthenticated" class="auth-button" type="button" :disabled="authLoading" @click="login">
-            {{ authLoading ? 'Checking...' : 'GitHub 登录' }}
-          </button>
+          <button v-if="!isAuthenticated" class="auth-button" type="button" @click="login">GitHub 登录</button>
           <div v-else class="auth-user">
             <router-link class="auth-profile" to="/community">
               <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" />

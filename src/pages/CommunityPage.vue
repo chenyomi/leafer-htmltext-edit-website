@@ -17,9 +17,7 @@
           </div>
           <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
         </div>
-        <button v-else class="primary-button" type="button" :disabled="authLoading" @click="login">
-          {{ authLoading ? '正在检查...' : '使用 GitHub 登录' }}
-        </button>
+        <button v-else class="primary-button" type="button" @click="login">使用 GitHub 登录</button>
       </div>
     </section>
 
