@@ -8,16 +8,17 @@
         <p class="description">用 GitHub 身份提问题、反馈 bug、提交功能建议，像轻量版 Issue 一样讨论。</p>
       </div>
 
-      <div class="user-card">
-        <div v-if="user" class="user-info">
+      <div class="hero-actions">
+        <a class="primary-button" href="#new-topic">发起讨论</a>
+        <button v-if="!user" class="secondary-button" type="button" @click="login">GitHub 登录</button>
+        <div v-else class="hero-user-card">
           <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
           <div>
-            <span>Signed in as</span>
+            <span>已登录</span>
             <strong>{{ user.name || user.login }}</strong>
+            <small>@{{ user.login }}</small>
           </div>
-          <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
         </div>
-        <button v-else class="primary-button" type="button" @click="login">使用 GitHub 登录</button>
       </div>
     </section>
 
@@ -39,7 +40,7 @@
       <div class="community-main">
         <div v-if="message" class="notice" :class="{ error: messageType === 'error' }">{{ message }}</div>
 
-        <section class="compose-card">
+        <section id="new-topic" class="compose-card">
           <div class="section-heading">
             <div>
               <p class="eyebrow">New Topic</p>
@@ -48,8 +49,22 @@
             <span class="status-pill">默认 open</span>
           </div>
 
-          <div v-if="!user" class="login-hint">登录 GitHub 后可以发帖和回复。帖子会带上 GitHub 头像和主页链接。</div>
+          <div v-if="!user" class="login-panel">
+            <div>
+              <h3>登录后发布帖子</h3>
+              <p>使用 GitHub 身份发起问题、Bug 反馈或功能建议。发布后会展示你的 GitHub 头像、昵称和主页链接。</p>
+            </div>
+            <button class="primary-button" type="button" @click="login">使用 GitHub 登录</button>
+          </div>
           <form v-else class="post-form" @submit.prevent="createPost">
+            <div class="composer-user">
+              <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
+              <div>
+                <span>以此身份发布</span>
+                <strong>{{ user.name || user.login }}</strong>
+              </div>
+              <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
+            </div>
             <select v-model="draft.category" aria-label="帖子分类">
               <option
                 v-for="item in categoryOptions.filter(item => item.value !== 'all')"
@@ -117,7 +132,12 @@
 
       <aside class="detail-panel">
         <div v-if="loadingDetail" class="empty-state">正在读取详情...</div>
-        <div v-else-if="!activePost" class="empty-state">选择左侧帖子查看详情。</div>
+        <div v-else-if="!activePost" class="detail-empty">
+          <p class="eyebrow">Topic Detail</p>
+          <h3>选择帖子查看详情</h3>
+          <p>左侧帖子会在这里展示完整内容和回复。也可以直接发起一个新的讨论。</p>
+          <a class="secondary-button" href="#new-topic">发起讨论</a>
+        </div>
         <template v-else>
           <article class="detail-card">
             <div class="detail-header">
@@ -396,25 +416,29 @@ h1 {
   line-height: 1.8;
 }
 
-.user-card,
+.hero-user-card,
 .compose-card,
 .posts-card,
 .detail-card,
 .replies-card,
-.community-sidebar {
+.community-sidebar,
+.detail-empty {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.06);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(18px);
 }
 
-.user-card {
-  min-width: 270px;
-  padding: 16px;
-  border-radius: 22px;
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 320px;
 }
 
-.user-info,
+.hero-user-card,
+.composer-user,
 .author-row,
 .section-heading,
 .form-actions,
@@ -424,25 +448,41 @@ h1 {
   align-items: center;
 }
 
-.user-info {
+.hero-user-card {
   gap: 12px;
+  min-width: 240px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 999px;
 }
 
-.user-info img,
+.composer-user {
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.hero-user-card img,
+.composer-user img,
 .author-row img {
   width: 38px;
   height: 38px;
   border-radius: 50%;
 }
 
-.user-info span,
+.hero-user-card span,
+.hero-user-card small,
+.composer-user span,
 .post-meta,
 .author-row small {
   color: rgba(255, 255, 255, 0.52);
   font-size: 12px;
 }
 
-.user-info strong {
+.hero-user-card strong,
+.hero-user-card small,
+.composer-user strong {
   display: block;
   margin-top: 2px;
 }
@@ -457,6 +497,7 @@ h1 {
 }
 
 .primary-button,
+.secondary-button,
 .ghost-button {
   display: inline-flex;
   align-items: center;
@@ -472,6 +513,12 @@ h1 {
   color: #050505;
   background: #ffffff;
   font-weight: 800;
+}
+
+.secondary-button {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .primary-button:disabled {
@@ -571,12 +618,46 @@ h1 {
 }
 
 .login-hint,
+.login-panel,
 .empty-state,
+.detail-empty,
 .notice {
   padding: 18px;
   border-radius: 16px;
   color: rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.05);
+}
+
+.login-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.login-panel h3,
+.detail-empty h3 {
+  margin: 0 0 8px;
+  color: #ffffff;
+}
+
+.login-panel p,
+.detail-empty p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  line-height: 1.7;
+}
+
+.detail-empty {
+  border-radius: 24px;
+}
+
+.detail-empty .eyebrow {
+  margin-top: 0;
+}
+
+.detail-empty .secondary-button {
+  margin-top: 18px;
 }
 
 .notice {
@@ -751,9 +832,21 @@ textarea {
     line-height: 1.7;
   }
 
-  .user-card {
+  .hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .hero-actions .primary-button,
+  .hero-actions .secondary-button {
+    width: 100%;
+  }
+
+  .hero-user-card {
     min-width: 0;
     width: 100%;
+    border-radius: 20px;
   }
 
   .community-layout {
@@ -835,8 +928,14 @@ textarea {
   }
 
   .form-actions .primary-button,
+  .login-panel .primary-button,
   .reply-form .primary-button {
     width: 100%;
+  }
+
+  .login-panel {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
@@ -845,12 +944,12 @@ textarea {
     padding-top: 92px;
   }
 
-  .user-info {
+  .composer-user {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
-  .user-info .ghost-button {
+  .composer-user .ghost-button {
     width: 100%;
     margin-left: 0;
   }
