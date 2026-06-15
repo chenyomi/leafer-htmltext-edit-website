@@ -9,11 +9,6 @@
           {{ t('community.description') }}
         </p>
       </div>
-
-      <div class="hero-actions">
-        <button class="primary-button" type="button" @click="openCompose">{{ t('community.newTopic') }}</button>
-        <button v-if="!user" class="secondary-button" type="button" @click="login">{{ t('nav.githubLogin') }}</button>
-      </div>
     </section>
 
     <div v-if="message" class="notice community-notice" :class="{ error: messageType === 'error' }">{{ message }}</div>
