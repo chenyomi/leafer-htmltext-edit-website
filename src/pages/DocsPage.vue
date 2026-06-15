@@ -858,6 +858,77 @@
           </div>
         </section>
 
+        <!-- ─── API: 实验功能 ─── -->
+        <section :id="'api-experimental'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              API · 实验功能
+              <a :href="'#api-experimental'" class="anchor-link" @click.prevent="scrollTo('api-experimental')">#</a>
+            </h2>
+          </div>
+
+          <div class="callout callout-warning">
+            实验功能默认关闭，需要显式开启后才会生效。未开启时不会影响原有
+            <code>fontSize</code>
+            全局字号、弧形文字、锁定比例缩放等稳定功能。
+          </div>
+
+          <h3 class="doc-h3">局部字号 inlineFontSize</h3>
+          <p class="doc-p">
+            <code>inlineFontSize</code>
+            用于在内嵌编辑状态下给选中的文字设置局部字号。它不会替代
+            <code>fontSize</code>
+            ：
+            <code>fontSize</code>
+            仍然表示整个文本对象的全局字号，
+            <code>inlineFontSize</code>
+            只作为富文本 HTML 中的局部
+            <code>span style="font-size: ..."</code>
+            保存。
+          </p>
+
+          <h3 class="doc-h3">开启方式</h3>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(inlineFontSizeEnableExample, 'inline-size-enable')">
+              <i class="pi" :class="copiedKey === 'inline-size-enable' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ inlineFontSizeEnableExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">使用方式</h3>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(inlineFontSizeUsageExample, 'inline-size-usage')">
+              <i class="pi" :class="copiedKey === 'inline-size-usage' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ inlineFontSizeUsageExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">功能边界</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>功能</th>
+                  <th>多字号文本下的行为</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in inlineFontSizeLimits" :key="item.name">
+                  <td>
+                    <code>{{ item.name }}</code>
+                  </td>
+                  <td class="param-desc">{{ item.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-info">
+            插件自身保存或导出的 HTML 会保留局部字号并支持再次恢复。第三方网页或其他编辑器复制来的复杂 HTML
+            会尽量兼容，但不保证所有样式结构都能完整还原。
+          </div>
+        </section>
+
         <!-- ─── API: 授权管理 ─── -->
         <section :id="'api-license'" class="doc-section">
           <div class="section-anchor-wrap">
@@ -1004,6 +1075,7 @@ const apiItems = [
   { id: 'api-htmltext', label: 'HtmlText' },
   { id: 'api-manage', label: 'HtmlTextManage' },
   { id: 'api-sethtml', label: 'setHTMLText' },
+  { id: 'api-experimental', label: '实验功能' },
   { id: 'api-license', label: '授权管理' }
 ];
 
@@ -1486,6 +1558,24 @@ items.forEach((item) => item.remove())
 canvas?.editor?.cancel()`
   },
   {
+    name: 'setFeatures',
+    anchor: 'set-features',
+    signature: 'htmlTextManage.setFeatures(features): void',
+    desc: '开启或关闭实验功能。实验功能默认关闭，建议只在明确需要时开启。',
+    params: [
+      {
+        name: 'features',
+        type: '{ inlineFontSize?: boolean }',
+        required: true,
+        desc: '实验功能开关。例如 inlineFontSize 表示选区级局部字号'
+      }
+    ],
+    returns: undefined,
+    example: `htmlTextManage.setFeatures({
+  inlineFontSize: true
+})`
+  },
+  {
     name: 'isMultiSelect',
     anchor: 'is-multi-select',
     signature: 'htmlTextManage.isMultiSelect(): boolean',
@@ -1581,6 +1671,11 @@ const setHtmlTextKeys = [
     desc: '文字颜色，例如 "#ff0000"、"rgba(0,0,0,0.5)"；有选区时只改选中文字'
   },
   { key: 'fontSize', valueType: 'number', desc: '字体大小（像素）；全局应用，不支持局部选区' },
+  {
+    key: 'inlineFontSize',
+    valueType: 'number | string',
+    desc: '实验功能：选区级局部字号。需先调用 htmlTextManage.setFeatures({ inlineFontSize: true })，且只在内嵌编辑状态下有选区时生效'
+  },
   { key: 'fontWeight', valueType: 'number | string', desc: '字重，例如 400、700、"bold"、"normal"；全局应用' },
   { key: 'lineHeight', valueType: 'number', desc: '行高倍数（相对 fontSize），例如 1.5；全局应用' },
   { key: 'letterSpacing', valueType: 'number', desc: '字间距（像素）；全局应用' },
@@ -1645,6 +1740,47 @@ setHTMLText('list', 'bullet')   // 无序列表
 const fontFamily = '"Dancing Script", cursive'
 const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
 setHTMLText('font', fontFamily, fontBase64)`;
+
+const inlineFontSizeEnableExample = `import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
+
+// 实验功能默认关闭。只有显式开启后 inlineFontSize 才会生效。
+htmlTextManage.setFeatures({
+  inlineFontSize: true,
+})`;
+
+const inlineFontSizeUsageExample = `import { setHTMLText } from '@chenyomi/leafer-htmltext-edit'
+
+// 1. 双击文本进入内嵌编辑器
+// 2. 选中需要调整的文字
+// 3. 设置局部字号
+setHTMLText('inlineFontSize', 42)
+
+// 如果需要恢复统一字号，使用全局 fontSize。
+// 这会统一整段文本字号，并清除局部字号标记。
+setHTMLText('fontSize', 24)`;
+
+const inlineFontSizeLimits = [
+  {
+    name: '弧形文字',
+    desc: '多字号文本暂不支持弧形文字。开启局部字号后，弧形排版会被跳过，建议使用统一字号后再应用弧形。'
+  },
+  {
+    name: '锁定比例缩放',
+    desc: '多字号文本不会参与锁定比例下的自动字号收口缩放，避免只缩放全局字号导致局部字号比例错乱。'
+  },
+  {
+    name: '全局 fontSize',
+    desc: '全局字号用于统一整段文本字号。调用 fontSize 会清除局部字号，让文本回到单字号模式。'
+  },
+  {
+    name: '多选批量局部字号',
+    desc: 'inlineFontSize 只在内嵌编辑器中对选区生效，不支持对多个文本节点批量设置局部字号。'
+  },
+  {
+    name: '外部 HTML',
+    desc: '插件自身保存或导出的 HTML 支持恢复局部字号。第三方复杂 HTML 会尽量兼容，但不保证所有样式结构完整还原。'
+  }
+];
 
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
