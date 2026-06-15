@@ -69,9 +69,9 @@
             <div class="post-main">
               <div class="post-title-row">
                 <span class="category-tag">{{ categoryLabel(post.category) }}</span>
-                <strong>{{ post.title }}</strong>
+                <strong class="post-title">{{ post.title }}</strong>
               </div>
-              <p>{{ post.content }}</p>
+              <p class="post-preview">{{ post.content }}</p>
               <div class="post-meta">
                 <span>{{ post.name || post.login }}</span>
                 <span>{{ formatDate(post.updated_at) }}</span>
@@ -1163,6 +1163,22 @@ textarea {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.post-title,
+.post-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.post-title {
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
+.post-preview {
+  -webkit-line-clamp: 2;
 }
 
 .reply-count {
