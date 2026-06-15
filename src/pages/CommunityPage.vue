@@ -24,7 +24,7 @@
 
     <div v-if="message" class="notice community-notice" :class="{ error: messageType === 'error' }">{{ message }}</div>
 
-    <section class="community-layout" :class="{ 'has-detail': activePostId }">
+    <section class="community-layout">
       <section class="topics-board">
         <div class="board-toolbar">
           <div>
@@ -84,65 +84,6 @@
           </button>
         </div>
       </section>
-
-      <aside v-if="activePostId" class="detail-panel">
-        <div v-if="loadingDetail" class="empty-state">正在读取详情...</div>
-        <div v-else-if="!activePost" class="detail-empty">
-          <p class="eyebrow">Topic Detail</p>
-          <h3>选择一个讨论</h3>
-          <p>详情和回复会显示在这里。首页默认聚焦浏览列表，发帖请使用右上角 New Topic。</p>
-          <button class="secondary-button" type="button" @click="openCompose">发起讨论</button>
-        </div>
-        <template v-else>
-          <article class="detail-card">
-            <div class="detail-header">
-              <span class="category-tag">{{ categoryLabel(activePost.category) }}</span>
-              <span class="status-pill">{{ activePost.status }}</span>
-            </div>
-            <h2>{{ activePost.title }}</h2>
-            <div class="author-row">
-              <img v-if="activePost.avatar_url" :src="activePost.avatar_url" alt="" />
-              <a v-if="activePost.html_url" :href="activePost.html_url" target="_blank" rel="noreferrer">
-                {{ activePost.name || activePost.login }}
-              </a>
-              <span v-else>{{ activePost.name || activePost.login }}</span>
-              <small>{{ formatDate(activePost.created_at) }}</small>
-            </div>
-            <p class="detail-content">{{ activePost.content }}</p>
-          </article>
-
-          <section class="replies-card">
-            <h3>回复</h3>
-            <div v-if="replies.length === 0" class="empty-state compact">还没有回复。</div>
-            <article v-for="reply in replies" :key="reply.id" class="reply-item">
-              <div class="author-row">
-                <img v-if="reply.avatar_url" :src="reply.avatar_url" alt="" />
-                <a v-if="reply.html_url" :href="reply.html_url" target="_blank" rel="noreferrer">
-                  {{ reply.name || reply.login }}
-                </a>
-                <span v-else>{{ reply.name || reply.login }}</span>
-                <small>{{ formatDate(reply.created_at) }}</small>
-              </div>
-              <p>{{ reply.content }}</p>
-            </article>
-
-            <form v-if="user" class="reply-form" novalidate @submit.prevent="createReply">
-              <textarea
-                v-model="replyDraft"
-                placeholder="写下你的回复..."
-                rows="4"
-                maxlength="5000"
-                @blur="replySubmitAttempted = true"
-              ></textarea>
-              <p v-if="showReplyValidation && replyError" class="field-error">{{ replyError }}</p>
-              <button class="primary-button" type="submit" :disabled="submittingReply">
-                {{ submittingReply ? '回复中...' : '提交回复' }}
-              </button>
-            </form>
-            <div v-else class="login-hint compact">登录 GitHub 后可以回复。</div>
-          </section>
-        </template>
-      </aside>
     </section>
 
     <Teleport to="body">
@@ -206,6 +147,78 @@
                 </button>
               </div>
             </form>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="compose-fade">
+        <div v-if="activePostId" class="detail-overlay" @click.self="closeDetail">
+          <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+            <div class="modal-heading">
+              <div>
+                <p class="eyebrow">Topic Detail</p>
+                <h2 id="detail-title">讨论详情</h2>
+              </div>
+              <button class="icon-button" type="button" aria-label="关闭详情" @click="closeDetail">×</button>
+            </div>
+
+            <div v-if="loadingDetail" class="empty-state">正在读取详情...</div>
+            <div v-else-if="!activePost" class="detail-empty">
+              <h3>帖子不存在或读取失败</h3>
+              <p>可以返回列表重新选择一个讨论。</p>
+              <button class="secondary-button" type="button" @click="closeDetail">返回列表</button>
+            </div>
+            <template v-else>
+              <article class="detail-card">
+                <div class="detail-header">
+                  <span class="category-tag">{{ categoryLabel(activePost.category) }}</span>
+                  <span class="status-pill">{{ activePost.status }}</span>
+                </div>
+                <h2>{{ activePost.title }}</h2>
+                <div class="author-row">
+                  <img v-if="activePost.avatar_url" :src="activePost.avatar_url" alt="" />
+                  <a v-if="activePost.html_url" :href="activePost.html_url" target="_blank" rel="noreferrer">
+                    {{ activePost.name || activePost.login }}
+                  </a>
+                  <span v-else>{{ activePost.name || activePost.login }}</span>
+                  <small>{{ formatDate(activePost.created_at) }}</small>
+                </div>
+                <p class="detail-content">{{ activePost.content }}</p>
+              </article>
+
+              <section class="replies-card">
+                <h3>回复</h3>
+                <div v-if="replies.length === 0" class="empty-state compact">还没有回复。</div>
+                <article v-for="reply in replies" :key="reply.id" class="reply-item">
+                  <div class="author-row">
+                    <img v-if="reply.avatar_url" :src="reply.avatar_url" alt="" />
+                    <a v-if="reply.html_url" :href="reply.html_url" target="_blank" rel="noreferrer">
+                      {{ reply.name || reply.login }}
+                    </a>
+                    <span v-else>{{ reply.name || reply.login }}</span>
+                    <small>{{ formatDate(reply.created_at) }}</small>
+                  </div>
+                  <p>{{ reply.content }}</p>
+                </article>
+
+                <form v-if="user" class="reply-form" novalidate @submit.prevent="createReply">
+                  <textarea
+                    v-model="replyDraft"
+                    placeholder="写下你的回复..."
+                    rows="4"
+                    maxlength="5000"
+                    @blur="replySubmitAttempted = true"
+                  ></textarea>
+                  <p v-if="showReplyValidation && replyError" class="field-error">{{ replyError }}</p>
+                  <button class="primary-button" type="submit" :disabled="submittingReply">
+                    {{ submittingReply ? '回复中...' : '提交回复' }}
+                  </button>
+                </form>
+                <div v-else class="login-hint compact">登录 GitHub 后可以回复。</div>
+              </section>
+            </template>
           </section>
         </div>
       </Transition>
@@ -340,6 +353,11 @@ function setCategory(category: CategoryFilter) {
 
 function openPost(id: string) {
   router.push({ name: 'community-detail', params: { postId: id } });
+}
+
+function closeDetail() {
+  if (submittingReply.value) return;
+  router.push({ name: 'community' });
 }
 
 function openCompose() {
@@ -824,13 +842,6 @@ textarea {
   gap: 12px;
 }
 
-.detail-panel {
-  position: sticky;
-  top: 120px;
-  display: grid;
-  gap: 18px;
-}
-
 .detail-header {
   justify-content: space-between;
   margin-bottom: 14px;
@@ -875,11 +886,6 @@ textarea {
 @media (max-width: 1100px) {
   .community-layout {
     grid-template-columns: 190px minmax(0, 1fr);
-  }
-
-  .detail-panel {
-    grid-column: 1 / -1;
-    position: static;
   }
 }
 
@@ -1052,10 +1058,6 @@ textarea {
   gap: 20px;
 }
 
-.community-layout.has-detail {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
-}
-
 .topics-board,
 .detail-card,
 .replies-card,
@@ -1197,20 +1199,12 @@ textarea {
   line-height: 1.1;
 }
 
-.detail-panel {
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
-}
-
-.detail-panel::-webkit-scrollbar {
-  width: 0;
-}
-
 .detail-empty .secondary-button {
   border: none;
 }
 
-.compose-overlay {
+.compose-overlay,
+.detail-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -1221,7 +1215,8 @@ textarea {
   backdrop-filter: blur(18px);
 }
 
-.compose-modal {
+.compose-modal,
+.detail-modal {
   width: min(620px, 100%);
   max-height: min(760px, calc(100vh - 48px));
   overflow-y: auto;
@@ -1231,6 +1226,17 @@ textarea {
   color: #ffffff;
   background: radial-gradient(circle at top right, rgba(125, 249, 255, 0.16), transparent 34%), rgba(12, 12, 14, 0.96);
   box-shadow: 0 32px 120px rgba(0, 0, 0, 0.55);
+}
+
+.detail-modal {
+  width: min(860px, 100%);
+  display: grid;
+  gap: 16px;
+}
+
+.detail-modal .detail-card,
+.detail-modal .replies-card {
+  box-shadow: none;
 }
 
 .modal-heading {
@@ -1263,15 +1269,8 @@ textarea {
 }
 
 @media (max-width: 980px) {
-  .community-layout.has-detail,
   .community-layout {
     grid-template-columns: 1fr;
-  }
-
-  .detail-panel {
-    max-height: none;
-    position: static;
-    overflow: visible;
   }
 }
 
@@ -1311,12 +1310,14 @@ textarea {
     white-space: normal;
   }
 
-  .compose-overlay {
+  .compose-overlay,
+  .detail-overlay {
     align-items: end;
     padding: 12px;
   }
 
-  .compose-modal {
+  .compose-modal,
+  .detail-modal {
     max-height: calc(100vh - 24px);
     padding: 18px;
     border-radius: 24px;
