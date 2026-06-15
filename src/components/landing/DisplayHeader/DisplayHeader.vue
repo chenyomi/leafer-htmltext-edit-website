@@ -7,21 +7,28 @@
 
       <nav class="landing-nav-items">
         <router-link class="nav-link" :class="{ 'active-link': activeItem === 'home' }" to="/" @click.prevent="goHome">
-          Home
+          {{ t('nav.home') }}
         </router-link>
-        <router-link class="nav-link" to="/" @click.prevent="goCase">Case</router-link>
-        <router-link class="nav-link" to="/" @click.prevent="goPrice">Price</router-link>
-        <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">Docs</router-link>
+        <router-link class="nav-link" to="/" @click.prevent="goCase">{{ t('nav.case') }}</router-link>
+        <router-link class="nav-link" to="/" @click.prevent="goPrice">{{ t('nav.price') }}</router-link>
+        <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">
+          {{ t('nav.docs') }}
+        </router-link>
         <router-link class="nav-link" to="/community" :class="{ 'active-link': activeItem === 'community' }">
-          Community
+          {{ t('nav.community') }}
         </router-link>
-        <div class="changelog-nav-wrapper" @mouseenter="openChangelog" @mouseleave="closeChangelog">
-          <span class="nav-link changelog-trigger">Changelog</span>
+        <div
+          v-if="changelog.length > 0"
+          class="changelog-nav-wrapper"
+          @mouseenter="openChangelog"
+          @mouseleave="closeChangelog"
+        >
+          <span class="nav-link changelog-trigger">{{ t('nav.changelog') }}</span>
           <Transition name="changelog-fade">
             <div v-if="changelogOpen" class="changelog-dropdown">
-              <div class="changelog-header">Changelog</div>
-              <div v-if="changelogLoading" class="changelog-loading">Loading...</div>
-              <div v-else-if="changelog.length === 0" class="changelog-loading">No data yet</div>
+              <div class="changelog-header">{{ t('nav.changelog') }}</div>
+              <div v-if="changelogLoading" class="changelog-loading">{{ t('nav.loading') }}</div>
+              <div v-else-if="changelog.length === 0" class="changelog-loading">{{ t('nav.noData') }}</div>
               <ul v-else class="changelog-list">
                 <li v-for="item in changelog" :key="item.sha" class="changelog-item">
                   <div class="changelog-item-header">
@@ -40,18 +47,29 @@
       </nav>
 
       <div class="nav-cta-group">
-        <button class="star-chip" type="button" aria-label="Star on GitHub" title="Star on GitHub" @click="openGitHub">
+        <LanguageSwitch />
+        <button
+          class="star-chip"
+          type="button"
+          :aria-label="t('nav.starGithub')"
+          :title="t('nav.starGithub')"
+          @click="openGitHub"
+        >
           <img :src="starIcon" alt="" />
           <span ref="starCountRef">{{ stars || 0 }}</span>
         </button>
         <div class="auth-actions">
-          <button v-if="!isAuthenticated" class="auth-button" type="button" @click="login">GitHub 登录</button>
+          <button v-if="!isAuthenticated" class="auth-button" type="button" @click="login">
+            {{ t('nav.githubLogin') }}
+          </button>
           <div v-else class="auth-user">
             <router-link class="auth-profile" to="/community">
               <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" />
               <span>{{ user?.name || user?.login }}</span>
             </router-link>
-            <button class="auth-logout" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
+            <button class="auth-logout" type="button" :disabled="authLoading" @click="handleLogout">
+              {{ t('nav.logout') }}
+            </button>
           </div>
         </div>
       </div>
@@ -68,6 +86,8 @@ import { useStars } from '@/composables/useStars';
 import { useChangelog } from '@/composables/useChangelog';
 import { useAuth } from '@/composables/useAuth';
 import starIcon from '@/assets/common/star.svg';
+import LanguageSwitch from '@/components/common/LanguageSwitch.vue';
+import { useI18n } from '@/i18n';
 import './DisplayHeader.css';
 
 interface Props {
@@ -81,6 +101,7 @@ const router = useRouter();
 const stars = useStars();
 const { changelog, loading: changelogLoading } = useChangelog();
 const { user, loading: authLoading, isAuthenticated, login, logout } = useAuth();
+const { t } = useI18n();
 
 const changelogOpen = ref(false);
 let closeTimer: ReturnType<typeof setTimeout> | null = null;

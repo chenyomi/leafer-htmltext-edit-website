@@ -5,12 +5,9 @@
         <div class="footer-left">
           <ShinyText text="Leafer HtmlText Edit" :disabled="false" :speed="2" class-name="footer-logo" />
           <p class="footer-description">
-            A plugins website created with
-            <i class="pi pi-heart-fill footer-heart"></i>
-            by
-            <a href="https://github.com/chenyomi" target="_blank" class="footer-creator-link">chenyomi</a>
+            {{ t('footer.description') }}
           </p>
-          <p class="footer-description">Built on top of the open-source project Vue Bits.</p>
+          <p class="footer-description">{{ t('footer.builtOn') }}</p>
           <p class="footer-copyright">© {{ new Date().getFullYear() }}</p>
         </div>
 
@@ -31,5 +28,8 @@
 <script setup lang="ts">
 import FadeContent from '@/content/Animations/FadeContent/FadeContent.vue';
 import ShinyText from '@/content/TextAnimations/ShinyText/ShinyText.vue';
+import { useI18n } from '@/i18n';
 import './Footer.css';
+
+const { t } = useI18n();
 </script>

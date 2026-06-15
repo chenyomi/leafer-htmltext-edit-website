@@ -2,25 +2,17 @@
   <main class="community-page">
     <section class="community-hero">
       <div>
-        <router-link class="back-link" to="/">Back to Home</router-link>
-        <p class="eyebrow">Community</p>
-        <h1>社区</h1>
+        <router-link class="back-link" to="/">{{ t('common.backHome') }}</router-link>
+        <p class="eyebrow">{{ t('community.eyebrow') }}</p>
+        <h1>{{ t('community.title') }}</h1>
         <p class="description">
-          围绕 Leafer HTMLText Edit 交流问题、反馈 Bug、提交功能建议，也可以分享案例和使用经验。
+          {{ t('community.description') }}
         </p>
       </div>
 
       <div class="hero-actions">
-        <button class="primary-button" type="button" @click="openCompose">发起讨论</button>
-        <button v-if="!user" class="secondary-button" type="button" @click="login">GitHub 登录</button>
-        <div v-else class="hero-user-card">
-          <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
-          <div>
-            <span>已登录</span>
-            <strong>{{ user.name || user.login }}</strong>
-            <small>@{{ user.login }}</small>
-          </div>
-        </div>
+        <button class="primary-button" type="button" @click="openCompose">{{ t('community.newTopic') }}</button>
+        <button v-if="!user" class="secondary-button" type="button" @click="login">{{ t('nav.githubLogin') }}</button>
       </div>
     </section>
 
@@ -30,12 +22,12 @@
       <section class="topics-board">
         <div class="board-toolbar">
           <div>
-            <p class="eyebrow">Topics</p>
-            <h2>社区讨论</h2>
+            <p class="eyebrow">{{ t('community.topics') }}</p>
+            <h2>{{ t('community.topicsTitle') }}</h2>
           </div>
           <div class="toolbar-actions">
-            <button class="ghost-button" type="button" @click="loadPosts">刷新</button>
-            <button class="primary-button" type="button" @click="openCompose">New Topic</button>
+            <button class="ghost-button" type="button" @click="loadPosts">{{ t('common.refresh') }}</button>
+            <button class="primary-button" type="button" @click="openCompose">{{ t('community.newTopic') }}</button>
           </div>
         </div>
 
@@ -54,33 +46,33 @@
 
         <div class="topic-filters">
           <label class="search-field">
-            <span>搜索</span>
-            <input v-model="searchQuery" type="search" placeholder="搜索标题或内容" />
+            <span>{{ t('community.search') }}</span>
+            <input v-model="searchQuery" type="search" :placeholder="t('community.searchPlaceholder')" />
           </label>
           <label>
-            <span>状态</span>
+            <span>{{ t('community.status') }}</span>
             <select v-model="activeStatus">
               <option v-for="item in statusOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
           </label>
           <label>
-            <span>排序</span>
+            <span>{{ t('community.sort') }}</span>
             <select v-model="activeSort">
               <option v-for="item in sortOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
           </label>
           <button class="filter-toggle" :class="{ active: mineOnly }" type="button" @click="mineOnly = !mineOnly">
-            我的帖子
+            {{ t('community.mineOnly') }}
           </button>
         </div>
 
         <div class="list-summary">
-          <span>{{ posts.length }} 个讨论</span>
-          <span>{{ activeCategory === 'all' ? '全部分类' : categoryLabel(activeCategory) }}</span>
+          <span>{{ t('community.discussionsCount', { count: posts.length }) }}</span>
+          <span>{{ activeCategory === 'all' ? t('community.allCategories') : categoryLabel(activeCategory) }}</span>
         </div>
 
-        <div v-if="loadingPosts" class="empty-state">正在读取帖子...</div>
-        <div v-else-if="posts.length === 0" class="empty-state">暂无帖子，点击右上角发起第一个讨论。</div>
+        <div v-if="loadingPosts" class="empty-state">{{ t('community.loadingPosts') }}</div>
+        <div v-else-if="posts.length === 0" class="empty-state">{{ t('community.emptyPosts') }}</div>
         <div v-else class="post-list">
           <button
             v-for="post in posts"
@@ -93,7 +85,7 @@
             <div class="post-main">
               <div class="post-title-row">
                 <span class="category-tag">{{ categoryLabel(post.category) }}</span>
-                <span v-if="post.is_pinned" class="pinned-tag">置顶</span>
+                <span v-if="post.is_pinned" class="pinned-tag">{{ t('community.pinned') }}</span>
                 <span class="status-pill" :class="`status-${post.status}`">{{ statusLabel(post.status) }}</span>
                 <strong class="post-title">{{ post.title }}</strong>
               </div>
@@ -101,12 +93,12 @@
               <div class="post-meta">
                 <span>{{ post.name || post.login }}</span>
                 <span>{{ formatActivity(post) }}</span>
-                <span>{{ post.view_count || 0 }} 浏览</span>
+                <span>{{ t('community.views', { count: post.view_count || 0 }) }}</span>
               </div>
             </div>
             <div class="reply-count">
               <strong>{{ post.reply_count || 0 }}</strong>
-              <span>回复</span>
+              <span>{{ t('community.replies') }}</span>
             </div>
           </button>
         </div>
@@ -119,30 +111,34 @@
           <section class="compose-modal" role="dialog" aria-modal="true" aria-labelledby="compose-title">
             <div class="modal-heading">
               <div>
-                <p class="eyebrow">New Topic</p>
-                <h2 id="compose-title">发起讨论</h2>
+                <p class="eyebrow">{{ t('community.newTopic') }}</p>
+                <h2 id="compose-title">{{ t('community.modalTitle') }}</h2>
               </div>
-              <button class="icon-button" type="button" aria-label="关闭发帖弹窗" @click="closeCompose">×</button>
+              <button class="icon-button" type="button" :aria-label="t('community.closeCompose')" @click="closeCompose">
+                ×
+              </button>
             </div>
 
             <div v-if="!user" class="login-panel">
               <div>
-                <h3>登录后发布帖子</h3>
-                <p>使用 GitHub 身份发起问题、Bug 反馈或功能建议。发布后会展示你的 GitHub 头像、昵称和主页链接。</p>
+                <h3>{{ t('community.loginToPost') }}</h3>
+                <p>{{ t('community.loginToPostDesc') }}</p>
               </div>
-              <button class="primary-button" type="button" @click="login">使用 GitHub 登录</button>
+              <button class="primary-button" type="button" @click="login">{{ t('community.loginGithub') }}</button>
             </div>
 
             <form v-else class="post-form" novalidate @submit.prevent="createPost">
               <div class="composer-user">
                 <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
                 <div>
-                  <span>以此身份发布</span>
+                  <span>{{ t('community.postAs') }}</span>
                   <strong>{{ user.name || user.login }}</strong>
                 </div>
-                <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
+                <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">
+                  {{ t('nav.logout') }}
+                </button>
               </div>
-              <select v-model="draft.category" aria-label="帖子分类">
+              <select v-model="draft.category" :aria-label="t('community.categoryAria')">
                 <option
                   v-for="item in categoryOptions.filter(item => item.value !== 'all')"
                   :key="item.value"
@@ -154,14 +150,14 @@
               <input
                 v-model="draft.title"
                 type="text"
-                placeholder="标题，例如：padding 在编辑态显示不一致"
+                :placeholder="t('community.titlePlaceholder')"
                 maxlength="120"
                 @blur="postSubmitAttempted = true"
               />
               <p v-if="showPostValidation && titleError" class="field-error">{{ titleError }}</p>
               <textarea
                 v-model="draft.content"
-                placeholder="描述你的问题、建议或案例..."
+                :placeholder="t('community.contentPlaceholder')"
                 rows="8"
                 maxlength="5000"
                 @blur="postSubmitAttempted = true"
@@ -170,7 +166,7 @@
               <div class="form-actions">
                 <span>{{ draft.content.length }}/5000</span>
                 <button class="primary-button" type="submit" :disabled="submitting">
-                  {{ submitting ? '发布中...' : '发布帖子' }}
+                  {{ submitting ? t('community.posting') : t('community.publishPost') }}
                 </button>
               </div>
             </form>
@@ -185,17 +181,19 @@
           <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
             <div class="modal-heading">
               <div>
-                <p class="eyebrow">Topic Detail</p>
-                <h2 id="detail-title">讨论详情</h2>
+                <p class="eyebrow">{{ t('community.detailEyebrow') }}</p>
+                <h2 id="detail-title">{{ t('community.detailTitle') }}</h2>
               </div>
-              <button class="icon-button" type="button" aria-label="关闭详情" @click="closeDetail">×</button>
+              <button class="icon-button" type="button" :aria-label="t('community.closeDetail')" @click="closeDetail">
+                ×
+              </button>
             </div>
 
-            <div v-if="loadingDetail" class="empty-state">正在读取详情...</div>
+            <div v-if="loadingDetail" class="empty-state">{{ t('community.loadingDetail') }}</div>
             <div v-else-if="!activePost" class="detail-empty">
-              <h3>帖子不存在或读取失败</h3>
-              <p>可以返回列表重新选择一个讨论。</p>
-              <button class="secondary-button" type="button" @click="closeDetail">返回列表</button>
+              <h3>{{ t('community.missingPostTitle') }}</h3>
+              <p>{{ t('community.missingPostDesc') }}</p>
+              <button class="secondary-button" type="button" @click="closeDetail">{{ t('community.backList') }}</button>
             </div>
             <template v-else>
               <article class="detail-card">
@@ -207,7 +205,7 @@
                 </div>
                 <div v-if="isAdmin" class="admin-actions">
                   <button class="ghost-button" type="button" :disabled="adminBusy" @click="togglePin(activePost)">
-                    {{ activePost.is_pinned ? '取消置顶' : '置顶' }}
+                    {{ activePost.is_pinned ? t('community.unpin') : t('community.pinned') }}
                   </button>
                   <button
                     v-for="item in statusOptions.filter(item => item.value !== 'all')"
@@ -220,7 +218,7 @@
                     {{ item.label }}
                   </button>
                   <button class="danger-button" type="button" :disabled="adminBusy" @click="removePost(activePost)">
-                    删除帖子
+                    {{ t('community.deletePost') }}
                   </button>
                 </div>
                 <h2>{{ activePost.title }}</h2>
@@ -236,8 +234,8 @@
               </article>
 
               <section class="replies-card">
-                <h3>回复</h3>
-                <div v-if="replies.length === 0" class="empty-state compact">还没有回复。</div>
+                <h3>{{ t('community.replies') }}</h3>
+                <div v-if="replies.length === 0" class="empty-state compact">{{ t('community.noReplies') }}</div>
                 <article v-for="reply in replies" :key="reply.id" class="reply-item">
                   <div class="author-row">
                     <img v-if="reply.avatar_url" :src="reply.avatar_url" alt="" />
@@ -253,7 +251,7 @@
                       :disabled="adminBusy"
                       @click="removeReply(reply)"
                     >
-                      删除
+                      {{ t('community.delete') }}
                     </button>
                   </div>
                   <p>{{ reply.content }}</p>
@@ -262,17 +260,17 @@
                 <form v-if="user" class="reply-form" novalidate @submit.prevent="createReply">
                   <textarea
                     v-model="replyDraft"
-                    placeholder="写下你的回复..."
+                    :placeholder="t('community.replyPlaceholder')"
                     rows="4"
                     maxlength="5000"
                     @blur="replySubmitAttempted = true"
                   ></textarea>
                   <p v-if="showReplyValidation && replyError" class="field-error">{{ replyError }}</p>
                   <button class="primary-button" type="submit" :disabled="submittingReply">
-                    {{ submittingReply ? '回复中...' : '提交回复' }}
+                    {{ submittingReply ? t('community.replying') : t('community.submitReply') }}
                   </button>
                 </form>
-                <div v-else class="login-hint compact">登录 GitHub 后可以回复。</div>
+                <div v-else class="login-hint compact">{{ t('community.loginToReply') }}</div>
               </section>
             </template>
           </section>
@@ -294,35 +292,37 @@ import {
   type CommunityStatus
 } from '@/services/communityApi';
 import { useAuth } from '@/composables/useAuth';
+import { useI18n } from '@/i18n';
 
 type CategoryFilter = CommunityCategory | 'all';
 
 const route = useRoute();
 const router = useRouter();
 const { user, loading: authLoading, login, logout } = useAuth();
+const { locale, t } = useI18n();
 
-const categoryOptions: Array<{ value: CategoryFilter; label: string; desc: string }> = [
-  { value: 'all', label: '全部', desc: '所有开放讨论' },
-  { value: 'question', label: '问题', desc: '使用疑问' },
-  { value: 'bug', label: 'Bug', desc: '异常反馈' },
-  { value: 'feature', label: '功能建议', desc: '新能力提议' },
-  { value: 'showcase', label: '案例展示', desc: '项目与效果' },
-  { value: 'discussion', label: '讨论', desc: '开放话题' }
-];
+const categoryOptions = computed<Array<{ value: CategoryFilter; label: string; desc: string }>>(() => [
+  { value: 'all', label: t('categories.all'), desc: t('categories.allDesc') },
+  { value: 'question', label: t('categories.question'), desc: t('categories.questionDesc') },
+  { value: 'bug', label: t('categories.bug'), desc: t('categories.bugDesc') },
+  { value: 'feature', label: t('categories.feature'), desc: t('categories.featureDesc') },
+  { value: 'showcase', label: t('categories.showcase'), desc: t('categories.showcaseDesc') },
+  { value: 'discussion', label: t('categories.discussion'), desc: t('categories.discussionDesc') }
+]);
 
-const statusOptions: Array<{ value: CommunityStatus | 'all'; label: string }> = [
-  { value: 'all', label: '全部状态' },
-  { value: 'open', label: '进行中' },
-  { value: 'resolved', label: '已解决' },
-  { value: 'closed', label: '已关闭' }
-];
+const statusOptions = computed<Array<{ value: CommunityStatus | 'all'; label: string }>>(() => [
+  { value: 'all', label: t('status.all') },
+  { value: 'open', label: t('status.open') },
+  { value: 'resolved', label: t('status.resolved') },
+  { value: 'closed', label: t('status.closed') }
+]);
 
-const sortOptions: Array<{ value: CommunitySort; label: string }> = [
-  { value: 'recently_replied', label: '最新回复' },
-  { value: 'latest', label: '最新发布' },
-  { value: 'most_replied', label: '最多回复' },
-  { value: 'most_viewed', label: '最多浏览' }
-];
+const sortOptions = computed<Array<{ value: CommunitySort; label: string }>>(() => [
+  { value: 'recently_replied', label: t('sort.recently_replied') },
+  { value: 'latest', label: t('sort.latest') },
+  { value: 'most_replied', label: t('sort.most_replied') },
+  { value: 'most_viewed', label: t('sort.most_viewed') }
+]);
 
 const posts = ref<CommunityPost[]>([]);
 const activePost = ref<CommunityPost | null>(null);
@@ -362,9 +362,9 @@ const activePostId = computed(() => {
 const trimmedTitle = computed(() => draft.title.trim());
 const trimmedContent = computed(() => draft.content.trim());
 const trimmedReply = computed(() => replyDraft.value.trim());
-const titleError = computed(() => (trimmedTitle.value.length < 2 ? '标题至少 2 个字符' : ''));
-const contentError = computed(() => (trimmedContent.value.length < 10 ? '内容至少 10 个字符' : ''));
-const replyError = computed(() => (trimmedReply.value.length < 2 ? '回复内容至少 2 个字符' : ''));
+const titleError = computed(() => (trimmedTitle.value.length < 2 ? t('community.titleError') : ''));
+const contentError = computed(() => (trimmedContent.value.length < 10 ? t('community.contentError') : ''));
+const replyError = computed(() => (trimmedReply.value.length < 2 ? t('community.replyError') : ''));
 const canSubmitPost = computed(() => !titleError.value && !contentError.value);
 const canSubmitReply = computed(() => trimmedReply.value.length >= 2);
 const showPostValidation = computed(() => postSubmitAttempted.value || Boolean(draft.title || draft.content));
@@ -380,21 +380,22 @@ function showMessage(text: string, type: 'info' | 'error' = 'info') {
 }
 
 function categoryLabel(category: CategoryFilter) {
-  return categoryOptions.find(item => item.value === category)?.label || category;
+  return categoryOptions.value.find(item => item.value === category)?.label || category;
 }
 
 function statusLabel(status: CommunityStatus) {
-  return statusOptions.find(item => item.value === status)?.label || status;
+  return statusOptions.value.find(item => item.value === status)?.label || status;
 }
 
 function formatActivity(post: CommunityPost) {
   const input = post.last_reply_at || post.updated_at || post.created_at;
-  return post.last_reply_at ? `最后回复 ${formatDate(input)}` : `发布于 ${formatDate(input)}`;
+  const date = formatDate(input);
+  return post.last_reply_at ? t('community.lastReply', { date }) : t('community.postedAt', { date });
 }
 
 function formatDate(input: string) {
   if (!input) return '-';
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat(locale.value, {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
@@ -414,7 +415,7 @@ async function loadPosts() {
     });
     posts.value = result.posts;
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '读取帖子失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.readPostsFailed'), 'error');
   } finally {
     loadingPosts.value = false;
   }
@@ -435,7 +436,7 @@ async function loadDetail(id: string) {
   } catch (error) {
     activePost.value = null;
     replies.value = [];
-    showMessage(error instanceof Error ? error.message : '读取详情失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.readDetailFailed'), 'error');
   } finally {
     loadingDetail.value = false;
   }
@@ -468,7 +469,7 @@ async function createPost() {
   if (!user.value) return;
   postSubmitAttempted.value = true;
   if (!canSubmitPost.value) {
-    showMessage(titleError.value || contentError.value || '请检查发帖内容', 'error');
+    showMessage(titleError.value || contentError.value || t('community.checkPost'), 'error');
     return;
   }
 
@@ -483,11 +484,11 @@ async function createPost() {
     draft.content = '';
     postSubmitAttempted.value = false;
     composeOpen.value = false;
-    showMessage('帖子已发布');
+    showMessage(t('community.postCreated'));
     await loadPosts();
     openPost(result.id);
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '发布失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.postFailed'), 'error');
   } finally {
     submitting.value = false;
   }
@@ -497,7 +498,7 @@ async function createReply() {
   if (!user.value || !activePostId.value) return;
   replySubmitAttempted.value = true;
   if (!canSubmitReply.value) {
-    showMessage(replyError.value || '请检查回复内容', 'error');
+    showMessage(replyError.value || t('community.checkReply'), 'error');
     return;
   }
 
@@ -506,11 +507,11 @@ async function createReply() {
     await communityApi.createReply(activePostId.value, { content: trimmedReply.value });
     replyDraft.value = '';
     replySubmitAttempted.value = false;
-    showMessage('回复已提交');
+    showMessage(t('community.replyCreated'));
     await loadDetail(activePostId.value);
     await loadPosts();
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '回复失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.replyFailed'), 'error');
   } finally {
     submittingReply.value = false;
   }
@@ -521,11 +522,11 @@ async function changePostStatus(post: CommunityPost, status: CommunityStatus | '
   adminBusy.value = true;
   try {
     await communityApi.updatePostStatus(post.id, status);
-    showMessage('帖子状态已更新');
+    showMessage(t('community.statusUpdated'));
     await loadDetail(post.id);
     await loadPosts();
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '更新状态失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.statusFailed'), 'error');
   } finally {
     adminBusy.value = false;
   }
@@ -536,41 +537,41 @@ async function togglePin(post: CommunityPost) {
   adminBusy.value = true;
   try {
     await communityApi.pinPost(post.id, !post.is_pinned);
-    showMessage(post.is_pinned ? '已取消置顶' : '已置顶');
+    showMessage(post.is_pinned ? t('community.unpinnedDone') : t('community.pinnedDone'));
     await loadDetail(post.id);
     await loadPosts();
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '置顶操作失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.pinFailed'), 'error');
   } finally {
     adminBusy.value = false;
   }
 }
 
 async function removePost(post: CommunityPost) {
-  if (!isAdmin.value || !window.confirm('确认删除这个帖子吗？')) return;
+  if (!isAdmin.value || !window.confirm(t('community.confirmDeletePost'))) return;
   adminBusy.value = true;
   try {
     await communityApi.deletePost(post.id);
-    showMessage('帖子已删除');
+    showMessage(t('community.postDeleted'));
     await loadPosts();
     closeDetail();
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '删除帖子失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.deletePostFailed'), 'error');
   } finally {
     adminBusy.value = false;
   }
 }
 
 async function removeReply(reply: CommunityReply) {
-  if (!isAdmin.value || !activePostId.value || !window.confirm('确认删除这条回复吗？')) return;
+  if (!isAdmin.value || !activePostId.value || !window.confirm(t('community.confirmDeleteReply'))) return;
   adminBusy.value = true;
   try {
     await communityApi.deleteReply(activePostId.value, reply.id);
-    showMessage('回复已删除');
+    showMessage(t('community.replyDeleted'));
     await loadDetail(activePostId.value);
     await loadPosts();
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '删除回复失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.deleteReplyFailed'), 'error');
   } finally {
     adminBusy.value = false;
   }
@@ -579,9 +580,9 @@ async function removeReply(reply: CommunityReply) {
 async function handleLogout() {
   try {
     await logout();
-    showMessage('已退出登录');
+    showMessage(t('community.logoutDone'));
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : '退出失败', 'error');
+    showMessage(error instanceof Error ? error.message : t('community.logoutFailed'), 'error');
   }
 }
 

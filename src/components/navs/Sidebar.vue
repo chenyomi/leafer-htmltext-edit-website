@@ -7,6 +7,7 @@
             <img :src="Logo" alt="Logo" class="drawer-logo" />
           </router-link>
 
+          <LanguageSwitch />
           <button class="icon-button" aria-label="Close" @click="closeDrawer">
             <i class="pi pi-times"></i>
           </button>
@@ -32,7 +33,7 @@
         <div class="separator"></div>
 
         <div class="useful-links">
-          <p class="useful-links-title">Useful Links</p>
+          <p class="useful-links-title">{{ t('sidebar.usefulLinks') }}</p>
 
           <div class="links-container">
             <a href="https://github.com/DavidHDev/vue-bits" target="_blank" @click="closeDrawer" class="useful-link">
@@ -41,12 +42,12 @@
             </a>
 
             <router-link to="/text-animations/split-text" @click="closeDrawer" class="useful-link">
-              <span>Docs</span>
+              <span>{{ t('nav.docs') }}</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </router-link>
 
             <a href="https://davidhaz.com/" target="_blank" @click="closeDrawer" class="useful-link">
-              <span>Who made this?</span>
+              <span>{{ t('sidebar.whoMadeThis') }}</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
           </div>
@@ -62,6 +63,10 @@
     @scroll="handleScroll"
   >
     <div ref="sidebarRef" class="sidebar-content">
+      <div class="sidebar-language-switch">
+        <LanguageSwitch />
+      </div>
+
       <div
         class="active-line"
         :style="{
@@ -114,6 +119,8 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import Logo from '../../assets/logos/vue-bits-logo.svg';
 import { CATEGORIES, NEW, UPDATED } from '../../constants/Categories';
+import LanguageSwitch from '@/components/common/LanguageSwitch.vue';
+import { useI18n } from '@/i18n';
 import '../../css/sidebar.css';
 
 const HOVER_TIMEOUT_DELAY = 150;
@@ -136,6 +143,7 @@ const savedSet = ref(new Set(getSavedComponents()));
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const scrollToTop = () => window.scrollTo(0, 0);
 const slug = (str: string) => str.replace(/\s+/g, '-').toLowerCase();

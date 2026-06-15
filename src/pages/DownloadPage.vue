@@ -1,34 +1,36 @@
 <template>
   <main class="download-page">
     <section class="download-card">
-      <router-link class="back-link" to="/">Back to Home</router-link>
+      <router-link class="back-link" to="/">{{ t('common.backHome') }}</router-link>
 
-      <p class="eyebrow">Offline Package</p>
-      <h1>Leafer HTMLText Edit 离线包下载</h1>
+      <p class="eyebrow">{{ t('download.eyebrow') }}</p>
+      <h1>{{ t('download.title') }}</h1>
       <p class="description">
-        下载最新的 npm tgz 离线安装包。插件包本身可以公开下载，实际使用权限仍由运行时 License 校验控制。
+        {{ t('download.description') }}
       </p>
 
-      <div v-if="loading" class="status-box">正在读取最新版本信息...</div>
+      <div v-if="loading" class="status-box">{{ t('download.loading') }}</div>
       <div v-else-if="error" class="status-box status-error">{{ error }}</div>
       <div v-else-if="manifest" class="download-panel">
         <div class="meta-grid">
           <div>
-            <span>Package</span>
+            <span>{{ t('download.package') }}</span>
             <strong>{{ manifest.name }}</strong>
           </div>
           <div>
-            <span>Version</span>
+            <span>{{ t('download.version') }}</span>
             <strong>{{ manifest.version }}</strong>
           </div>
           <div>
-            <span>Updated</span>
+            <span>{{ t('download.updated') }}</span>
             <strong>{{ formattedUpdatedAt }}</strong>
           </div>
         </div>
 
         <div class="actions">
-          <a class="primary-button" :href="downloadUrl" :download="downloadFileName">Download Latest TGZ</a>
+          <a class="primary-button" :href="downloadUrl" :download="downloadFileName">
+            {{ t('download.downloadLatest') }}
+          </a>
           <code>{{ installCommand }}</code>
         </div>
       </div>
@@ -38,6 +40,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from '@/i18n';
 
 interface DownloadManifest {
   name: string;
@@ -54,6 +57,7 @@ interface DownloadManifest {
 const manifest = ref<DownloadManifest | null>(null);
 const loading = ref(true);
 const error = ref('');
+const { locale, t } = useI18n();
 
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -78,7 +82,7 @@ const installCommand = computed(() => {
 
 const formattedUpdatedAt = computed(() => {
   if (!manifest.value?.updatedAt) return '-';
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat(locale.value, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -94,12 +98,12 @@ onMounted(async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`读取下载信息失败：${response.status}`);
+      throw new Error(`${t('download.readError')}: ${response.status}`);
     }
 
     manifest.value = await response.json();
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '读取下载信息失败';
+    error.value = err instanceof Error ? err.message : t('download.readError');
   } finally {
     loading.value = false;
   }

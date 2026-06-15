@@ -23,11 +23,11 @@
     <Hero />
     <section class="community-entry">
       <div>
-        <span>Community</span>
-        <h2>有问题或建议？来社区讨论</h2>
-        <p>反馈 Bug、提交功能建议、分享案例，也可以查看最新讨论。</p>
+        <span>{{ t('nav.community') }}</span>
+        <h2>{{ t('landing.communityTitle') }}</h2>
+        <p>{{ t('landing.communityDesc') }}</p>
       </div>
-      <router-link class="community-entry-link" to="/community">进入社区</router-link>
+      <router-link class="community-entry-link" to="/community">{{ t('landing.enterCommunity') }}</router-link>
     </section>
     <StartBuilding />
     <Footer />
@@ -41,7 +41,10 @@ import FloatingLines from '@/components/landing/FloatingLines/FloatingLines.vue'
 import Footer from '@/components/landing/Footer/Footer.vue';
 import StartBuilding from '@/components/landing/StartBuilding/StartBuilding.vue';
 import heroImage from '@/assets/common/hero.webp';
+import { useI18n } from '@/i18n';
+
 const isMobile = ref(false);
+const { t } = useI18n();
 
 const checkIsMobile = () => {
   isMobile.value = window.innerWidth <= 768;

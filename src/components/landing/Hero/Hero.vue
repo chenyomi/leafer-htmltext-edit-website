@@ -21,7 +21,7 @@
     <div class="hero-main-content">
       <router-link custom to="" class="hero-new-badge-container">
         <a href="https://www.leaferjs.com/" target="_blank">
-          <span class="hero-new-badge">Plugins 🎁 for</span>
+          <span class="hero-new-badge">{{ t('landing.badge') }}</span>
           <div class="hero-new-badge-text">
             <span>Leafer</span>
             <i class="pi-arrow-right pi" style="font-size: 0.8rem"></i>
@@ -48,13 +48,13 @@
         split-type="words"
         :delay="25"
         :duration="1"
-        text="一个强大的 Leafer UI 富文本编辑器插件，集成 Quill 2.0，支持 HTML 文本编辑和丰富的文本样式控制。"
+        :text="t('landing.subtitle')"
       />
 
       <div class="hero-action-buttons">
         <router-link custom to="" class="landing-button">
           <a href="https://chenyomi.github.io/leafer-htmltext-edit-view/" target="_blank">
-            <span>View Live Demo</span>
+            <span>{{ t('landing.liveDemo') }}</span>
             <div class="button-arrow-circle">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -70,7 +70,7 @@
         </router-link>
 
         <router-link class="landing-button landing-button-secondary" :to="{ path: '/docs', hash: '#quick-start' }">
-          <span>Quick Start</span>
+          <span>{{ t('landing.quickStart') }}</span>
           <div class="button-arrow-circle">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -92,6 +92,9 @@
 import SplitText from '@/content/TextAnimations/SplitText/SplitText.vue';
 import { defineComponent, h, onMounted, onUnmounted, ref } from 'vue';
 import landingBlur from '../../../assets/common/landing-blur.svg';
+import { useI18n } from '@/i18n';
+
+const { t } = useI18n();
 
 const ResponsiveSplitText = defineComponent({
   props: {

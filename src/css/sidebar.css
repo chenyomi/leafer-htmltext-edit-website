@@ -41,6 +41,12 @@
   position: relative;
 }
 
+.sidebar-language-switch {
+  display: flex;
+  justify-content: flex-start;
+  margin: 0 0 1.5rem calc(1em + 2px);
+}
+
 .sidebar::-webkit-scrollbar {
   width: 10px;
 }
