@@ -5,51 +5,44 @@
         <VueBitsLogo />
       </router-link>
 
+      <nav class="landing-nav-items">
+        <router-link class="nav-link" :class="{ 'active-link': activeItem === 'home' }" to="/" @click.prevent="goHome">
+          Home
+        </router-link>
+        <router-link class="nav-link" to="/" @click.prevent="goCase">Case</router-link>
+        <router-link class="nav-link" to="/" @click.prevent="goPrice">Price</router-link>
+        <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">Docs</router-link>
+        <router-link class="nav-link" to="/community" :class="{ 'active-link': activeItem === 'community' }">
+          Community
+        </router-link>
+        <div class="changelog-nav-wrapper" @mouseenter="openChangelog" @mouseleave="closeChangelog">
+          <span class="nav-link changelog-trigger">Changelog</span>
+          <Transition name="changelog-fade">
+            <div v-if="changelogOpen" class="changelog-dropdown">
+              <div class="changelog-header">Changelog</div>
+              <div v-if="changelogLoading" class="changelog-loading">Loading...</div>
+              <div v-else-if="changelog.length === 0" class="changelog-loading">No data yet</div>
+              <ul v-else class="changelog-list">
+                <li v-for="item in changelog" :key="item.sha" class="changelog-item">
+                  <div class="changelog-item-header">
+                    <span class="changelog-tag" :class="getTagClass(item.message)">{{ getTag(item.message) }}</span>
+                    <span class="changelog-title">{{ stripTag(item.message) }}</span>
+                    <span class="changelog-date">{{ item.date }}</span>
+                  </div>
+                  <ul v-if="item.detail.length" class="changelog-detail">
+                    <li v-for="(d, i) in item.detail" :key="i">{{ d }}</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </Transition>
+        </div>
+      </nav>
+
       <div class="nav-cta-group">
-        <nav class="landing-nav-items">
-          <router-link
-            class="nav-link"
-            :class="{ 'active-link': activeItem === 'home' }"
-            to="/"
-            @click.prevent="goHome"
-          >
-            Home
-          </router-link>
-          <router-link class="nav-link" to="/" @click.prevent="goCase">Case</router-link>
-          <router-link class="nav-link" to="/" @click.prevent="goPrice">Price</router-link>
-          <router-link class="nav-link" to="/docs" :class="{ 'active-link': activeItem === 'docs' }">Docs</router-link>
-          <router-link class="nav-link" to="/community" :class="{ 'active-link': activeItem === 'community' }">
-            Community
-          </router-link>
-          <div class="changelog-nav-wrapper" @mouseenter="openChangelog" @mouseleave="closeChangelog">
-            <span class="nav-link changelog-trigger">Changelog</span>
-            <Transition name="changelog-fade">
-              <div v-if="changelogOpen" class="changelog-dropdown">
-                <div class="changelog-header">Changelog</div>
-                <div v-if="changelogLoading" class="changelog-loading">Loading...</div>
-                <div v-else-if="changelog.length === 0" class="changelog-loading">No data yet</div>
-                <ul v-else class="changelog-list">
-                  <li v-for="item in changelog" :key="item.sha" class="changelog-item">
-                    <div class="changelog-item-header">
-                      <span class="changelog-tag" :class="getTagClass(item.message)">{{ getTag(item.message) }}</span>
-                      <span class="changelog-title">{{ stripTag(item.message) }}</span>
-                      <span class="changelog-date">{{ item.date }}</span>
-                    </div>
-                    <ul v-if="item.detail.length" class="changelog-detail">
-                      <li v-for="(d, i) in item.detail" :key="i">{{ d }}</li>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
-            </Transition>
-          </div>
-        </nav>
-        <button class="cta-button" @click="openGitHub">
-          Star On GitHub
-          <span ref="starCountRef">
-            <img :src="starIcon" alt="Star Icon" />
-            {{ stars || 0 }}
-          </span>
+        <button class="star-chip" type="button" aria-label="Star on GitHub" title="Star on GitHub" @click="openGitHub">
+          <img :src="starIcon" alt="" />
+          <span ref="starCountRef">{{ stars || 0 }}</span>
         </button>
         <div class="auth-actions">
           <button v-if="!isAuthenticated" class="auth-button" type="button" @click="login">GitHub 登录</button>
@@ -149,7 +142,6 @@ watch(
         },
         {
           scale: 1,
-          width: '100px',
           opacity: 1,
           duration: 0.8,
           ease: 'back.out(1)'

@@ -5,11 +5,11 @@
         <router-link class="back-link" to="/">Back to Home</router-link>
         <p class="eyebrow">Community</p>
         <h1>Leafer HTMLText Edit 社区</h1>
-        <p class="description">用 GitHub 身份提问题、反馈 bug、提交功能建议，像轻量版 Issue 一样讨论。</p>
+        <p class="description">像 Issue 一样提问题、反馈 Bug、提交功能建议，也可以分享案例和讨论想法。</p>
       </div>
 
       <div class="hero-actions">
-        <a class="primary-button" href="#new-topic">发起讨论</a>
+        <button class="primary-button" type="button" @click="openCompose">发起讨论</button>
         <button v-if="!user" class="secondary-button" type="button" @click="login">GitHub 登录</button>
         <div v-else class="hero-user-card">
           <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
@@ -22,121 +22,76 @@
       </div>
     </section>
 
-    <section class="community-layout">
-      <aside class="community-sidebar">
-        <button
-          v-for="item in categoryOptions"
-          :key="item.value"
-          class="category-button"
-          :class="{ active: activeCategory === item.value }"
-          type="button"
-          @click="setCategory(item.value)"
-        >
-          <span>{{ item.label }}</span>
-          <small>{{ item.desc }}</small>
-        </button>
-      </aside>
+    <div v-if="message" class="notice community-notice" :class="{ error: messageType === 'error' }">{{ message }}</div>
 
-      <div class="community-main">
-        <div v-if="message" class="notice" :class="{ error: messageType === 'error' }">{{ message }}</div>
-
-        <section id="new-topic" class="compose-card">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">New Topic</p>
-              <h2>发起讨论</h2>
-            </div>
-            <span class="status-pill">默认 open</span>
+    <section class="community-layout" :class="{ 'has-detail': activePostId }">
+      <section class="topics-board">
+        <div class="board-toolbar">
+          <div>
+            <p class="eyebrow">Topics</p>
+            <h2>社区讨论</h2>
           </div>
-
-          <div v-if="!user" class="login-panel">
-            <div>
-              <h3>登录后发布帖子</h3>
-              <p>使用 GitHub 身份发起问题、Bug 反馈或功能建议。发布后会展示你的 GitHub 头像、昵称和主页链接。</p>
-            </div>
-            <button class="primary-button" type="button" @click="login">使用 GitHub 登录</button>
-          </div>
-          <form v-else class="post-form" @submit.prevent="createPost">
-            <div class="composer-user">
-              <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
-              <div>
-                <span>以此身份发布</span>
-                <strong>{{ user.name || user.login }}</strong>
-              </div>
-              <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
-            </div>
-            <select v-model="draft.category" aria-label="帖子分类">
-              <option
-                v-for="item in categoryOptions.filter(item => item.value !== 'all')"
-                :key="item.value"
-                :value="item.value"
-              >
-                {{ item.label }}
-              </option>
-            </select>
-            <input
-              v-model="draft.title"
-              type="text"
-              placeholder="标题，例如：padding 在编辑态显示不一致"
-              maxlength="120"
-            />
-            <textarea
-              v-model="draft.content"
-              placeholder="描述你的问题、建议或案例..."
-              rows="6"
-              maxlength="5000"
-            ></textarea>
-            <div class="form-actions">
-              <span>{{ draft.content.length }}/5000</span>
-              <button class="primary-button" type="submit" :disabled="submitting">
-                {{ submitting ? '发布中...' : '发布帖子' }}
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <section class="posts-card">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Topics</p>
-              <h2>社区帖子</h2>
-            </div>
+          <div class="toolbar-actions">
             <button class="ghost-button" type="button" @click="loadPosts">刷新</button>
+            <button class="primary-button" type="button" @click="openCompose">New Topic</button>
           </div>
+        </div>
 
-          <div v-if="loadingPosts" class="empty-state">正在读取帖子...</div>
-          <div v-else-if="posts.length === 0" class="empty-state">暂无帖子，发起第一个讨论吧。</div>
-          <div v-else class="post-list">
-            <button
-              v-for="post in posts"
-              :key="post.id"
-              class="post-item"
-              :class="{ active: post.id === activePostId }"
-              type="button"
-              @click="openPost(post.id)"
-            >
+        <div class="category-tabs" aria-label="帖子分类筛选">
+          <button
+            v-for="item in categoryOptions"
+            :key="item.value"
+            class="category-chip"
+            :class="{ active: activeCategory === item.value }"
+            type="button"
+            @click="setCategory(item.value)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+
+        <div class="list-summary">
+          <span>{{ posts.length }} 个开放讨论</span>
+          <span v-if="activeCategory !== 'all'">{{ categoryLabel(activeCategory) }}</span>
+        </div>
+
+        <div v-if="loadingPosts" class="empty-state">正在读取帖子...</div>
+        <div v-else-if="posts.length === 0" class="empty-state">暂无帖子，点击右上角发起第一个讨论。</div>
+        <div v-else class="post-list">
+          <button
+            v-for="post in posts"
+            :key="post.id"
+            class="post-item"
+            :class="{ active: post.id === activePostId }"
+            type="button"
+            @click="openPost(post.id)"
+          >
+            <div class="post-main">
               <div class="post-title-row">
                 <span class="category-tag">{{ categoryLabel(post.category) }}</span>
                 <strong>{{ post.title }}</strong>
               </div>
               <p>{{ post.content }}</p>
               <div class="post-meta">
-                <span>{{ post.login }}</span>
+                <span>{{ post.name || post.login }}</span>
                 <span>{{ formatDate(post.updated_at) }}</span>
-                <span>{{ post.reply_count || 0 }} 回复</span>
               </div>
-            </button>
-          </div>
-        </section>
-      </div>
+            </div>
+            <div class="reply-count">
+              <strong>{{ post.reply_count || 0 }}</strong>
+              <span>回复</span>
+            </div>
+          </button>
+        </div>
+      </section>
 
-      <aside class="detail-panel">
+      <aside v-if="activePostId" class="detail-panel">
         <div v-if="loadingDetail" class="empty-state">正在读取详情...</div>
         <div v-else-if="!activePost" class="detail-empty">
           <p class="eyebrow">Topic Detail</p>
-          <h3>选择帖子查看详情</h3>
-          <p>左侧帖子会在这里展示完整内容和回复。也可以直接发起一个新的讨论。</p>
-          <a class="secondary-button" href="#new-topic">发起讨论</a>
+          <h3>选择一个讨论</h3>
+          <p>详情和回复会显示在这里。首页默认聚焦浏览列表，发帖请使用右上角 New Topic。</p>
+          <button class="secondary-button" type="button" @click="openCompose">发起讨论</button>
         </div>
         <template v-else>
           <article class="detail-card">
@@ -171,8 +126,15 @@
               <p>{{ reply.content }}</p>
             </article>
 
-            <form v-if="user" class="reply-form" @submit.prevent="createReply">
-              <textarea v-model="replyDraft" placeholder="写下你的回复..." rows="4" maxlength="5000"></textarea>
+            <form v-if="user" class="reply-form" novalidate @submit.prevent="createReply">
+              <textarea
+                v-model="replyDraft"
+                placeholder="写下你的回复..."
+                rows="4"
+                maxlength="5000"
+                @blur="replySubmitAttempted = true"
+              ></textarea>
+              <p v-if="showReplyValidation && replyError" class="field-error">{{ replyError }}</p>
               <button class="primary-button" type="submit" :disabled="submittingReply">
                 {{ submittingReply ? '回复中...' : '提交回复' }}
               </button>
@@ -182,6 +144,72 @@
         </template>
       </aside>
     </section>
+
+    <Teleport to="body">
+      <Transition name="compose-fade">
+        <div v-if="composeOpen" class="compose-overlay" @click.self="closeCompose">
+          <section class="compose-modal" role="dialog" aria-modal="true" aria-labelledby="compose-title">
+            <div class="modal-heading">
+              <div>
+                <p class="eyebrow">New Topic</p>
+                <h2 id="compose-title">发起讨论</h2>
+              </div>
+              <button class="icon-button" type="button" aria-label="关闭发帖弹窗" @click="closeCompose">×</button>
+            </div>
+
+            <div v-if="!user" class="login-panel">
+              <div>
+                <h3>登录后发布帖子</h3>
+                <p>使用 GitHub 身份发起问题、Bug 反馈或功能建议。发布后会展示你的 GitHub 头像、昵称和主页链接。</p>
+              </div>
+              <button class="primary-button" type="button" @click="login">使用 GitHub 登录</button>
+            </div>
+
+            <form v-else class="post-form" novalidate @submit.prevent="createPost">
+              <div class="composer-user">
+                <img v-if="user.avatar_url" :src="user.avatar_url" alt="" />
+                <div>
+                  <span>以此身份发布</span>
+                  <strong>{{ user.name || user.login }}</strong>
+                </div>
+                <button class="ghost-button" type="button" :disabled="authLoading" @click="handleLogout">退出</button>
+              </div>
+              <select v-model="draft.category" aria-label="帖子分类">
+                <option
+                  v-for="item in categoryOptions.filter(item => item.value !== 'all')"
+                  :key="item.value"
+                  :value="item.value"
+                >
+                  {{ item.label }}
+                </option>
+              </select>
+              <input
+                v-model="draft.title"
+                type="text"
+                placeholder="标题，例如：padding 在编辑态显示不一致"
+                maxlength="120"
+                @blur="postSubmitAttempted = true"
+              />
+              <p v-if="showPostValidation && titleError" class="field-error">{{ titleError }}</p>
+              <textarea
+                v-model="draft.content"
+                placeholder="描述你的问题、建议或案例..."
+                rows="8"
+                maxlength="5000"
+                @blur="postSubmitAttempted = true"
+              ></textarea>
+              <p v-if="showPostValidation && contentError" class="field-error">{{ contentError }}</p>
+              <div class="form-actions">
+                <span>{{ draft.content.length }}/5000</span>
+                <button class="primary-button" type="submit" :disabled="submitting">
+                  {{ submitting ? '发布中...' : '发布帖子' }}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
   </main>
 </template>
 
@@ -214,6 +242,9 @@ const loadingPosts = ref(false);
 const loadingDetail = ref(false);
 const submitting = ref(false);
 const submittingReply = ref(false);
+const composeOpen = ref(false);
+const postSubmitAttempted = ref(false);
+const replySubmitAttempted = ref(false);
 const message = ref('');
 const messageType = ref<'info' | 'error'>('info');
 const replyDraft = ref('');
@@ -233,6 +264,17 @@ const activePostId = computed(() => {
   return typeof id === 'string' ? id : '';
 });
 
+const trimmedTitle = computed(() => draft.title.trim());
+const trimmedContent = computed(() => draft.content.trim());
+const trimmedReply = computed(() => replyDraft.value.trim());
+const titleError = computed(() => (trimmedTitle.value.length < 2 ? '标题至少 2 个字符' : ''));
+const contentError = computed(() => (trimmedContent.value.length < 10 ? '内容至少 10 个字符' : ''));
+const replyError = computed(() => (trimmedReply.value.length < 2 ? '回复内容至少 2 个字符' : ''));
+const canSubmitPost = computed(() => !titleError.value && !contentError.value);
+const canSubmitReply = computed(() => trimmedReply.value.length >= 2);
+const showPostValidation = computed(() => postSubmitAttempted.value || Boolean(draft.title || draft.content));
+const showReplyValidation = computed(() => replySubmitAttempted.value || Boolean(replyDraft.value));
+
 function showMessage(text: string, type: 'info' | 'error' = 'info') {
   message.value = text;
   messageType.value = type;
@@ -241,7 +283,7 @@ function showMessage(text: string, type: 'info' | 'error' = 'info') {
   }, 3600);
 }
 
-function categoryLabel(category: CommunityCategory) {
+function categoryLabel(category: CategoryFilter) {
   return categoryOptions.find(item => item.value === category)?.label || category;
 }
 
@@ -300,17 +342,35 @@ function openPost(id: string) {
   router.push({ name: 'community-detail', params: { postId: id } });
 }
 
+function openCompose() {
+  composeOpen.value = true;
+}
+
+function closeCompose() {
+  if (submitting.value) return;
+  composeOpen.value = false;
+  postSubmitAttempted.value = false;
+}
+
 async function createPost() {
   if (!user.value) return;
+  postSubmitAttempted.value = true;
+  if (!canSubmitPost.value) {
+    showMessage(titleError.value || contentError.value || '请检查发帖内容', 'error');
+    return;
+  }
+
   submitting.value = true;
   try {
     const result = await communityApi.createPost({
-      title: draft.title,
-      content: draft.content,
+      title: trimmedTitle.value,
+      content: trimmedContent.value,
       category: draft.category
     });
     draft.title = '';
     draft.content = '';
+    postSubmitAttempted.value = false;
+    composeOpen.value = false;
     showMessage('帖子已发布');
     await loadPosts();
     openPost(result.id);
@@ -323,10 +383,17 @@ async function createPost() {
 
 async function createReply() {
   if (!user.value || !activePostId.value) return;
+  replySubmitAttempted.value = true;
+  if (!canSubmitReply.value) {
+    showMessage(replyError.value || '请检查回复内容', 'error');
+    return;
+  }
+
   submittingReply.value = true;
   try {
-    await communityApi.createReply(activePostId.value, { content: replyDraft.value });
+    await communityApi.createReply(activePostId.value, { content: trimmedReply.value });
     replyDraft.value = '';
+    replySubmitAttempted.value = false;
     showMessage('回复已提交');
     await loadDetail(activePostId.value);
     await loadPosts();
@@ -696,6 +763,13 @@ textarea {
   line-height: 1.7;
 }
 
+.field-error {
+  margin: -4px 2px 0;
+  color: #ff9f9f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .form-actions {
   justify-content: space-between;
   color: rgba(255, 255, 255, 0.45);
@@ -964,6 +1038,290 @@ textarea {
   textarea {
     border-radius: 14px;
     font-size: 16px;
+  }
+}
+
+/* ── Community redesign overrides ────────────────────────────────────────── */
+.community-notice {
+  width: min(1200px, 100%);
+  margin: 0 auto 18px;
+}
+
+.community-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.community-layout.has-detail {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+}
+
+.topics-board,
+.detail-card,
+.replies-card,
+.detail-empty {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.topics-board {
+  padding: 18px;
+  border-radius: 26px;
+}
+
+.board-toolbar,
+.toolbar-actions,
+.category-tabs,
+.list-summary,
+.post-item,
+.reply-count,
+.modal-heading {
+  display: flex;
+  align-items: center;
+}
+
+.board-toolbar {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.board-toolbar .eyebrow,
+.modal-heading .eyebrow {
+  margin: 0 0 6px;
+}
+
+.board-toolbar h2,
+.modal-heading h2 {
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+
+.toolbar-actions {
+  gap: 10px;
+}
+
+.toolbar-actions .ghost-button {
+  margin-left: 0;
+}
+
+.category-tabs {
+  gap: 8px;
+  margin: 0 -4px 14px;
+  padding: 0 4px 4px;
+  overflow-x: auto;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.05);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.category-chip.active {
+  color: #ffffff;
+  border-color: rgba(125, 249, 255, 0.32);
+  background: rgba(125, 249, 255, 0.13);
+}
+
+.list-summary {
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 13px;
+}
+
+.post-item {
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.post-main {
+  min-width: 0;
+}
+
+.post-title-row {
+  margin-bottom: 8px;
+}
+
+.post-title-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-count {
+  flex: 0 0 64px;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 12px;
+  text-align: center;
+}
+
+.reply-count strong {
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.detail-panel {
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.detail-panel::-webkit-scrollbar {
+  width: 0;
+}
+
+.detail-empty .secondary-button {
+  border: none;
+}
+
+.compose-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(18px);
+}
+
+.compose-modal {
+  width: min(620px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  color: #ffffff;
+  background: radial-gradient(circle at top right, rgba(125, 249, 255, 0.16), transparent 34%), rgba(12, 12, 14, 0.96);
+  box-shadow: 0 32px 120px rgba(0, 0, 0, 0.55);
+}
+
+.modal-heading {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.icon-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  cursor: pointer;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.compose-fade-enter-active,
+.compose-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.compose-fade-enter-from,
+.compose-fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 980px) {
+  .community-layout.has-detail,
+  .community-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-panel {
+    max-height: none;
+    position: static;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 760px) {
+  .community-notice {
+    margin-bottom: 14px;
+  }
+
+  .board-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+  }
+
+  .toolbar-actions .ghost-button,
+  .toolbar-actions .primary-button {
+    flex: 1;
+  }
+
+  .topics-board {
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .post-item {
+    gap: 12px;
+  }
+
+  .reply-count {
+    flex-basis: 50px;
+  }
+
+  .post-title-row strong {
+    white-space: normal;
+  }
+
+  .compose-overlay {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .compose-modal {
+    max-height: calc(100vh - 24px);
+    padding: 18px;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-item {
+    flex-direction: column;
+  }
+
+  .reply-count {
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-basis: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: none;
+    text-align: left;
   }
 }
 </style>
