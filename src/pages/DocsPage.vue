@@ -1641,9 +1641,17 @@ setHTMLText('font', fontFamily, fontBase64)`;
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.5.9',
+    version: '2.5.11',
     date: '2026-06',
     tag: 'latest',
+    items: [
+      '发布 v2.5.11'
+    ]
+  },
+  {
+    version: '2.5.9',
+    date: '2026-06',
+    tag: 'patch',
     items: [
       '在 HtmlText 组件中添加 padding 属性支持',
       '实现 applyPaddingToTextHtml 函数以应用内边距样式',
@@ -1746,57 +1754,6 @@ const changelog = [
       '更新安装说明，去除不必要的包管理器示例',
       '增加快速开始部分，提供更清晰的使用示例',
       '更新许可证信息，简化商业使用说明'
-    ]
-  },
-  {
-    version: '2.5.0',
-    date: '2026-05',
-    tag: 'patch',
-    items: [
-      '更新版本号至 2.5.0',
-      '修改 IHtmlTextInputData 类型以支持 CSS 字符串值的行高',
-      '更新 handleShowCurve 函数以正确处理行高值类型',
-      '添加 align 属性，支持文本的左对齐、居中和右对齐',
-      '更新相关样式处理，确保新属性生效',
-      '添加 textShadow 属性器，支持局部文字阴影',
-      '实现斜体检测，优化文字宽度计算',
-      '调整 webkitTextStroke 属性的应用逻辑',
-      '更新 HtmlText 类，确保 Quill 识别字符级颜色格式',
-      '修改 TextEditor 类，使用文本数据中的颜色作为光标颜色',
-      '更新 README 文档，说明新功能',
-      '添加行内描边效果支持',
-      '添加选区级字重控制功能',
-      '修改初始化方法为异步执行，简化调用方式',
-      '更新样式以支持局部描边的正确渲染',
-      '实现局部和全局描边的逻辑处理',
-      '在 HtmlText 中添加 fontWeight 属性支持',
-      '在 TextEditor 中实现字体粗细的动态处理',
-      '提取和清理 HTML 内容以防止样式冲突',
-      '增加提取语义内容的工具函数',
-      '在 TextEditTool 中添加 textStroke 属性支持，确保锁定比例缩放时轮廓线宽度同步更新',
-      '在 TextEditor 中调整 webkitTextStroke 的应用位置，确保轮廓线宽度按缩放比例正确渲染',
-      '精确测量 HtmlText 的 SVG 尺寸，消除多余空白',
-      '支持在 TextEditTool 中处理 HtmlText 的锁定比例',
-      '优化 utils.ts 中的字符宽度测量和弧形辅助层清理逻辑',
-      '更新 TextEditor 以支持 HtmlText 的相关操作',
-      '在 HtmlText 中使用 IUI 类型增强文本元素的类型安全',
-      '在 HtmlTextManage 中添加选择范围管理功能',
-      '在 TextEditTool 中优化事件处理和文本缩放逻辑',
-      '在 TextEditor 中增强文本样式同步和输入处理',
-      '在 utils 中添加字母间距和垂直布局同步功能',
-      'version',
-      '更新',
-      '更新轮廓',
-      '添加aes',
-      '更新混淆',
-      '授权更新res',
-      '2',
-      '11',
-      '1',
-      'pack',
-      '2.0.1',
-      '优化',
-      'init'
     ]
   }
 ];
