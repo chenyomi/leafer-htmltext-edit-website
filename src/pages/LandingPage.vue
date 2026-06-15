@@ -21,6 +21,14 @@
       />
     </div>
     <Hero />
+    <section class="community-entry">
+      <div>
+        <span>Community</span>
+        <h2>有问题或建议？来社区讨论</h2>
+        <p>反馈 Bug、提交功能建议、分享案例，也可以查看最新讨论。</p>
+      </div>
+      <router-link class="community-entry-link" to="/community">进入社区</router-link>
+    </section>
     <StartBuilding />
     <Footer />
   </section>
@@ -49,3 +57,65 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkIsMobile);
 });
 </script>
+
+<style scoped>
+.community-entry {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: min(1180px, calc(100% - 32px));
+  margin: -42px auto 80px;
+  padding: 24px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.community-entry span {
+  color: #8b9cff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.community-entry h2 {
+  margin: 8px 0;
+  font-size: clamp(24px, 3vw, 38px);
+  letter-spacing: -0.04em;
+}
+
+.community-entry p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.community-entry-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  color: #050505;
+  background: #ffffff;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .community-entry {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: -20px;
+    padding: 20px;
+  }
+}
+</style>

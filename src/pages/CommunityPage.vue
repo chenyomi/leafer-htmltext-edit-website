@@ -4,8 +4,10 @@
       <div>
         <router-link class="back-link" to="/">Back to Home</router-link>
         <p class="eyebrow">Community</p>
-        <h1>Leafer HTMLText Edit 社区</h1>
-        <p class="description">像 Issue 一样提问题、反馈 Bug、提交功能建议，也可以分享案例和讨论想法。</p>
+        <h1>社区</h1>
+        <p class="description">
+          围绕 Leafer HTMLText Edit 交流问题、反馈 Bug、提交功能建议，也可以分享案例和使用经验。
+        </p>
       </div>
 
       <div class="hero-actions">
@@ -50,9 +52,31 @@
           </button>
         </div>
 
+        <div class="topic-filters">
+          <label class="search-field">
+            <span>搜索</span>
+            <input v-model="searchQuery" type="search" placeholder="搜索标题或内容" />
+          </label>
+          <label>
+            <span>状态</span>
+            <select v-model="activeStatus">
+              <option v-for="item in statusOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </label>
+          <label>
+            <span>排序</span>
+            <select v-model="activeSort">
+              <option v-for="item in sortOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </label>
+          <button class="filter-toggle" :class="{ active: mineOnly }" type="button" @click="mineOnly = !mineOnly">
+            我的帖子
+          </button>
+        </div>
+
         <div class="list-summary">
-          <span>{{ posts.length }} 个开放讨论</span>
-          <span v-if="activeCategory !== 'all'">{{ categoryLabel(activeCategory) }}</span>
+          <span>{{ posts.length }} 个讨论</span>
+          <span>{{ activeCategory === 'all' ? '全部分类' : categoryLabel(activeCategory) }}</span>
         </div>
 
         <div v-if="loadingPosts" class="empty-state">正在读取帖子...</div>
@@ -69,12 +93,15 @@
             <div class="post-main">
               <div class="post-title-row">
                 <span class="category-tag">{{ categoryLabel(post.category) }}</span>
+                <span v-if="post.is_pinned" class="pinned-tag">置顶</span>
+                <span class="status-pill" :class="`status-${post.status}`">{{ statusLabel(post.status) }}</span>
                 <strong class="post-title">{{ post.title }}</strong>
               </div>
               <p class="post-preview">{{ post.content }}</p>
               <div class="post-meta">
                 <span>{{ post.name || post.login }}</span>
-                <span>{{ formatDate(post.updated_at) }}</span>
+                <span>{{ formatActivity(post) }}</span>
+                <span>{{ post.view_count || 0 }} 浏览</span>
               </div>
             </div>
             <div class="reply-count">
@@ -174,7 +201,27 @@
               <article class="detail-card">
                 <div class="detail-header">
                   <span class="category-tag">{{ categoryLabel(activePost.category) }}</span>
-                  <span class="status-pill">{{ activePost.status }}</span>
+                  <span class="status-pill" :class="`status-${activePost.status}`">
+                    {{ statusLabel(activePost.status) }}
+                  </span>
+                </div>
+                <div v-if="isAdmin" class="admin-actions">
+                  <button class="ghost-button" type="button" :disabled="adminBusy" @click="togglePin(activePost)">
+                    {{ activePost.is_pinned ? '取消置顶' : '置顶' }}
+                  </button>
+                  <button
+                    v-for="item in statusOptions.filter(item => item.value !== 'all')"
+                    :key="item.value"
+                    class="ghost-button"
+                    type="button"
+                    :disabled="adminBusy || activePost.status === item.value"
+                    @click="changePostStatus(activePost, item.value)"
+                  >
+                    {{ item.label }}
+                  </button>
+                  <button class="danger-button" type="button" :disabled="adminBusy" @click="removePost(activePost)">
+                    删除帖子
+                  </button>
                 </div>
                 <h2>{{ activePost.title }}</h2>
                 <div class="author-row">
@@ -199,6 +246,15 @@
                     </a>
                     <span v-else>{{ reply.name || reply.login }}</span>
                     <small>{{ formatDate(reply.created_at) }}</small>
+                    <button
+                      v-if="isAdmin"
+                      class="reply-delete"
+                      type="button"
+                      :disabled="adminBusy"
+                      @click="removeReply(reply)"
+                    >
+                      删除
+                    </button>
                   </div>
                   <p>{{ reply.content }}</p>
                 </article>
@@ -229,7 +285,14 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { communityApi, type CommunityCategory, type CommunityPost, type CommunityReply } from '@/services/communityApi';
+import {
+  communityApi,
+  type CommunityCategory,
+  type CommunityPost,
+  type CommunityReply,
+  type CommunitySort,
+  type CommunityStatus
+} from '@/services/communityApi';
 import { useAuth } from '@/composables/useAuth';
 
 type CategoryFilter = CommunityCategory | 'all';
@@ -247,12 +310,31 @@ const categoryOptions: Array<{ value: CategoryFilter; label: string; desc: strin
   { value: 'discussion', label: '讨论', desc: '开放话题' }
 ];
 
+const statusOptions: Array<{ value: CommunityStatus | 'all'; label: string }> = [
+  { value: 'all', label: '全部状态' },
+  { value: 'open', label: '进行中' },
+  { value: 'resolved', label: '已解决' },
+  { value: 'closed', label: '已关闭' }
+];
+
+const sortOptions: Array<{ value: CommunitySort; label: string }> = [
+  { value: 'recently_replied', label: '最新回复' },
+  { value: 'latest', label: '最新发布' },
+  { value: 'most_replied', label: '最多回复' },
+  { value: 'most_viewed', label: '最多浏览' }
+];
+
 const posts = ref<CommunityPost[]>([]);
 const activePost = ref<CommunityPost | null>(null);
 const replies = ref<CommunityReply[]>([]);
 const activeCategory = ref<CategoryFilter>('all');
+const activeStatus = ref<CommunityStatus | 'all'>('open');
+const activeSort = ref<CommunitySort>('recently_replied');
+const searchQuery = ref('');
+const mineOnly = ref(false);
 const loadingPosts = ref(false);
 const loadingDetail = ref(false);
+const adminBusy = ref(false);
 const submitting = ref(false);
 const submittingReply = ref(false);
 const composeOpen = ref(false);
@@ -287,6 +369,7 @@ const canSubmitPost = computed(() => !titleError.value && !contentError.value);
 const canSubmitReply = computed(() => trimmedReply.value.length >= 2);
 const showPostValidation = computed(() => postSubmitAttempted.value || Boolean(draft.title || draft.content));
 const showReplyValidation = computed(() => replySubmitAttempted.value || Boolean(replyDraft.value));
+const isAdmin = computed(() => user.value?.login === 'chenyuming');
 
 function showMessage(text: string, type: 'info' | 'error' = 'info') {
   message.value = text;
@@ -298,6 +381,15 @@ function showMessage(text: string, type: 'info' | 'error' = 'info') {
 
 function categoryLabel(category: CategoryFilter) {
   return categoryOptions.find(item => item.value === category)?.label || category;
+}
+
+function statusLabel(status: CommunityStatus) {
+  return statusOptions.find(item => item.value === status)?.label || status;
+}
+
+function formatActivity(post: CommunityPost) {
+  const input = post.last_reply_at || post.updated_at || post.created_at;
+  return post.last_reply_at ? `最后回复 ${formatDate(input)}` : `发布于 ${formatDate(input)}`;
 }
 
 function formatDate(input: string) {
@@ -315,7 +407,10 @@ async function loadPosts() {
   try {
     const result = await communityApi.listPosts({
       category: activeCategory.value === 'all' ? undefined : activeCategory.value,
-      status: 'open'
+      status: activeStatus.value === 'all' ? undefined : activeStatus.value,
+      q: searchQuery.value.trim() || undefined,
+      sort: activeSort.value,
+      mine: mineOnly.value
     });
     posts.value = result.posts;
   } catch (error) {
@@ -348,7 +443,6 @@ async function loadDetail(id: string) {
 
 function setCategory(category: CategoryFilter) {
   activeCategory.value = category;
-  loadPosts();
 }
 
 function openPost(id: string) {
@@ -422,6 +516,66 @@ async function createReply() {
   }
 }
 
+async function changePostStatus(post: CommunityPost, status: CommunityStatus | 'all') {
+  if (!isAdmin.value || status === 'all') return;
+  adminBusy.value = true;
+  try {
+    await communityApi.updatePostStatus(post.id, status);
+    showMessage('帖子状态已更新');
+    await loadDetail(post.id);
+    await loadPosts();
+  } catch (error) {
+    showMessage(error instanceof Error ? error.message : '更新状态失败', 'error');
+  } finally {
+    adminBusy.value = false;
+  }
+}
+
+async function togglePin(post: CommunityPost) {
+  if (!isAdmin.value) return;
+  adminBusy.value = true;
+  try {
+    await communityApi.pinPost(post.id, !post.is_pinned);
+    showMessage(post.is_pinned ? '已取消置顶' : '已置顶');
+    await loadDetail(post.id);
+    await loadPosts();
+  } catch (error) {
+    showMessage(error instanceof Error ? error.message : '置顶操作失败', 'error');
+  } finally {
+    adminBusy.value = false;
+  }
+}
+
+async function removePost(post: CommunityPost) {
+  if (!isAdmin.value || !window.confirm('确认删除这个帖子吗？')) return;
+  adminBusy.value = true;
+  try {
+    await communityApi.deletePost(post.id);
+    showMessage('帖子已删除');
+    await loadPosts();
+    closeDetail();
+  } catch (error) {
+    showMessage(error instanceof Error ? error.message : '删除帖子失败', 'error');
+  } finally {
+    adminBusy.value = false;
+  }
+}
+
+async function removeReply(reply: CommunityReply) {
+  if (!isAdmin.value || !activePostId.value || !window.confirm('确认删除这条回复吗？')) return;
+  adminBusy.value = true;
+  try {
+    await communityApi.deleteReply(activePostId.value, reply.id);
+    showMessage('回复已删除');
+    await loadDetail(activePostId.value);
+    await loadPosts();
+  } catch (error) {
+    showMessage(error instanceof Error ? error.message : '删除回复失败', 'error');
+  } finally {
+    adminBusy.value = false;
+  }
+}
+
 async function handleLogout() {
   try {
     await logout();
@@ -430,6 +584,17 @@ async function handleLogout() {
     showMessage(error instanceof Error ? error.message : '退出失败', 'error');
   }
 }
+
+let searchTimer: number | null = null;
+
+watch([activeCategory, activeStatus, activeSort, mineOnly], () => {
+  loadPosts();
+});
+
+watch(searchQuery, () => {
+  if (searchTimer) window.clearTimeout(searchTimer);
+  searchTimer = window.setTimeout(() => loadPosts(), 320);
+});
 
 watch(activePostId, id => loadDetail(id), { immediate: true });
 
@@ -488,9 +653,9 @@ h3 {
 
 h1 {
   max-width: 780px;
-  font-size: clamp(42px, 7vw, 76px);
-  line-height: 1.02;
-  letter-spacing: -0.06em;
+  font-size: clamp(44px, 6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
 }
 
 .description {
@@ -902,8 +1067,8 @@ textarea {
   }
 
   h1 {
-    font-size: clamp(34px, 12vw, 48px);
-    letter-spacing: -0.045em;
+    font-size: clamp(38px, 14vw, 56px);
+    letter-spacing: -0.04em;
   }
 
   .description {
@@ -1140,6 +1305,55 @@ textarea {
   background: rgba(125, 249, 255, 0.13);
 }
 
+.topic-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 150px 150px auto;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.topic-filters label {
+  display: grid;
+  gap: 6px;
+}
+
+.topic-filters label span {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.topic-filters input,
+.topic-filters select {
+  min-height: 42px;
+  border-radius: 999px;
+  padding: 0 14px;
+}
+
+.filter-toggle,
+.danger-button,
+.reply-delete {
+  cursor: pointer;
+  font: inherit;
+}
+
+.filter-toggle {
+  align-self: end;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.filter-toggle.active {
+  color: #050505;
+  background: #ffffff;
+}
+
 .list-summary {
   justify-content: space-between;
   margin-bottom: 12px;
@@ -1197,6 +1411,62 @@ textarea {
   color: #ffffff;
   font-size: 20px;
   line-height: 1.1;
+}
+
+.pinned-tag {
+  flex-shrink: 0;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #ffe9a8;
+  background: rgba(255, 200, 87, 0.14);
+  border: 1px solid rgba(255, 200, 87, 0.24);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-closed {
+  color: #d4d4d4;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.status-resolved {
+  color: #b9ffc9;
+  background: rgba(30, 160, 63, 0.18);
+  border-color: rgba(30, 160, 63, 0.28);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.admin-actions .ghost-button {
+  margin-left: 0;
+}
+
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 106, 106, 0.28);
+  border-radius: 999px;
+  color: #ffb4b4;
+  background: rgba(255, 106, 106, 0.1);
+}
+
+.reply-delete {
+  margin-left: auto;
+  border: none;
+  color: #ffb4b4;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .detail-empty .secondary-button {
@@ -1296,6 +1566,14 @@ textarea {
   .topics-board {
     padding: 14px;
     border-radius: 22px;
+  }
+
+  .topic-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-toggle {
+    align-self: stretch;
   }
 
   .post-item {

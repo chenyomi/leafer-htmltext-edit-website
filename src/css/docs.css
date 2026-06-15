@@ -199,6 +199,45 @@
   z-index: 1;
 }
 
+.doc-community-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid rgba(139, 156, 255, 0.18);
+  border-radius: 16px;
+  background: rgba(139, 156, 255, 0.08);
+}
+
+.doc-community-card strong {
+  color: #fff;
+}
+
+.doc-community-card p {
+  margin: 0.35rem 0 0;
+  color: #a9a9a9;
+  line-height: 1.6;
+}
+
+.doc-community-card a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  color: #050505;
+  background: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .doc-p {
   font-size: 0.9375rem;
   color: #aaa;
@@ -911,6 +950,15 @@
   .doc-section {
     padding: 1.1rem;
     border-radius: 18px;
+  }
+
+  .doc-community-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .doc-community-card a {
+    width: 100%;
   }
 
   .doc-feature-grid {

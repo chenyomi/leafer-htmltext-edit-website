@@ -116,6 +116,14 @@
             富文本编辑器插件，集成 Quill 2.0，支持完整的 HTML 文本编辑和丰富的文本样式控制。
           </p>
 
+          <div class="doc-community-card">
+            <div>
+              <strong>接入遇到问题？</strong>
+              <p>去社区反馈 Bug、提交功能建议，或者查看其他用户的讨论。</p>
+            </div>
+            <router-link to="/community">去社区讨论</router-link>
+          </div>
+
           <div class="doc-feature-grid">
             <div class="doc-feature-card" v-for="f in features" :key="f.title">
               <span class="doc-feature-icon">{{ f.icon }}</span>
@@ -1644,9 +1652,7 @@ const changelog = [
     version: '2.5.11',
     date: '2026-06',
     tag: 'latest',
-    items: [
-      '发布 v2.5.11'
-    ]
+    items: ['发布 v2.5.11']
   },
   {
     version: '2.5.9',
@@ -1699,11 +1705,7 @@ const changelog = [
     version: '2.5.5',
     date: '2026-06',
     tag: 'patch',
-    items: [
-      '更新版本号至 2.5.5',
-      '移除冗余的样式设置代码',
-      '确保在编辑器加载时应用字体、字号、行高等样式'
-    ]
+    items: ['更新版本号至 2.5.5', '移除冗余的样式设置代码', '确保在编辑器加载时应用字体、字号、行高等样式']
   },
   {
     version: '2.5.4',
@@ -1723,10 +1725,7 @@ const changelog = [
     version: '2.5.3',
     date: '2026-06',
     tag: 'patch',
-    items: [
-      '更新版本号至 2.5.3',
-      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
-    ]
+    items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
   },
   {
     version: '2.5.2',
