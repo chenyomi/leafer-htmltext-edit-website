@@ -1788,7 +1788,9 @@ const changelog = [
     version: '2.5.11',
     date: '2026-06',
     tag: 'latest',
-    items: ['发布 v2.5.11']
+    items: [
+      '发布 v2.5.11'
+    ]
   },
   {
     version: '2.5.9',
@@ -1841,7 +1843,11 @@ const changelog = [
     version: '2.5.5',
     date: '2026-06',
     tag: 'patch',
-    items: ['更新版本号至 2.5.5', '移除冗余的样式设置代码', '确保在编辑器加载时应用字体、字号、行高等样式']
+    items: [
+      '更新版本号至 2.5.5',
+      '移除冗余的样式设置代码',
+      '确保在编辑器加载时应用字体、字号、行高等样式'
+    ]
   },
   {
     version: '2.5.4',
@@ -1861,7 +1867,10 @@ const changelog = [
     version: '2.5.3',
     date: '2026-06',
     tag: 'patch',
-    items: ['更新版本号至 2.5.3', '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数']
+    items: [
+      '更新版本号至 2.5.3',
+      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
+    ]
   },
   {
     version: '2.5.2',
