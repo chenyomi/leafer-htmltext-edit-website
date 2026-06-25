@@ -211,48 +211,221 @@
           </div>
         </section>
 
-        <!-- ─── 基础用法 ─── -->
-        <section :id="'basic-usage'" class="doc-section">
+        <!-- ─── 初始化指南 ─── -->
+        <section :id="'init-guide'" class="doc-section">
           <div class="section-anchor-wrap">
             <h2 class="doc-h2">
-              基础用法
-              <a :href="'#basic-usage'" class="anchor-link" @click.prevent="scrollTo('basic-usage')">#</a>
+              初始化指南
+              <a :href="'#init-guide'" class="anchor-link" @click.prevent="scrollTo('init-guide')">#</a>
             </h2>
           </div>
 
-          <h3 class="doc-h3" id="vue3-example">Vue 3 示例</h3>
+          <p class="doc-p">
+            接入插件时需要理解
+            <strong>两层初始化</strong>
+            ：先在页面里挂载编辑器能力，再按业务场景创建
+            <code>HtmlText</code>
+            节点。两层都完成后，双击编辑、样式工具栏、保存回显才会正常工作。
+          </p>
+
+          <div class="init-layer-grid">
+            <div class="init-layer-card" v-for="layer in initLayers" :key="layer.step">
+              <span class="init-layer-step">{{ layer.step }}</span>
+              <strong>{{ layer.title }}</strong>
+              <p>{{ layer.desc }}</p>
+              <code class="init-layer-code">{{ layer.code }}</code>
+            </div>
+          </div>
+
+          <h3 class="doc-h3" id="plugin-bootstrap">第一层：页面级初始化</h3>
+          <p class="doc-p">
+            每个页面只需执行一次。顺序固定：
+            <code>setLicense</code>
+            → 创建
+            <code>App</code>
+            →
+            <code>htmlTextManage.init(app)</code>
+            。
+          </p>
           <div class="code-block-wrap">
             <div class="code-lang-badge">App.vue</div>
-            <button class="copy-btn" @click="copyCode(vue3Example, 'vue3')">
-              <i class="pi" :class="copiedKey === 'vue3' ? 'pi-check' : 'pi-copy'"></i>
+            <button class="copy-btn" @click="copyCode(pluginBootstrapExample, 'plugin-bootstrap')">
+              <i class="pi" :class="copiedKey === 'plugin-bootstrap' ? 'pi-check' : 'pi-copy'"></i>
             </button>
-            <pre class="code-block"><code>{{ vue3Example }}</code></pre>
+            <pre class="code-block"><code>{{ pluginBootstrapExample }}</code></pre>
+          </div>
+
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>步骤</th>
+                  <th>调用</th>
+                  <th>参数 / 说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in pluginBootstrapSteps" :key="row.step">
+                  <td>{{ row.step }}</td>
+                  <td>
+                    <code>{{ row.call }}</code>
+                  </td>
+                  <td class="param-desc">{{ row.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="callout callout-warning">
-            <strong>注意：</strong>
+            <strong>授权顺序：</strong>
             <code>setLicense</code>
             必须在
             <code>htmlTextManage.init()</code>
-            <strong>之前</strong>
-            调用。本地开发环境无需授权即可使用，生产环境需要购买授权。
+            之前调用。本地
+            <code>localhost</code>
+            开发不受限；生产域名需有效 License。
           </div>
 
-          <h3 class="doc-h3">初始化自定义字体</h3>
+          <h3 class="doc-h3" id="content-modes">第二层：节点内容初始化方式</h3>
           <p class="doc-p">
-            如果创建节点时就需要使用自定义字体，可以同时传入
-            <code>fontFamily</code>
-            和
-            <code>fontBase64</code>
-            。插件会在初始 HTML 中注入
-            <code>@font-face</code>
-            ，节点回显和双击进入编辑态时都会继续使用同一字体。
+            创建
+            <code>HtmlText</code>
+            时，内容来源有四种常见方式。先选对方式，再补样式和布局参数。
           </p>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(initialFontExample, 'initial-font')">
-              <i class="pi" :class="copiedKey === 'initial-font' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ initialFontExample }}</code></pre>
+
+          <div class="params-table-wrap">
+            <table class="params-table init-mode-table">
+              <thead>
+                <tr>
+                  <th>方式</th>
+                  <th>适用场景</th>
+                  <th>关键字段</th>
+                  <th>行为说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="mode in initModes" :key="mode.name">
+                  <td>
+                    <strong>{{ mode.name }}</strong>
+                  </td>
+                  <td class="param-desc">{{ mode.scene }}</td>
+                  <td>
+                    <code>{{ mode.fields }}</code>
+                  </td>
+                  <td class="param-desc">{{ mode.behavior }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-info">
+            <strong>优先级规则（避免回显错乱）：</strong>
+            <ul class="doc-ul">
+              <li>
+                同时传
+                <code>text</code>
+                和
+                <code>content</code>
+                时，以
+                <code>text</code>
+                为准，
+                <code>content</code>
+                会被忽略
+              </li>
+              <li>
+                传
+                <code>text</code>
+                时，插件会从 HTML 反解
+                <code>fontSize</code>
+                、
+                <code>fontFamily</code>
+                、
+                <code>padding</code>
+                等元数据；但你
+                <strong>显式传入的参数优先级更高</strong>
+              </li>
+              <li>
+                只传
+                <code>content</code>
+                时，插件会按
+                <code>fontSize</code>
+                、
+                <code>color</code>
+                、
+                <code>align</code>
+                等样式参数自动拼出完整 HTML
+              </li>
+              <li>
+                既不传
+                <code>content</code>
+                也不传
+                <code>text</code>
+                时，会生成默认占位文本
+                <code>Hello World</code>
+              </li>
+            </ul>
+          </div>
+
+          <h3 class="doc-h3" id="init-scenarios">按场景初始化</h3>
+
+          <div v-for="scenario in initScenarios" :key="scenario.id" class="init-scenario-block">
+            <h4 class="init-scenario-title">
+              {{ scenario.title }}
+              <span class="init-scenario-tag">{{ scenario.mode }}</span>
+            </h4>
+            <p class="doc-p">{{ scenario.desc }}</p>
+            <ul v-if="scenario.tips?.length" class="doc-ul">
+              <li v-for="tip in scenario.tips" :key="tip">{{ tip }}</li>
+            </ul>
+            <div class="code-block-wrap">
+              <div v-if="scenario.lang" class="code-lang-badge">{{ scenario.lang }}</div>
+              <button class="copy-btn" @click="copyCode(scenario.code, 'scenario-' + scenario.id)">
+                <i class="pi" :class="copiedKey === 'scenario-' + scenario.id ? 'pi-check' : 'pi-copy'"></i>
+              </button>
+              <pre class="code-block"><code>{{ scenario.code }}</code></pre>
+            </div>
+          </div>
+
+          <h3 class="doc-h3" id="init-params">构造参数一览</h3>
+          <p class="doc-p">
+            <code>new HtmlText(data)</code>
+            接受
+            <code>IHtmlTextInputData</code>
+            ，即插件文本属性 + Leafer
+            <code>Box</code>
+            通用属性。以下按用途分组，完整字段表见
+            <a href="#api-htmltext" @click.prevent="scrollTo('api-htmltext')">API · HtmlText</a>
+            。
+          </p>
+
+          <div v-for="group in initParamGroups" :key="group.title" class="init-param-group">
+            <h4 class="init-param-group-title">{{ group.title }}</h4>
+            <div class="params-table-wrap">
+              <table class="params-table">
+                <thead>
+                  <tr>
+                    <th>参数</th>
+                    <th>类型</th>
+                    <th>默认值</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in group.params" :key="p.name">
+                    <td>
+                      <code>{{ p.name }}</code>
+                    </td>
+                    <td>
+                      <span class="type-badge">{{ p.type }}</span>
+                    </td>
+                    <td>
+                      <code class="default-val">{{ p.default }}</code>
+                    </td>
+                    <td class="param-desc">{{ p.desc }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -267,10 +440,9 @@
 
           <p class="doc-p">
             <code>HtmlText</code>
-            本质上是一个注册到 Leafer 体系里的画布节点。推荐优先保存 Leafer JSON，这样节点位置、宽高、子节点、
-            <code>data.textData</code>
-            和编辑状态所需元数据都会一起保留。只有在业务系统已经把文字内容、字体资源、素材模板分开存储时，才建议使用下方的
-            HTML 内容回显方案。
+            本质是 Leafer 画布节点。保存与回显时，优先选择与
+            <a href="#content-modes" @click.prevent="scrollTo('content-modes')">初始化方式</a>
+            对应的方案即可，不必重复拼 HTML。
           </p>
 
           <h3 class="doc-h3">纯 Leafer 项目：保存整棵画布</h3>
@@ -309,29 +481,13 @@
 
           <h3 class="doc-h3">特殊场景：只保存 HTML 内容</h3>
           <p class="doc-p">
-            有些业务不会保存完整 Leafer JSON，而是只保存富文本内容
-            HTML，同时把字体文件交给字体管理器维护。这种情况下，回显时需要把字体
+            业务把字体和内容分开存储时，回显请使用
+            <code>text</code>
+            字段，把
             <code>@font-face</code>
-            和内容 HTML 拼成一个完整的
-            <code>text</code>
-            字段传给
-            <code>new HtmlText({ text })</code>
+            与内容 HTML 拼在一起传入。完整示例见
+            <a href="#init-scenarios" @click.prevent="scrollTo('init-scenarios')">初始化指南 · 场景 4</a>
             。
-            <code>text</code>
-            是插件渲染和进入编辑态的 HTML 来源：前面的字体
-            <code>style</code>
-            负责让自定义字体可加载，后面的内容 HTML 负责保留字号、颜色、描边、宽高和对齐等内联样式。插件会自动从内容
-            HTML 里反解
-            <code>width</code>
-            、
-            <code>height</code>
-            、
-            <code>fontSize</code>
-            、
-            <code>fontFamily</code>
-            、
-            <code>textStroke</code>
-            等编辑所需元数据。
           </p>
           <div class="code-block-wrap">
             <button class="copy-btn" @click="copyCode(htmlOnlyPersistenceExample, 'html-only-persistence')">
@@ -1066,7 +1222,7 @@ const guideItems = [
   { id: 'introduction', label: '介绍' },
   { id: 'installation', label: '安装' },
   { id: 'quick-start', label: '快速开始' },
-  { id: 'basic-usage', label: '基础用法' },
+  { id: 'init-guide', label: '初始化指南' },
   { id: 'data-persistence', label: '数据保存与回显' },
   { id: 'editing-guide', label: '编辑原理与常见问题' }
 ];
@@ -1143,7 +1299,7 @@ module.exports = {
   },
 }`;
 
-const vue3Example = `<template>
+const pluginBootstrapExample = `<template>
   <div id="leafer-view" style="width: 100vw; height: 100vh;"></div>
 </template>
 
@@ -1151,60 +1307,293 @@ const vue3Example = `<template>
 import { onMounted } from 'vue'
 import { App } from 'leafer-ui'
 import 'leafer-editor'
-import {
-  htmlTextManage,
-  setLicense,
-  HtmlText,
-} from '@chenyomi/leafer-htmltext-edit'
+import { htmlTextManage, setLicense, HtmlText } from '@chenyomi/leafer-htmltext-edit'
 
 onMounted(async () => {
-  // 1. 设置 License（必须在 init 之前调用）
+  // ① 授权（必须在 init 之前）
   await setLicense('your-license-key')
 
-  // 2. 创建 Leafer App
-  const app = new App({
-    view: 'leafer-view',
-    fill: '#ffffff',
-    editor: {},
-  })
+  // ② 创建画布
+  const app = new App({ view: 'leafer-view', fill: '#ffffff', editor: {} })
 
-  // 3. 初始化编辑器管理器
+  // ③ 初始化插件（每页一次）
   await htmlTextManage.init(app)
 
-  // 4. 创建富文本节点并添加到画布
+  // ④ 创建文本节点（见下方「按场景初始化」）
   const text = new HtmlText({
     x: 100,
     y: 100,
+    content: '双击编辑',
     fontSize: 24,
-    fontFamily: '"Dancing Script", cursive',
-    fontBase64: 'data:font/woff2;charset=utf-8;base64,...',
-    lineHeight: 1.5,
-    padding: [12, 16],
-    content: '双击此处编辑文本',
-    color: '#e74c3c',
     editable: true,
     draggable: true,
   })
-
   app.tree.add(text)
 })
 <\/script>`;
 
-const initialFontExample = `const fontFamily = '"Dancing Script", cursive'
+const initLayers = [
+  {
+    step: '①',
+    title: '页面级：挂载编辑器能力',
+    desc: '每个页面执行一次，负责 License、Quill 实例和 Leafer Editor 绑定。',
+    code: 'setLicense → new App() → htmlTextManage.init(app)'
+  },
+  {
+    step: '②',
+    title: '节点级：创建 HtmlText',
+    desc: '按业务选择 content / text / JSON 等方式传入内容，再 add 到画布。',
+    code: 'new HtmlText({ ... }) → app.tree.add(text)'
+  }
+];
+
+const pluginBootstrapSteps = [
+  {
+    step: '1',
+    call: 'setLicense(key)',
+    desc: '验证授权。本地 localhost 可跳过；生产域名需有效密钥。必须在 init 之前调用。'
+  },
+  {
+    step: '2',
+    call: 'new App({ view, editor })',
+    desc: 'view 为容器 id 或 DOM；editor: {} 开启选中、缩放、内嵌编辑能力。'
+  },
+  {
+    step: '3',
+    call: 'htmlTextManage.init(app)',
+    desc: '绑定 App、创建全局 Quill。参数为 Leafer App 实例，每页调用一次即可。'
+  },
+  {
+    step: '4',
+    call: 'new HtmlText(data)',
+    desc: '创建富文本节点。data 为 IHtmlTextInputData，内容字段见下方对比表。'
+  }
+];
+
+const initModes = [
+  {
+    name: 'content + 样式参数',
+    scene: '新建文本、工具栏创建、简单模板',
+    fields: 'content, fontSize, color, align...',
+    behavior: '插件按样式属性自动拼出完整 HTML，最省心'
+  },
+  {
+    name: 'text 完整 HTML',
+    scene: '业务只存 HTML、模板回显、跨系统导入',
+    fields: 'text',
+    behavior: '原样渲染；缺 Quill CSS 会自动补全；从 HTML 反解 fontSize / padding 等元数据'
+  },
+  {
+    name: 'text = 字体 + 内容',
+    scene: '字体库与正文分开存储',
+    fields: 'text: fontStyle + contentHtml',
+    behavior: 'fontStyle 注入 @font-face，contentHtml 保留内联样式'
+  },
+  {
+    name: 'Leafer JSON 回显',
+    scene: '纯 Leafer 项目、保存过 toJSON()',
+    fields: '整份节点 JSON',
+    behavior: '最完整，位置、样式、textData 一次恢复'
+  }
+];
+
+const initScenarioContentCode = `// 场景 A：新建简单文本（推荐入门）
+const text = new HtmlText({
+  x: 120,
+  y: 80,
+  content: '双击此处编辑',
+  fontSize: 24,
+  color: '#e74c3c',
+  editable: true,
+  draggable: true,
+})
+app.tree.add(text)`;
+
+const initScenarioFullStyleCode = `// 场景 B：新建带完整样式 + 自定义字体
+const fontFamily = '"Dancing Script", cursive'
 const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
 
 const text = new HtmlText({
   x: 100,
   y: 100,
-  content: '初始化时加载自定义字体',
+  width: 400,              // 固定宽度，超出自动换行
+  content: '标题文字',
   fontFamily,
-  fontBase64,
+  fontBase64,              // 与 fontFamily 配合，自动注入 @font-face
   fontSize: 32,
+  fontWeight: 600,
+  italic: true,
+  lineHeight: 1.5,
+  letterSpacing: 1,
+  padding: [12, 16],
+  color: '#2c3e50',
+  textShadow: '1px 1px 4px rgba(0,0,0,0.3)',
+  textStroke: '2px #000',
+  align: 'center',
+  alignContent: 'center',
   editable: true,
   draggable: true,
 })
-
 app.tree.add(text)`;
+
+const initScenarioTextCode = `// 场景 C：直接传入完整 HTML（业务已保存富文本）
+const savedHtml = \`<div style="width:400px;padding:12px 16px;">
+  <p class="ql-align-center" style="font-size:28px;line-height:1.5;">
+    <span style="color:#e74c3c;">已保存的标题</span>
+  </p>
+</div>\`
+
+const text = new HtmlText({
+  x: 200,
+  y: 150,
+  text: savedHtml,         // 优先级高于 content
+  editable: true,
+  draggable: true,
+})
+app.tree.add(text)`;
+
+const initScenarioJsonCode = `// 场景 D：Leafer JSON 回显（推荐纯 Leafer 项目）
+const saved = await api.getTextElement(id)  // 之前 text.toJSON() 存下的数据
+
+const text = new HtmlText(saved.data)     // 直接传入整份节点数据
+app.tree.add(text)
+
+// 更新已有节点
+const existing = app.findId(saved.data.id)
+existing?.set(saved.data)`;
+
+const initScenarioSplitStorageCode = `// 场景 E：字体与内容分开存储
+const contentHtml = '<div style="width:980px;height:294px;"><p class="ql-align-center" style="font-size:70px;font-family:YouSheBiaoTiHei-2;"><span style="-webkit-text-stroke:6px rgb(0,66,104);color:rgb(253,225,5);">标题</span></p></div>'
+
+const fontStyle = '<style>@font-face{font-family:\\'YouSheBiaoTiHei-2\\';src:url(data:font/woff2;base64,...) format(\\'woff2\\');}</style>'
+
+const text = new HtmlText({
+  x: 100,
+  y: 100,
+  text: fontStyle + contentHtml,  // 拼接后作为 text 传入
+  editable: true,
+  draggable: true,
+})
+app.tree.add(text)`;
+
+const initScenarios = [
+  {
+    id: 'content',
+    title: '场景 A：新建简单文本',
+    mode: 'content',
+    desc: '只写文字和基础样式，让插件自动包装 HTML。适合「插入文本框」按钮、空白画布新建。',
+    tips: ['支持 content 里带 <strong>、<em> 等简单标签', '不传 content/text 时默认显示 Hello World'],
+    lang: 'main.ts',
+    code: initScenarioContentCode
+  },
+  {
+    id: 'full-style',
+    title: '场景 B：带完整样式 + 自定义字体',
+    mode: 'content + 样式参数',
+    desc: '创建时就把字体、描边、对齐、内边距等定好。fontBase64 会在初始 HTML 注入 @font-face。',
+    tips: ['width > 0 时进入固定宽度模式，文字自动换行', 'italic: true 会用 <em> 包裹，保留斜体外溢宽度'],
+    lang: 'main.ts',
+    code: initScenarioFullStyleCode
+  },
+  {
+    id: 'text-html',
+    title: '场景 C：完整 HTML 回显',
+    mode: 'text',
+    desc: '业务系统只保存富文本 HTML 时使用。插件会反解字号、字体、padding、对齐等到 textData。',
+    tips: [
+      '保留 <p style>、<span style> 等内联样式，不要 strip 成纯文本',
+      '若 HTML 只有 @font-face 没有 Quill CSS，插件会自动补全'
+    ],
+    lang: 'main.ts',
+    code: initScenarioTextCode
+  },
+  {
+    id: 'split-storage',
+    title: '场景 E：字体与内容分开存储',
+    mode: 'text = fontStyle + contentHtml',
+    desc: '字体由字体管理器维护，正文单独存 HTML。回显时拼接为 text 字段。',
+    tips: ['自定义字体必须补回对应 @font-face', '显式传入的 width/fontSize 等参数优先级高于反解值'],
+    lang: 'main.ts',
+    code: initScenarioSplitStorageCode
+  },
+  {
+    id: 'json',
+    title: '场景 D：Leafer JSON 回显',
+    mode: 'toJSON()',
+    desc: '保存过 HtmlText.toJSON() 或整棵画布 JSON 时，直接把数据传给构造函数或 set()。',
+    tips: ['回显前仍需 htmlTextManage.init(app)', '这是最完整、最不易丢样式的方案'],
+    lang: 'main.ts',
+    code: initScenarioJsonCode
+  }
+];
+
+const initParamGroups = [
+  {
+    title: '内容来源（二选一，text 优先）',
+    params: [
+      {
+        name: 'content',
+        type: 'string',
+        default: '—',
+        desc: '纯文本或简单标签；插件按样式参数自动包装 HTML'
+      },
+      {
+        name: 'text',
+        type: 'string',
+        default: '—',
+        desc: '完整 HTML；自动反解元数据，缺 CSS 时自动补全'
+      }
+    ]
+  },
+  {
+    title: '文本样式',
+    params: [
+      { name: 'fontSize', type: 'number', default: '16', desc: '全局字号（像素）' },
+      { name: 'fontFamily', type: 'string', default: '—', desc: '字体族名称' },
+      {
+        name: 'fontBase64',
+        type: 'string',
+        default: '—',
+        desc: '自定义字体 data URL，配合 fontFamily 注入 @font-face'
+      },
+      { name: 'fontWeight', type: 'number | string', default: '—', desc: '字重，如 600、"bold"' },
+      { name: 'italic', type: 'boolean', default: 'false', desc: '全局斜体，用 <em> 包裹' },
+      { name: 'lineHeight', type: 'number | string', default: '1.5', desc: '行高倍数或 "40px"' },
+      { name: 'letterSpacing', type: 'number', default: '0', desc: '字间距（像素）' },
+      { name: 'color', type: 'string', default: '—', desc: '文字颜色，写入 Quill 字符级 color' },
+      { name: 'textShadow', type: 'string', default: '—', desc: 'CSS text-shadow' },
+      { name: 'textStroke', type: 'string', default: '—', desc: 'CSS -webkit-text-stroke，如 "2px #000"' },
+      {
+        name: 'align',
+        type: 'false | "center" | "right" | "justify" | "distribute"',
+        default: 'false',
+        desc: '水平对齐：左 / 中 / 右 / 两端 / 分散'
+      },
+      {
+        name: 'alignContent',
+        type: "'start' | 'center' | 'end'",
+        default: "'start'",
+        desc: '垂直对齐：顶 / 中 / 底'
+      },
+      { name: 'padding', type: 'number | string | number[]', default: '0', desc: '文本内边距' }
+    ]
+  },
+  {
+    title: '布局与节点行为',
+    params: [
+      { name: 'x / y', type: 'number', default: '0', desc: '画布坐标（像素）' },
+      { name: 'width', type: 'number', default: 'auto', desc: '固定宽度模式，超出换行' },
+      { name: 'height', type: 'number', default: 'auto', desc: '节点高度' },
+      { name: 'editable', type: 'boolean', default: 'true', desc: '是否可双击进入编辑' },
+      { name: 'draggable', type: 'boolean', default: 'true', desc: '是否可拖拽' },
+      { name: 'fill', type: 'string', default: '—', desc: '节点背景色' },
+      { name: 'opacity', type: 'number', default: '1', desc: '不透明度 0–1' },
+      { name: 'rotation', type: 'number', default: '0', desc: '旋转角度' },
+      { name: 'scaleX / scaleY', type: 'number', default: '1', desc: '缩放' },
+      { name: 'lockRatio', type: 'boolean', default: 'false', desc: '锁定宽高比缩放' }
+    ]
+  }
+];
 
 // ─── HtmlText constructor params ──────────────────────────────────────────────
 const htmlTextParams = [
@@ -1263,10 +1652,10 @@ const htmlTextParams = [
   },
   {
     name: 'lineHeight',
-    type: 'number',
+    type: 'number | string',
     required: false,
     default: '1.5',
-    desc: '行高倍数，相对于 fontSize。例如 1.5 表示 1.5 倍行高'
+    desc: '行高倍数（如 1.5）或像素字符串（如 "40px"）'
   },
   { name: 'letterSpacing', type: 'number', required: false, default: '0', desc: '字间距（像素）' },
   {
@@ -1282,6 +1671,20 @@ const htmlTextParams = [
     required: false,
     default: '—',
     desc: 'CSS text-shadow 格式的文字阴影，例如 "2px 2px 4px #000000"'
+  },
+  {
+    name: 'textStroke',
+    type: 'string',
+    required: false,
+    default: '—',
+    desc: 'CSS -webkit-text-stroke 格式的文字描边，例如 "2px #333"'
+  },
+  {
+    name: 'align',
+    type: 'false | "center" | "right" | "justify" | "distribute"',
+    required: false,
+    default: 'false',
+    desc: '水平对齐：false=左对齐，"center"=居中，"right"=右对齐，"justify"=两端对齐，"distribute"=分散对齐'
   },
   {
     name: 'alignContent',
@@ -1785,107 +2188,212 @@ const inlineFontSizeLimits = [
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.6.5',
+    version: '2.6.7',
     date: '2026-06',
     tag: 'latest',
+    items: ['修改 __updateBoxBounds 方法，优化固定宽度模式下的内容高度测量逻辑']
+  },
+  {
+    version: '2.6.6',
+    date: '2026-06',
+    tag: 'patch',
     items: [
-      '发布 v2.6.5'
+      '引入新的文本描边处理函数，优化编辑器样式',
+      '修复全局文本描边在排版格式化后的问题',
+      '清理不必要的文本描边样式，确保编辑器渲染正确'
+    ]
+  },
+  {
+    version: '2.6.5',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '在 HtmlText.ts 中调整内容高度计算方式，确保在固定宽度模式下正确测量',
+      '在 innerEditorSync.ts 中添加内容高度测量函数，处理固定高度布局',
+      '在 addFontSizeToP.ts 中修正高度计算，使用 Math.ceil 确保准确性',
+      '在 updateHtmlText.ts 中集成新的内容高度测量逻辑'
+    ]
+  },
+  {
+    version: '2.6.4',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '添加 syncInnerEditorDomToLeaf 函数以同步编辑器样式',
+      '优化 TextEditTool 和 TextEditor 中的样式处理逻辑',
+      '在 updateHtmlText 中集成样式同步功能',
+      '移除不必要的全局字号处理，确保局部字号的独立性',
+      '优化 HTML 文本解析，确保局部字号的正确识别',
+      '调整样式处理，确保行高和字体大小的兼容性'
+    ]
+  },
+  {
+    version: '2.6.3',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '添加新版本 TGZ 文件',
+      '更新 manifest.json 和 package.json 中的版本信息',
+      '实现行高同步功能，确保文本编辑器内联元素的行高一致性',
+      '优化字体大小处理逻辑，支持更复杂的格式化场景',
+      '如果令牌缺失，输出错误信息并终止工作流',
+      '更新 git push 命令以使用指定的远程 URL',
+      '修复网站仓库访问令牌的使用方式',
+      '将依赖安装命令从 npm ci 修改为 npm install'
+    ]
+  },
+  {
+    version: '2.6.2',
+    date: '2026-06',
+    tag: 'patch',
+    items: [
+      '添加行高应用功能，支持根据缩放比例设置行高',
+      '引入逻辑字号解析功能，确保格式变更后正确应用字号',
+      '优化 inlineFontSize 处理，确保 HTML 内容中的字号正确注册',
+      '移除不必要的行高样式设置'
     ]
   },
   {
     version: '2.6.1',
     date: '2026-06',
     tag: 'patch',
+    items: ['优化了数据处理逻辑', '增强了错误处理机制']
+  },
+  {
+    version: '2.6.0',
+    date: '2026-06',
+    tag: 'patch',
     items: [
-      '发布 v2.6.1'
+      '实现全局文本数据处理函数 createGlobalTextDataHandler',
+      '增强布局处理功能，新增 handleAlign、handleAlignContent 和 handleList 函数',
+      '增加文本样式处理函数，包括 handleBold、handleItalic 和 handleTextCase',
+      '实现 HTML 文本更新功能，支持字体、大小、颜色等样式的动态更新',
+      '引入新的辅助函数，简化 HTML 文本的粘贴和格式化操作',
+      '注册自定义 Quill 格式，包括 fontWeight、textStroke 和 textShadow',
+      '增强 HTML 文本节点的数据结构，支持更多样式属性',
+      '在 `TextEditTool` 中集成了锁定比例缩放逻辑',
+      '优化了文本描边和字号的处理，确保在缩放时保持一致性',
+      '增强了对 inline 文本描边的支持',
+      '在 utils.ts 中添加 scaleCSSValueByRatio 和 scaleCssPxValues 函数，用于处理 CSS px 值的缩放',
+      '更新 TextEditor.ts 和 HtmlTextManage.ts，集成文本阴影的缩放逻辑',
+      '优化文本编辑器的样式应用，确保文本阴影在缩放时正确显示'
+    ]
+  },
+  {
+    version: '2.5.12',
+    date: '2026-06',
+    tag: 'minor',
+    items: [
+      '支持设置和获取行内字体大小',
+      '支持检测和同步列表项的字体大小',
+      '支持缩放编辑器中的行内字体大小',
+      '支持恢复原始行内字体大小',
+      '新增 inlineTextStroke.ts 文件，提供行内文本描边的处理功能',
+      '支持缩放编辑器中的文本描边',
+      '支持恢复原始文本描边',
+      '设置版本为 2.5.11',
+      '指定最新版本和文件下载链接',
+      '更新日期为 2026-06-15'
     ]
   },
   {
     version: '2.5.11',
     date: '2026-06',
-    tag: 'minor',
-    items: [
-      '发布 v2.5.11'
-    ]
-  },
-  {
-    version: '2.5.9',
-    date: '2026-06',
     tag: 'patch',
     items: [
+      '修改 resolveCapabilities 函数，直接返回解锁全部能力的状态',
+      '增加对旧版 license 的兼容性说明',
+      '更新版本号至 2.5.10',
+      '一点小更新',
       '在 HtmlText 组件中添加 padding 属性支持',
       '实现 applyPaddingToTextHtml 函数以应用内边距样式',
       '在 TextEditor 中同步内边距样式',
       '在 utils 中添加 syncInnerEditorPadding 函数',
       '在 parseHtmlTextData 中解析内边距',
-      '新增 padding.ts 文件，定义 HtmlTextPadding 类型及相关函数'
-    ]
-  },
-  {
-    version: '2.5.8',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
+      '新增 padding.ts 文件，定义 HtmlTextPadding 类型及相关函数',
       '新增 .github/workflows/publish-tgz.yml 文件，实现 TGZ 文件的自动发布',
       '新增 scripts/create-tgz.mjs 脚本，处理 TGZ 文件的创建和版本管理',
       '在 package.json 中添加 `pack:tgz` 和 `pack:dry` 脚本',
       '修改 HtmlText.ts 中的样式规则，增加对 -webkit-text-stroke 的支持',
-      '更新 utils.ts 中的样式生成逻辑，确保 -webkit-text-stroke 正确渲染'
-    ]
-  },
-  {
-    version: '2.5.7',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
+      '更新 utils.ts 中的样式生成逻辑，确保 -webkit-text-stroke 正确渲染',
       '更新版本号至 2.5.7',
       '优化 HtmlText 类构造函数，合并解析后的数据',
       '改进 TextEditor 类的文本加载逻辑，确保正确处理 HtmlText',
       '扩展 parseHtmlTextData 函数，支持提取宽度和高度',
-      '增加字体规则注入和提取功能，确保样式正确应用'
-    ]
-  },
-  {
-    version: '2.5.6',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
+      '增加字体规则注入和提取功能，确保样式正确应用',
       '添加 parseHtmlTextData 函数用于从 HTML 字符串中提取文本元数据',
       '在 HtmlText 组件中集成解析逻辑，确保文本渲染时具备必要的 CSS',
-      '优化文本元素创建时的样式处理'
-    ]
-  },
-  {
-    version: '2.5.5',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
+      '优化文本元素创建时的样式处理',
       '更新版本号至 2.5.5',
       '移除冗余的样式设置代码',
-      '确保在编辑器加载时应用字体、字号、行高等样式'
-    ]
-  },
-  {
-    version: '2.5.4',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
+      '确保在编辑器加载时应用字体、字号、行高等样式',
       '在 IHtmlTextContentData 接口中添加 fontBase64 属性以支持自定义字体',
       '在 HtmlText 类中处理 fontBase64 以注入 @font-face',
       '在 TextEditor 类中根据 fontFamily 设置字体样式',
       '在 utils.ts 中调整字体处理逻辑以支持单字体模型',
       '添加新的许可证密钥',
       '更新许可证信息，包括域名、过期日期、发行日期、邮箱、用户ID、功能和版本',
-      '将许可证有效期延长至 800 天'
-    ]
-  },
-  {
-    version: '2.5.3',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
+      '将许可证有效期延长至 800 天',
       '更新版本号至 2.5.3',
-      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
+      '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数',
+      '更新版本号至 2.5.2 - 将版本号从 2.5.1 更新至 2.5.2',
+      '增加对 HTMLText 节点的解析支持',
+      '更新 `addFontSizeToP` 函数，确保内联样式优先级处理对齐问题',
+      '调整 `TextEditor` 类中的对齐逻辑，避免覆盖段落对齐设置',
+      '扩展 align 属性，支持 "justify" 和 "distribute" 对齐方式',
+      '更新样式以支持新的对齐选项',
+      '更新 CSS，支持分散对齐样式',
+      '在内联样式中添加分散对齐的支持',
+      '支持斜体格式的处理，优化文本渲染',
+      '清除节点遗留的宽高约束，提升内容适应性',
+      '精简特性列表，移除冗余描述',
+      '更新安装说明，去除不必要的包管理器示例',
+      '增加快速开始部分，提供更清晰的使用示例',
+      '更新许可证信息，简化商业使用说明',
+      '更新版本号至 2.5.0',
+      '修改 IHtmlTextInputData 类型以支持 CSS 字符串值的行高',
+      '更新 handleShowCurve 函数以正确处理行高值类型',
+      '添加 align 属性，支持文本的左对齐、居中和右对齐',
+      '更新相关样式处理，确保新属性生效',
+      '添加 textShadow 属性器，支持局部文字阴影',
+      '实现斜体检测，优化文字宽度计算',
+      '调整 webkitTextStroke 属性的应用逻辑',
+      '更新 HtmlText 类，确保 Quill 识别字符级颜色格式',
+      '修改 TextEditor 类，使用文本数据中的颜色作为光标颜色',
+      '更新 README 文档，说明新功能',
+      '添加行内描边效果支持',
+      '添加选区级字重控制功能',
+      '修改初始化方法为异步执行，简化调用方式',
+      '更新样式以支持局部描边的正确渲染',
+      '实现局部和全局描边的逻辑处理',
+      '在 HtmlText 中添加 fontWeight 属性支持',
+      '在 TextEditor 中实现字体粗细的动态处理',
+      '提取和清理 HTML 内容以防止样式冲突',
+      '增加提取语义内容的工具函数',
+      '在 TextEditTool 中添加 textStroke 属性支持，确保锁定比例缩放时轮廓线宽度同步更新',
+      '在 TextEditor 中调整 webkitTextStroke 的应用位置，确保轮廓线宽度按缩放比例正确渲染',
+      '精确测量 HtmlText 的 SVG 尺寸，消除多余空白',
+      '支持在 TextEditTool 中处理 HtmlText 的锁定比例',
+      '优化 utils.ts 中的字符宽度测量和弧形辅助层清理逻辑',
+      '更新 TextEditor 以支持 HtmlText 的相关操作',
+      '在 HtmlText 中使用 IUI 类型增强文本元素的类型安全',
+      '在 HtmlTextManage 中添加选择范围管理功能',
+      '在 TextEditTool 中优化事件处理和文本缩放逻辑',
+      '在 TextEditor 中增强文本样式同步和输入处理',
+      '在 utils 中添加字母间距和垂直布局同步功能',
+      'version',
+      '更新',
+      '更新轮廓',
+      '添加aes',
+      '更新混淆',
+      '授权更新res',
+      '2',
+      '11',
+      '1',
+      'pack',
+      '2.0.1',
+      '优化',
+      'init'
     ]
   }
 ];

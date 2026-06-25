@@ -9,7 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEBSITE_ROOT = resolve(__dirname, '..');
 const DOCS_PAGE = resolve(WEBSITE_ROOT, 'src/pages/DocsPage.vue');
 const PACKAGE_NAME = '@chenyomi/leafer-htmltext-edit';
-const DEFAULT_REPOS = ['chenyomi/leafer-htmltext-edit', 'chenyomi/npm-chenyomi-leafer-htmltext-edit'];
+const DEFAULT_REPOS = ['chenyomi/npm-chenyomi-leafer-htmltext-edit'];
 
 function getGitHubToken() {
   return process.env.HTMLTEXT_GITHUB_TOKEN || process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';

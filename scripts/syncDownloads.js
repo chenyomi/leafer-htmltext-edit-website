@@ -19,6 +19,10 @@ function run(cmd, args, cwd, encoding) {
 }
 
 function getSourceRepo() {
+  if (process.env.HTMLTEXT_DISABLE_LOCAL === '1') {
+    return null;
+  }
+
   const candidates = [
     process.env.HTMLTEXT_SRC,
     resolve(WEBSITE_ROOT, '../@chenyomi-leafer-htmltext-edit'),

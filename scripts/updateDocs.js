@@ -1,88 +1,165 @@
-import fs from 'fs';
-import path from 'path';
+import { execSync } from 'child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs';
 import https from 'https';
+import { tmpdir } from 'os';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const REPOS = [
-    {
-        name: 'leafer-htmltext-edit',
-        url: 'https://raw.githubusercontent.com/chenyomi/leafer-htmltext-edit/main/README.md',
-        savePath: 'src/content/docs/leafer-htmltext-edit.md'
-    },
-    {
-        name: 'leafer-htmltext-edit-view',
-        url: 'https://raw.githubusercontent.com/chenyomi/leafer-htmltext-edit-view/master/README.md',
-        savePath: 'src/content/docs/leafer-htmltext-edit-view.md'
-    }
-];
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const WEBSITE_ROOT = resolve(__dirname, '..');
+const DOCS_DIR = resolve(WEBSITE_ROOT, 'src/content/docs');
+const PLUGIN_REPO = process.env.HTMLTEXT_GITHUB_REPO || 'chenyomi/npm-chenyomi-leafer-htmltext-edit';
+const DEMO_README_URL =
+  'https://raw.githubusercontent.com/chenyomi/leafer-htmltext-edit-view/master/README.md';
 
-function fetchRaw(url) {
-    return new Promise((resolve, reject) => {
-        const req = https.get(url, { 
-            timeout: 15000,
-            headers: { 'User-Agent': 'Node.js/HTTPS-Client' }
-        }, (res) => {
-            if (res.statusCode === 302 || res.statusCode === 301) {
-                https.get(res.headers.location, { headers: { 'User-Agent': 'Node.js' } }, (res2) => {
-                    let data = '';
-                    res2.on('data', chunk => data += chunk);
-                    res2.on('end', () => resolve(data));
-                }).on('error', reject);
-                return;
-            }
-            if (res.statusCode !== 200) {
-                reject(new Error(`Status Code: ${res.statusCode}`));
-                return;
-            }
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => resolve(data));
-        });
-        req.on('error', reject);
-        req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
-    });
+function getGitHubToken() {
+  return process.env.HTMLTEXT_GITHUB_TOKEN || process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
 }
 
-function convertMarkdownToVue(name, content) {
-    // 简单的 Markdown 转 Vue 内容，可以根据需要使用 markdown-it 或其他库
-    // 这里为了演示，我们只将其包裹在 template 中，或者你可以直接在页面中动态加载 md
-    return content;
+function withGitHubToken(url) {
+  const token = getGitHubToken();
+  if (!token || !url.startsWith('https://github.com/')) return url;
+  return url.replace('https://github.com/', `https://x-access-token:${encodeURIComponent(token)}@github.com/`);
+}
+
+function run(cmd, cwd) {
+  return execSync(cmd, {
+    cwd,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+    env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+  }).trim();
+}
+
+function getLocalPluginRepo() {
+  if (process.env.HTMLTEXT_DISABLE_LOCAL === '1') return null;
+
+  const candidates = [
+    process.env.HTMLTEXT_SRC,
+    resolve(WEBSITE_ROOT, '../@chenyomi-leafer-htmltext-edit'),
+    resolve(WEBSITE_ROOT, '../../@chenyomi-leafer-htmltext-edit')
+  ].filter(Boolean);
+
+  for (const path of candidates) {
+    if (existsSync(resolve(path, 'README.md'))) {
+      return { path, cleanup: null };
+    }
+  }
+
+  return null;
+}
+
+function clonePluginRepo() {
+  const dir = mkdtempSync(resolve(tmpdir(), 'htmltext-readme-'));
+  const url = `https://github.com/${PLUGIN_REPO}.git`;
+  const cloneUrl = withGitHubToken(url);
+
+  try {
+    console.log(`🌐 拉取插件 README: ${url}`);
+    run(`git clone --depth 1 --quiet ${cloneUrl} .`, dir);
+    return {
+      path: dir,
+      cleanup: () => rmSync(dir, { recursive: true, force: true })
+    };
+  } catch (error) {
+    rmSync(dir, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+function readPluginReadme(repoPath) {
+  const readmePath = resolve(repoPath, 'README.md');
+  if (!existsSync(readmePath)) {
+    throw new Error(`未找到 README.md: ${readmePath}`);
+  }
+  return readFileSync(readmePath, 'utf-8');
+}
+
+function fetchRaw(url) {
+  return new Promise((resolvePromise, reject) => {
+    const req = https.get(
+      url,
+      {
+        timeout: 20000,
+        headers: { 'User-Agent': 'leafer-htmltext-edit-website-docs-sync' }
+      },
+      res => {
+        if (res.statusCode === 301 || res.statusCode === 302) {
+          fetchRaw(res.headers.location).then(resolvePromise).catch(reject);
+          return;
+        }
+        if (res.statusCode !== 200) {
+          reject(new Error(`status ${res.statusCode}`));
+          return;
+        }
+        let data = '';
+        res.on('data', chunk => {
+          data += chunk;
+        });
+        res.on('end', () => resolvePromise(data));
+      }
+    );
+    req.on('timeout', () => req.destroy(new Error('timeout')));
+    req.on('error', reject);
+  });
+}
+
+async function syncPluginReadme() {
+  const local = getLocalPluginRepo();
+  const repo = local || clonePluginRepo();
+
+  try {
+    const content = readPluginReadme(repo.path);
+    const savePath = resolve(DOCS_DIR, 'leafer-htmltext-edit.md');
+    writeFileSync(savePath, content, 'utf-8');
+    console.log('✅ 已同步插件 README → src/content/docs/leafer-htmltext-edit.md');
+  } finally {
+    repo.cleanup?.();
+  }
+}
+
+async function syncDemoReadme() {
+  const savePath = resolve(DOCS_DIR, 'leafer-htmltext-edit-view.md');
+  const urls = [
+    DEMO_README_URL,
+    DEMO_README_URL.replace('/master/', '/main/')
+  ];
+
+  for (const url of urls) {
+    try {
+      const content = await fetchRaw(url);
+      writeFileSync(savePath, content, 'utf-8');
+      console.log('✅ 已同步演示 README → src/content/docs/leafer-htmltext-edit-view.md');
+      return;
+    } catch {
+      // try next branch
+    }
+  }
+
+  console.warn('⚠️  演示仓库 README 拉取失败，保留现有文件');
 }
 
 async function main() {
-    const docsDir = path.resolve('src/content/docs');
-    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir, { recursive: true });
+  if (!existsSync(DOCS_DIR)) mkdirSync(DOCS_DIR, { recursive: true });
 
-    for (const config of REPOS) {
-        console.log(`Fetching ${config.name}...`);
-        
-        // 尝试多个可能的 URL
-        const urlsToTry = [config.url];
-        if (config.url.includes('/main/')) urlsToTry.push(config.url.replace('/main/', '/master/'));
-        if (config.url.includes('/master/')) urlsToTry.push(config.url.replace('/master/', '/main/'));
-        
-        // 附加特殊路径
-        if (config.name === 'leafer-htmltext-edit') {
-            urlsToTry.push('https://raw.githubusercontent.com/chenyomi/npm-chenyomi-leafer-htmltext-edit/main/README.md');
-            urlsToTry.push('https://raw.githubusercontent.com/chenyomi/npm-chenyomi-leafer-htmltext-edit/master/README.md');
-        }
-
-        let success = false;
-        let fetchedContent = '';
-        for (const url of urlsToTry) {
-            try {
-                fetchedContent = await fetchRaw(url);
-                success = true;
-                break;
-            } catch (e) { }
-        }
-
-        if (success) {
-            fs.writeFileSync(path.resolve(config.savePath), fetchedContent);
-            console.log(`Saved ${config.name}`);
-        } else {
-            console.error(`Failed to fetch ${config.name}`);
-        }
+  try {
+    await syncPluginReadme();
+  } catch (error) {
+    console.error(`❌ 插件 README 同步失败: ${error.message}`);
+    const fallback = resolve(DOCS_DIR, 'leafer-htmltext-edit.md');
+    if (!existsSync(fallback)) {
+      writeFileSync(
+        fallback,
+        '# leafer-htmltext-edit\n\n文档获取失败，请检查 HTMLTEXT_GITHUB_TOKEN 或仓库权限。\n',
+        'utf-8'
+      );
     }
+  }
+
+  await syncDemoReadme();
 }
 
-main();
+main().catch(error => {
+  console.error(error);
+  process.exit(1);
+});

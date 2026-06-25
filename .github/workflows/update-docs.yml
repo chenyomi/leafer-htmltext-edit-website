@@ -2,8 +2,8 @@ name: Update External Docs
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天凌晨运行
-  workflow_dispatch: # 支持手动触发
+    - cron: '0 0 * * *' # 每天 UTC 0 点运行
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,38 +18,43 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: 20
-
-      - name: Run Update Scripts
-        env:
-          HTMLTEXT_GITHUB_TOKEN: ${{ secrets.HTMLTEXT_GITHUB_TOKEN || github.token }}
-        run: npm run docs:sync-all
-        
-      - name: Commit and Push
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add src/content/docs/ src/pages/DocsPage.vue public/downloads/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: sync external plugin docs and downloads" && git push)
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.28.1
 
-      - name: Setup Node for build
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 25
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Sync plugin docs, changelog and downloads
+        env:
+          HTMLTEXT_GITHUB_TOKEN: ${{ secrets.HTMLTEXT_GITHUB_TOKEN || github.token }}
+          HTMLTEXT_GITHUB_REPO: chenyomi/npm-chenyomi-leafer-htmltext-edit
+          HTMLTEXT_DISABLE_LOCAL: '1'
+        run: pnpm run docs:sync-all
+
+      - name: Commit and push synced files
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add src/content/docs/ src/pages/DocsPage.vue public/downloads/
+          if git diff --staged --quiet; then
+            echo "No synced changes to commit."
+          else
+            git commit -m "docs: sync external plugin docs and downloads"
+            git push
+          fi
 
       - name: Build project
         run: pnpm run build
