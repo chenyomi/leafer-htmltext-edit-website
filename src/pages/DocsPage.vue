@@ -1785,9 +1785,17 @@ const inlineFontSizeLimits = [
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.6.1',
+    version: '2.6.5',
     date: '2026-06',
     tag: 'latest',
+    items: [
+      '发布 v2.6.5'
+    ]
+  },
+  {
+    version: '2.6.1',
+    date: '2026-06',
+    tag: 'patch',
     items: [
       '发布 v2.6.1'
     ]
@@ -1878,21 +1886,6 @@ const changelog = [
     items: [
       '更新版本号至 2.5.3',
       '在 dateEdit 方法中使用 resolveHTMLTextLeaf 处理回调参数'
-    ]
-  },
-  {
-    version: '2.5.2',
-    date: '2026-06',
-    tag: 'patch',
-    items: [
-      '更新版本号至 2.5.2 - 将版本号从 2.5.1 更新至 2.5.2',
-      '增加对 HTMLText 节点的解析支持',
-      '更新 `addFontSizeToP` 函数，确保内联样式优先级处理对齐问题',
-      '调整 `TextEditor` 类中的对齐逻辑，避免覆盖段落对齐设置',
-      '扩展 align 属性，支持 "justify" 和 "distribute" 对齐方式',
-      '更新样式以支持新的对齐选项',
-      '更新 CSS，支持分散对齐样式',
-      '在内联样式中添加分散对齐的支持'
     ]
   }
 ];
