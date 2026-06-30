@@ -369,6 +369,11 @@
           </div>
 
           <h3 class="doc-h3" id="init-scenarios">按场景初始化</h3>
+          <p class="doc-p">
+            涉及多种自定义字体回显时，先看
+            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">多字体与回显</a>
+            专章。
+          </p>
 
           <div v-for="scenario in initScenarios" :key="scenario.id" class="init-scenario-block">
             <h4 class="init-scenario-title">
@@ -428,6 +433,141 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        <!-- ─── 多字体与回显 ─── -->
+        <section :id="'font-echo-guide'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              多字体与回显
+              <a :href="'#font-echo-guide'" class="anchor-link" @click.prevent="scrollTo('font-echo-guide')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            四个和字体相关的构造参数容易混。先记住：
+            <strong>单字体用前两个，多字体用后两个；回显优先存 JSON 或完整 HTML。</strong>
+          </p>
+
+          <h3 class="doc-h3">四个字体参数分别干什么？</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>参数</th>
+                  <th>类型</th>
+                  <th>干什么用</th>
+                  <th>什么时候用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in fontFieldsGuide" :key="row.name">
+                  <td>
+                    <code>{{ row.name }}</code>
+                  </td>
+                  <td>
+                    <span class="type-badge">{{ row.type }}</span>
+                  </td>
+                  <td class="param-desc">{{ row.role }}</td>
+                  <td class="param-desc">{{ row.when }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warning">
+            <code>fontFamily + fontBase64</code>
+            只能注册
+            <strong>一个</strong>
+            主自定义字体。一段文字里要用多种自定义字体，必须用
+            <code>fonts[]</code>
+            /
+            <code>fontFaces</code>
+            ，或在
+            <code>text</code>
+            的
+            <code>&lt;style&gt;</code>
+            里写多条
+            <code>@font-face</code>
+            。
+          </div>
+
+          <h3 class="doc-h3">多字体回显：三种写法（选一种即可）</h3>
+          <div class="params-table-wrap">
+            <table class="params-table init-mode-table">
+              <thead>
+                <tr>
+                  <th>写法</th>
+                  <th>你怎么存数据</th>
+                  <th>怎么传</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in fontEchoModes" :key="row.name">
+                  <td>
+                    <strong>{{ row.name }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.storage }}</td>
+                  <td class="param-desc">
+                    <code>{{ row.how }}</code>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 class="doc-h4">写法 1：Leafer JSON（最推荐）</h4>
+          <p class="doc-p">
+            保存
+            <code>htmlText.toJSON()</code>
+            ，回显
+            <code>new HtmlText(json)</code>
+            。字体、局部 span、textData 都在里面。
+          </p>
+
+          <h4 class="doc-h4">写法 2：完整 HTML 一个字段</h4>
+          <p class="doc-p">
+            <code>text</code>
+            里自带
+            <code>&lt;style&gt;</code>
+            （可含多条
+            <code>@font-face</code>
+            ）+ 带
+            <code>font-family</code>
+            的
+            <code>&lt;p&gt;/&lt;span&gt;</code>
+            。只传
+            <code>new HtmlText({ text })</code>
+            ，不必再传
+            <code>fontFaces</code>
+            。
+          </p>
+
+          <h4 class="doc-h4">写法 3：字体和内容分开存（场景 E）</h4>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(initScenarioMultiFontCode, 'multi-font-echo')">
+              <i class="pi" :class="copiedKey === 'multi-font-echo' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ initScenarioMultiFontCode }}</code></pre>
+          </div>
+          <p class="doc-p">
+            注意：多字体时在一个
+            <code>&lt;style&gt;</code>
+            里写
+            <strong>多条</strong>
+            <code>@font-face</code>
+            ，不是多个
+            <code>&lt;style&gt;</code>
+            标签各写一个。
+          </p>
+
+          <h4 class="doc-h4">写法 4：构造时传 fonts[]（新建时常用）</h4>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(multiFontInitExample, 'multi-font-init-guide')">
+              <i class="pi" :class="copiedKey === 'multi-font-init-guide' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ multiFontInitExample }}</code></pre>
           </div>
         </section>
 
@@ -977,14 +1117,18 @@
 
           <p class="doc-p">
             <code>setHTMLText</code>
-            是应用文本样式的核心函数。多选时批量应用到所有选中节点。 各 key 支持
-            <strong>局部（选区）</strong>
-            还是
-            <strong>全局（整段）</strong>
-            ，见
+            是应用文本样式的核心函数。多选时批量应用到所有选中节点。 使用前请先读
             <a href="#api-experimental" @click.prevent="scrollTo('api-experimental')">局部与全局样式</a>
-            总表。
+            里的「三种操作场景」——大部分看不懂的问题都是没双击或没拖选文字。
           </p>
+
+          <div class="callout callout-info">
+            <strong>快速记：</strong>
+            整段改字号 / 行高 / 字重 → 选中节点即可； 某几个字加粗 / 改色 → 双击编辑后拖选再调用； 某几个字改字号 / 字体
+            / 字间距 → 双击 + 拖选（字号还需
+            <code>setFeatures({ inlineFontSize: true })</code>
+            ）。
+          </div>
 
           <div class="code-block-wrap">
             <button
@@ -1080,55 +1224,137 @@
           </div>
 
           <p class="doc-p">
-            插件把样式分成两层：
-            <strong>全局</strong>
-            写入
-            <code>textData</code>
-            并落到
-            <code>&lt;p style="..."&gt;</code>
-            ；
-            <strong>局部</strong>
-            只写在
-            <code>&lt;span style="..."&gt;</code>
-            ，不替代全局字段。判断规则通常是：
-            <strong>内嵌编辑态 + 有文字选区</strong>
-            → 局部；否则 → 全局（或段落级）。
+            <code>setHTMLText</code>
+            是改样式的 API。搞懂下面两件事就不会乱：
           </p>
+          <ol class="doc-ol">
+            <li>
+              <strong>先选中</strong>
+              画布上的
+              <code>HtmlText</code>
+              节点（出现外框）。
+            </li>
+            <li>
+              改「某几个字」时：
+              <strong>双击进入内嵌编辑</strong>
+              → 用鼠标
+              <strong>拖选一段字</strong>
+              （光标闪烁不算选区）。
+            </li>
+          </ol>
 
-          <h3 class="doc-h3">setHTMLText 作用范围总表</h3>
+          <h3 class="doc-h3">三种操作场景（决定改局部还是改整段）</h3>
           <div class="params-table-wrap">
             <table class="params-table">
               <thead>
                 <tr>
-                  <th>key</th>
-                  <th>作用范围</th>
-                  <th>说明</th>
+                  <th>场景</th>
+                  <th>你怎么操作</th>
+                  <th>多数 API 的效果</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in formatScopeTable" :key="row.key">
+                <tr v-for="row in editScenarios" :key="row.name">
+                  <td>
+                    <strong>{{ row.name }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.how }}</td>
+                  <td class="param-desc">{{ row.effect }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warning">
+            <strong>常见踩坑：</strong>
+            <ul class="doc-ul">
+              <li>只单击选中节点、没双击 → 只能改「整段全局」类属性（fontSize、lineHeight 等）</li>
+              <li>
+                双击进了编辑但只闪光标、没拖蓝字 → 多数字符格式会作用在
+                <strong>全文</strong>
+                ，不是局部
+              </li>
+              <li>
+                <code>inlineFontSize</code>
+                、局部
+                <code>font</code>
+                、局部
+                <code>letterSpacing</code>
+                <strong>必须有拖选的一段字</strong>
+                才生效
+              </li>
+              <li>
+                内嵌编辑里
+                <strong>全选</strong>
+                再改
+                <code>font</code>
+                → 按整段全局字体处理，不是局部
+              </li>
+            </ul>
+          </div>
+
+          <h3 class="doc-h3">按你的目标查：该用哪个 API？</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>你想做什么</th>
+                  <th>要不要双击编辑</th>
+                  <th>要不要拖选文字</th>
+                  <th>调用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in formatCookbook" :key="row.goal">
+                  <td>{{ row.goal }}</td>
+                  <td class="param-desc">{{ row.needInner }}</td>
+                  <td class="param-desc">{{ row.needSelection }}</td>
+                  <td>
+                    <code>{{ row.call }}</code>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">技术细节：各 key 在三种场景下的行为</h3>
+          <p class="doc-p">给需要对照源码的同学。列标题对应上面的三种场景。</p>
+          <div class="params-table-wrap format-matrix-wrap">
+            <table class="params-table format-matrix-table">
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>① 外框选中</th>
+                  <th>
+                    ② 内嵌编辑
+                    <br />
+                    无拖选
+                  </th>
+                  <th>
+                    ③ 内嵌编辑
+                    <br />
+                    有拖选
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in formatScopeMatrix" :key="row.key">
                   <td>
                     <code>{{ row.key }}</code>
                   </td>
-                  <td>
-                    <span :class="'scope-badge scope-' + row.scopeKind">{{ row.scope }}</span>
-                  </td>
-                  <td class="param-desc">{{ row.note }}</td>
+                  <td class="param-desc">{{ row.outer }}</td>
+                  <td class="param-desc">{{ row.innerNoSel }}</td>
+                  <td class="param-desc">{{ row.innerSel }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div class="callout callout-info">
-            <strong>多选：</strong>
+            <strong>多选节点：</strong>
             <code>setHTMLText</code>
-            会对每个选中节点执行；但
-            <code>inlineFontSize</code>
-            、局部
-            <code>font</code>
-            、局部
-            <code>letterSpacing</code>
-            只在内嵌编辑器里对当前 Quill 选区生效，不支持跨节点批量局部样式。
+            会对每个选中节点执行；但带「拖选」的局部样式只作用于当前内嵌编辑器里的 Quill
+            选区，不能一次给多个节点里的某几个字批量设样式。
           </div>
 
           <h3 class="doc-h3">局部字体与多字体（font）</h3>
@@ -1412,6 +1638,7 @@ const guideItems = [
   { id: 'installation', label: '安装' },
   { id: 'quick-start', label: '快速开始' },
   { id: 'init-guide', label: '初始化指南' },
+  { id: 'font-echo-guide', label: '多字体与回显' },
   { id: 'data-persistence', label: '数据保存与回显' },
   { id: 'editing-guide', label: '编辑原理与常见问题' }
 ];
@@ -1564,8 +1791,8 @@ const initModes = [
   {
     name: 'content + 样式参数',
     scene: '新建文本、工具栏创建、简单模板',
-    fields: 'content, fontSize, color, align...',
-    behavior: '插件按样式属性自动拼出完整 HTML，最省心'
+    fields: 'content, fontSize, color, fonts[]...',
+    behavior: '插件按样式属性自动拼 HTML；多字体用 fonts[] / fontFaces'
   },
   {
     name: 'text 完整 HTML',
@@ -1666,6 +1893,74 @@ const text = new HtmlText({
 })
 app.tree.add(text)`;
 
+const initScenarioMultiFontCode = `// 字体库按 id 查出多条 base64，拼进一个 <style>
+const fontStyle = \`<style>
+@font-face { font-family: 'YouSheBiaoTiHei-2'; src: url(data:font/woff2;base64,AAA...) format('woff2'); }
+@font-face { font-family: 'Dancing Script'; src: url(data:font/woff2;base64,BBB...) format('woff2'); }
+</style>\`
+
+// 正文 HTML：不同 span 引用不同 font-family
+const contentHtml = \`<div style="width:400px;">
+  <p style="font-size:28px;font-family:YouSheBiaoTiHei-2;">
+    <span style="font-family:YouSheBiaoTiHei-2;">标题</span>
+    <span style="font-family:'Dancing Script',cursive;">副标题</span>
+  </p>
+</div>\`
+
+new HtmlText({
+  text: fontStyle + contentHtml,
+})`;
+
+const fontFieldsGuide = [
+  {
+    name: 'fontFamily',
+    type: 'string',
+    role: '整段文字的默认字体名（写在 <p> 上）',
+    when: '新建文本时指定全局字体；单字体场景'
+  },
+  {
+    name: 'fontBase64',
+    type: 'string',
+    role: '与 fontFamily 配对的主字体文件（data URL）',
+    when: '只有一个自定义字体时，和 fontFamily 一起传'
+  },
+  {
+    name: 'fontFaces',
+    type: 'Record<string, string>',
+    role: '字体名 → base64 字典，可注册多种自定义字体',
+    when: '新建时已知多种字体；或从 HTML 反解后落在 textData 里'
+  },
+  {
+    name: 'fonts',
+    type: 'Array<{family, base64}>',
+    role: '和 fontFaces 相同，只是数组写法，插件内部会转成 fontFaces',
+    when: '新建多字体文本，比手写 <style> 省事'
+  }
+];
+
+const fontEchoModes = [
+  {
+    name: 'Leafer JSON',
+    storage: '之前调过 htmlText.toJSON()',
+    how: 'new HtmlText(savedJson)'
+  },
+  {
+    name: '完整 HTML',
+    storage: '一个字符串含 <style>多条@font-face + 内容',
+    how: 'new HtmlText({ text: savedHtml })'
+  },
+  {
+    name: '字体+内容拆开',
+    storage: 'fontStyle 一列、contentHtml 一列',
+    how: 'new HtmlText({ text: fontStyle + contentHtml })'
+  },
+  {
+    name: 'fonts[] 新建',
+    storage: '字体 id → base64 字典',
+    how: 'new HtmlText({ fonts: [...], content: "..." })'
+  }
+];
+
 const initScenarios = [
   {
     id: 'content',
@@ -1701,8 +1996,12 @@ const initScenarios = [
     id: 'split-storage',
     title: '场景 E：字体与内容分开存储',
     mode: 'text = fontStyle + contentHtml',
-    desc: '字体由字体管理器维护，正文单独存 HTML。回显时拼接为 text 字段。',
-    tips: ['自定义字体必须补回对应 @font-face', '显式传入的 width/fontSize 等参数优先级高于反解值'],
+    desc: '字体由字体管理器维护，正文单独存 HTML。回显时拼接为 text 字段。多字体时在一个 <style> 里写多条 @font-face。',
+    tips: [
+      '自定义字体必须补回对应 @font-face（几种字体写几条）',
+      'contentHtml 里 <span style="font-family:..."> 要和 @font-face 名字一致',
+      '显式传入的 width/fontSize 等参数优先级高于反解值'
+    ],
     lang: 'main.ts',
     code: initScenarioSplitStorageCode
   },
@@ -2261,20 +2560,20 @@ const setHtmlTextKeys = [
   {
     key: 'bold',
     valueType: 'boolean（可省略）',
-    desc: '切换加粗。省略 value 时自动 toggle；也可传 true/false 明确指定'
+    desc: '加粗。外框选中→整段全局字重；内嵌编辑→改 Quill 字符（无拖选时作用于全文）'
   },
-  { key: 'italic', valueType: 'boolean（可省略）', desc: '切换斜体。省略 value 时自动 toggle' },
-  { key: 'underline', valueType: 'boolean（可省略）', desc: '切换下划线。省略 value 时自动 toggle' },
-  { key: 'strike', valueType: 'boolean（可省略）', desc: '切换删除线。省略 value 时自动 toggle' },
+  { key: 'italic', valueType: 'boolean（可省略）', desc: '斜体。规则同 bold' },
+  { key: 'underline', valueType: 'boolean（可省略）', desc: '下划线。内嵌编辑时改字符；外框选中时作用于全文' },
+  { key: 'strike', valueType: 'boolean（可省略）', desc: '删除线。规则同 underline' },
   {
     key: 'textCase',
     valueType: '省略 value',
-    desc: '大小写转换。根据当前内容循环切换：小写 → 大写 → 大写，需在编辑模式下有选区才生效'
+    desc: '大小写转换。必须内嵌编辑且有拖选，否则不执行'
   },
   {
     key: 'script',
     valueType: '"super" | "sub"',
-    desc: '上下标。"super" = 上标（X²），"sub" = 下标（H₂O）；再次调用相同值可取消'
+    desc: '上下标。内嵌编辑时改字符（无拖选→全文）；外框选中→全文'
   },
   {
     key: 'align',
@@ -2289,91 +2588,136 @@ const setHtmlTextKeys = [
   {
     key: 'color',
     valueType: 'string（CSS 颜色值）',
-    desc: '文字颜色，例如 "#ff0000"、"rgba(0,0,0,0.5)"；有选区时只改选中文字'
+    desc: '文字颜色。有拖选→只改选中字；无拖选→全文改色（内嵌编辑或外框选中均可）'
   },
-  { key: 'fontSize', valueType: 'number', desc: '全局字号（像素）；会清除所有 inlineFontSize 局部字号' },
+  {
+    key: 'fontSize',
+    valueType: 'number',
+    desc: '整段全局字号。选中节点即可，不需双击；会清除所有 inlineFontSize'
+  },
   {
     key: 'inlineFontSize',
     valueType: 'number | string',
-    desc: '【实验】选区级局部字号。需 setFeatures({ inlineFontSize: true })，且内嵌编辑 + 有选区'
+    desc: '【实验】局部字号。必须：setFeatures 开启 + 双击编辑 + 拖选一段字'
   },
-  { key: 'fontWeight', valueType: 'number | string', desc: '字重，全局应用，例如 400、700、"bold"' },
-  { key: 'lineHeight', valueType: 'number | string', desc: '行高，全局应用（倍数或 "40px"）' },
+  {
+    key: 'fontWeight',
+    valueType: 'number | string',
+    desc: '整段全局字重。选中节点即可，例如 400、700、"bold"'
+  },
+  {
+    key: 'lineHeight',
+    valueType: 'number | string',
+    desc: '整段全局行高。选中节点即可（倍数或 "40px"）'
+  },
   {
     key: 'letterSpacing',
     valueType: 'number',
-    desc: '字间距（像素）。内嵌编辑 + 有选区 → 局部 span；否则 → 全局 textData.letterSpacing'
+    desc: '有拖选→局部字间距 span；无拖选→整段全局 letterSpacing'
   },
   {
     key: 'textShadow',
-    valueType: 'string（CSS text-shadow）',
-    desc: '文字阴影，例如 "2px 2px 4px #000"。编辑模式下支持局部选区（再次传相同值可取消）；非编辑模式为全局应用'
+    valueType: 'string',
+    desc: '外框选中→整段全局阴影；内嵌编辑→改字符（无拖选时全文）'
   },
   {
     key: 'textStroke',
-    valueType: 'string（CSS -webkit-text-stroke）',
-    desc: '文字描边，例如 "1px #333"；编辑模式下支持局部选区'
+    valueType: 'string',
+    desc: '外框选中→整段全局描边；内嵌编辑→改字符（无拖选时全文）'
   },
   {
     key: 'list',
     valueType: '"ordered" | "bullet"',
-    desc: '列表类型。"ordered" = 有序列表，"bullet" = 无序列表；再次调用可取消'
+    desc: '列表。内嵌编辑时切换当前行；外框选中时作用于全文段落'
   },
   {
     key: 'font',
-    valueType: 'string（fontFamily）',
-    desc: '字体族。内嵌编辑 + 有选区（非全选）→ 局部 span 字体；无选区 / 全选 → 全局 fontFamily。第三个参数 base64font 写入 fontFaces'
+    valueType: 'string + base64font?',
+    desc: '有拖选且非全选→局部字体 span；否则→整段 fontFamily。第三个参数写入 fontFaces'
   }
 ];
 
-// ─── 局部 vs 全局样式总表 ─────────────────────────────────────────────────────
-const formatScopeTable = [
+const editScenarios = [
   {
-    key: 'bold / italic / underline / strike',
-    scope: '局部',
-    scopeKind: 'local',
-    note: '内嵌编辑 + 选区；字符级 Quill 格式'
-  },
-  { key: 'color', scope: '局部', scopeKind: 'local', note: '有选区时只改选中文字；无选区时作用于全部内容' },
-  { key: 'script', scope: '局部', scopeKind: 'local', note: '上下标，需选区' },
-  { key: 'textCase', scope: '局部', scopeKind: 'local', note: '大小写转换，需选区' },
-  {
-    key: 'textShadow',
-    scope: '局部 / 全局',
-    scopeKind: 'mixed',
-    note: '内嵌编辑 + 选区 → span 局部阴影；否则写入 textData 全局阴影'
+    name: '① 外框选中',
+    how: '单击文本，出现缩放框，未双击进编辑器',
+    effect: 'fontSize / lineHeight / alignContent 等「整段属性」生效；bold 等会改 textData 全局'
   },
   {
-    key: 'textStroke',
-    scope: '局部 / 全局',
-    scopeKind: 'mixed',
-    note: '内嵌编辑 + 选区 → span 局部描边；否则写入 textData 全局描边'
+    name: '② 内嵌编辑，无拖选',
+    how: '双击进入编辑，光标闪但没有任何文字被拖蓝',
+    effect: 'bold / color / textShadow 等会作用在全文；inlineFontSize / 局部 font 不生效'
   },
   {
-    key: 'font',
-    scope: '局部 / 全局',
-    scopeKind: 'mixed',
-    note: '内嵌编辑 + 选区（非全选）→ span 局部字体；全选 / 无选区 → 全局 fontFamily，并清除局部字体'
+    name: '③ 内嵌编辑，有拖选',
+    how: '双击进入编辑，拖蓝一部分文字',
+    effect: '可设局部字号 / 局部字体 / 局部字间距；bold / color 等只改选中部分'
+  }
+];
+
+const formatCookbook = [
+  { goal: '整段字号变大', needInner: '否', needSelection: '否', call: "setHTMLText('fontSize', 32)" },
+  { goal: '几个字变大', needInner: '是', needSelection: '是', call: "setHTMLText('inlineFontSize', 48)" },
+  { goal: '整段换字体', needInner: '否', needSelection: '否', call: "setHTMLText('font', family, base64)" },
+  { goal: '几个字换字体', needInner: '是', needSelection: '是（勿全选）', call: "setHTMLText('font', family, base64)" },
+  { goal: '几个字加粗', needInner: '是', needSelection: '是', call: "setHTMLText('bold')" },
+  { goal: '整段加粗', needInner: '否', needSelection: '否', call: "setHTMLText('bold')" },
+  { goal: '整段字间距', needInner: '否', needSelection: '否', call: "setHTMLText('letterSpacing', 2)" },
+  { goal: '几个字间距', needInner: '是', needSelection: '是', call: "setHTMLText('letterSpacing', 4)" },
+  { goal: '垂直居中', needInner: '否', needSelection: '否', call: "setHTMLText('alignContent', 'center')" }
+];
+
+const formatScopeMatrix = [
+  {
+    key: 'fontSize / lineHeight / fontWeight / padding / alignContent',
+    outer: '整段 textData',
+    innerNoSel: '整段 textData',
+    innerSel: '整段 textData（忽略选区）'
   },
   {
     key: 'inlineFontSize',
-    scope: '局部（实验）',
-    scopeKind: 'experimental',
-    note: '需 setFeatures({ inlineFontSize: true })，仅内嵌编辑 + 选区'
+    outer: '不生效',
+    innerNoSel: '不生效',
+    innerSel: '仅选区 span（需 setFeatures）'
+  },
+  {
+    key: 'font',
+    outer: '整段 fontFamily',
+    innerNoSel: '整段 fontFamily',
+    innerSel: '选区 span（全选→整段）'
   },
   {
     key: 'letterSpacing',
-    scope: '局部 / 全局',
-    scopeKind: 'mixed',
-    note: '内嵌编辑 + 选区 → span 局部字间距；否则全局 letterSpacing'
+    outer: '整段 letterSpacing',
+    innerNoSel: '整段 letterSpacing',
+    innerSel: '选区 span'
   },
-  { key: 'fontSize', scope: '全局', scopeKind: 'global', note: '更新 textData.fontSize；会清除所有 inlineFontSize' },
-  { key: 'lineHeight', scope: '全局', scopeKind: 'global', note: '写在 <p> 上' },
-  { key: 'fontWeight', scope: '全局', scopeKind: 'global', note: '写在 <p> 上' },
-  { key: 'padding', scope: '全局', scopeKind: 'global', note: '容器内边距' },
-  { key: 'align', scope: '段落', scopeKind: 'block', note: '水平对齐，段落 / 列表行级' },
-  { key: 'alignContent', scope: '全局', scopeKind: 'global', note: '垂直对齐，外层 flex 容器' },
-  { key: 'list', scope: '段落', scopeKind: 'block', note: '有序 / 无序列表，作用于当前行或整段' }
+  {
+    key: 'bold / italic',
+    outer: 'textData 全局',
+    innerNoSel: 'Quill 全文字符',
+    innerSel: 'Quill 选区字符'
+  },
+  {
+    key: 'underline / strike / color',
+    outer: '全文字符',
+    innerNoSel: '全文字符',
+    innerSel: '选区字符'
+  },
+  {
+    key: 'textCase',
+    outer: '不执行',
+    innerNoSel: '不执行',
+    innerSel: '仅选区'
+  },
+  {
+    key: 'textShadow / textStroke',
+    outer: 'textData 全局',
+    innerNoSel: 'Quill 全文字符',
+    innerSel: 'Quill 选区字符'
+  },
+  { key: 'align', outer: '全文段落', innerNoSel: '光标所在段落', innerSel: '选区涉及段落' },
+  { key: 'list', outer: '全文段落', innerNoSel: '当前行 toggle', innerSel: '当前行 toggle' }
 ];
 
 const setHtmlTextExample = `// 1. 基础文字格式（编辑模式下对选区生效）

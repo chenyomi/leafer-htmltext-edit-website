@@ -1102,6 +1102,16 @@
   color: #ce93d8;
 }
 
+.format-matrix-wrap {
+  overflow-x: auto;
+}
+
+.format-matrix-table th,
+.format-matrix-table td {
+  min-width: 7.5rem;
+  vertical-align: top;
+}
+
 @media (max-width: 768px) {
   .init-layer-grid {
     grid-template-columns: 1fr;
