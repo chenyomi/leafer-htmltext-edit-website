@@ -340,6 +340,8 @@
                 、
                 <code>fontFamily</code>
                 、
+                <code>fontFaces</code>
+                、
                 <code>padding</code>
                 等元数据；但你
                 <strong>显式传入的参数优先级更高</strong>
@@ -496,6 +498,54 @@
             <pre class="code-block"><code>{{ htmlOnlyPersistenceExample }}</code></pre>
           </div>
 
+          <h3 class="doc-h3">多字体与 HTML 回显</h3>
+          <p class="doc-p">
+            一段文本可同时嵌入多个自定义字体。保存时 HTML 的
+            <code>&lt;style&gt;</code>
+            里会有多条
+            <code>@font-face</code>
+            ；局部字体还会出现在
+            <code>&lt;span style="font-family:..."&gt;</code>
+            。只传
+            <code>text</code>
+            初始化或回显时，插件会通过
+            <code>parseHtmlTextData</code>
+            反解全部
+            <code>fontFaces</code>
+            及
+            <code>hasInlineFont</code>
+            等标记；进入编辑时也会把 HTML 里的
+            <code>@font-face</code>
+            合并进
+            <code>textData</code>
+            。
+          </p>
+          <ul class="doc-ul">
+            <li>
+              推荐：保存
+              <code>HtmlText.toJSON()</code>
+              或整棵 Leafer JSON，可同时保留
+              <code>textData.fontFaces</code>
+              与
+              <code>text</code>
+            </li>
+            <li>
+              只存 HTML：必须保留完整
+              <code>&lt;style&gt;</code>
+              （含所有
+              <code>@font-face</code>
+              ）和内容
+              <code>&lt;span&gt;</code>
+              样式
+            </li>
+            <li>
+              初始化多字体：传
+              <code>fonts: [{ family, base64 }, ...]</code>
+              或
+              <code>fontFaces: Record&lt;string, string&gt;</code>
+            </li>
+          </ul>
+
           <div class="callout callout-warning">
             不建议保存 Quill 实例、DOM 或编辑器运行时状态。保存
             <code>HtmlText.toJSON()</code>
@@ -508,9 +558,10 @@
             <code>&lt;p style="..."&gt;</code>
             、
             <code>&lt;span style="..."&gt;</code>
-            等内联样式，并在使用自定义字体时补回对应
+            等内联样式，并在使用自定义字体时补回
+            <strong>全部</strong>
             <code>@font-face</code>
-            。只剩纯文本时无法恢复字号、字体、描边、颜色、宽高和对齐等视觉效果。
+            （多字体场景可能有多条）。只剩纯文本时无法恢复字号、字体、描边、颜色、宽高和对齐等视觉效果。
           </div>
         </section>
 
@@ -926,8 +977,13 @@
 
           <p class="doc-p">
             <code>setHTMLText</code>
-            是应用文本样式的核心函数。在编辑模式下对选区生效；
-            非编辑模式下对整个节点生效；多选时批量应用到所有选中节点。
+            是应用文本样式的核心函数。多选时批量应用到所有选中节点。 各 key 支持
+            <strong>局部（选区）</strong>
+            还是
+            <strong>全局（整段）</strong>
+            ，见
+            <a href="#api-experimental" @click.prevent="scrollTo('api-experimental')">局部与全局样式</a>
+            总表。
           </p>
 
           <div class="code-block-wrap">
@@ -1014,36 +1070,156 @@
           </div>
         </section>
 
-        <!-- ─── API: 实验功能 ─── -->
+        <!-- ─── API: 局部与全局样式 ─── -->
         <section :id="'api-experimental'" class="doc-section">
           <div class="section-anchor-wrap">
             <h2 class="doc-h2">
-              API · 实验功能
+              API · 局部与全局样式
               <a :href="'#api-experimental'" class="anchor-link" @click.prevent="scrollTo('api-experimental')">#</a>
             </h2>
           </div>
 
-          <div class="callout callout-warning">
-            实验功能默认关闭，需要显式开启后才会生效。未开启时不会影响原有
-            <code>fontSize</code>
-            全局字号、弧形文字、锁定比例缩放等稳定功能。
+          <p class="doc-p">
+            插件把样式分成两层：
+            <strong>全局</strong>
+            写入
+            <code>textData</code>
+            并落到
+            <code>&lt;p style="..."&gt;</code>
+            ；
+            <strong>局部</strong>
+            只写在
+            <code>&lt;span style="..."&gt;</code>
+            ，不替代全局字段。判断规则通常是：
+            <strong>内嵌编辑态 + 有文字选区</strong>
+            → 局部；否则 → 全局（或段落级）。
+          </p>
+
+          <h3 class="doc-h3">setHTMLText 作用范围总表</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>作用范围</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in formatScopeTable" :key="row.key">
+                  <td>
+                    <code>{{ row.key }}</code>
+                  </td>
+                  <td>
+                    <span :class="'scope-badge scope-' + row.scopeKind">{{ row.scope }}</span>
+                  </td>
+                  <td class="param-desc">{{ row.note }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          <h3 class="doc-h3">局部字号 inlineFontSize</h3>
+          <div class="callout callout-info">
+            <strong>多选：</strong>
+            <code>setHTMLText</code>
+            会对每个选中节点执行；但
+            <code>inlineFontSize</code>
+            、局部
+            <code>font</code>
+            、局部
+            <code>letterSpacing</code>
+            只在内嵌编辑器里对当前 Quill 选区生效，不支持跨节点批量局部样式。
+          </div>
+
+          <h3 class="doc-h3">局部字体与多字体（font）</h3>
+          <p class="doc-p">
+            <code>setHTMLText('font', fontFamily, base64font)</code>
+            默认开启，无需
+            <code>setFeatures</code>
+            。 内嵌编辑且有选区时，只给选中文字加
+            <code>span style="font-family:..."</code>
+            ；无选区或全选时改全局
+            <code>textData.fontFamily</code>
+            并清除局部字体。自定义字体请传第三个参数
+            <code>base64font</code>
+            ，插件会写入
+            <code>textData.fontFaces</code>
+            并在 HTML
+            <code>&lt;style&gt;</code>
+            中合并多个
+            <code>@font-face</code>
+            。
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(inlineFontUsageExample, 'inline-font-usage')">
+              <i class="pi" :class="copiedKey === 'inline-font-usage' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ inlineFontUsageExample }}</code></pre>
+          </div>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(multiFontInitExample, 'multi-font-init')">
+              <i class="pi" :class="copiedKey === 'multi-font-init' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ multiFontInitExample }}</code></pre>
+          </div>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>场景</th>
+                  <th>行为</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in inlineFontNotes" :key="item.name">
+                  <td>
+                    <code>{{ item.name }}</code>
+                  </td>
+                  <td class="param-desc">{{ item.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">局部字间距（letterSpacing）</h3>
+          <p class="doc-p">
+            <code>setHTMLText('letterSpacing', n)</code>
+            在内嵌编辑且有选区时写入
+            <code>span style="letter-spacing:..."</code>
+            ；否则更新全局
+            <code>textData.letterSpacing</code>
+            并清除局部标记。与局部字号类似，全局字间距写在
+            <code>&lt;p&gt;</code>
+            上，局部写在
+            <code>&lt;span&gt;</code>
+            上。
+          </p>
+
+          <h3 class="doc-h3">局部字号 inlineFontSize（实验功能）</h3>
+          <div class="callout callout-warning">
+            <code>inlineFontSize</code>
+            是唯一仍需
+            <code>htmlTextManage.setFeatures({ inlineFontSize: true })</code>
+            的样式能力。未开启时不影响
+            <code>fontSize</code>
+            、局部字体、弧形文字等稳定功能。
+          </div>
           <p class="doc-p">
             <code>inlineFontSize</code>
-            用于在内嵌编辑状态下给选中的文字设置局部字号。它不会替代
+            不会替代
             <code>fontSize</code>
             ：
             <code>fontSize</code>
-            仍然表示整个文本对象的全局字号，
+            表示整个文本对象的全局字号，
             <code>inlineFontSize</code>
-            只作为富文本 HTML 中的局部
+            只作为
             <code>span style="font-size: ..."</code>
-            保存。
+            保存。调用全局
+            <code>fontSize</code>
+            会清除所有局部字号。
           </p>
 
-          <h3 class="doc-h3">开启方式</h3>
+          <h4 class="doc-h4">开启方式</h4>
           <div class="code-block-wrap">
             <button class="copy-btn" @click="copyCode(inlineFontSizeEnableExample, 'inline-size-enable')">
               <i class="pi" :class="copiedKey === 'inline-size-enable' ? 'pi-check' : 'pi-copy'"></i>
@@ -1051,7 +1227,7 @@
             <pre class="code-block"><code>{{ inlineFontSizeEnableExample }}</code></pre>
           </div>
 
-          <h3 class="doc-h3">使用方式</h3>
+          <h4 class="doc-h4">使用方式</h4>
           <div class="code-block-wrap">
             <button class="copy-btn" @click="copyCode(inlineFontSizeUsageExample, 'inline-size-usage')">
               <i class="pi" :class="copiedKey === 'inline-size-usage' ? 'pi-check' : 'pi-copy'"></i>
@@ -1059,12 +1235,12 @@
             <pre class="code-block"><code>{{ inlineFontSizeUsageExample }}</code></pre>
           </div>
 
-          <h3 class="doc-h3">功能边界</h3>
+          <h4 class="doc-h4">局部字号的影响与限制</h4>
           <div class="params-table-wrap">
             <table class="params-table">
               <thead>
                 <tr>
-                  <th>功能</th>
+                  <th>关联能力</th>
                   <th>多字号文本下的行为</th>
                 </tr>
               </thead>
@@ -1080,8 +1256,21 @@
           </div>
 
           <div class="callout callout-info">
-            插件自身保存或导出的 HTML 会保留局部字号并支持再次恢复。第三方网页或其他编辑器复制来的复杂 HTML
-            会尽量兼容，但不保证所有样式结构都能完整还原。
+            插件导出的 HTML 会保留局部字号 / 局部字体 / 局部字间距，并通过
+            <code>parseHtmlTextData</code>
+            反解
+            <code>hasInlineFont</code>
+            、
+            <code>fontFaces</code>
+            等标记。只存
+            <code>text</code>
+            回显时，务必保留
+            <code>&lt;style&gt;</code>
+            内全部
+            <code>@font-face</code>
+            与
+            <code>&lt;span style&gt;</code>
+            ；第三方复杂 HTML 会尽量兼容，但不保证完整还原。
           </div>
         </section>
 
@@ -1231,7 +1420,7 @@ const apiItems = [
   { id: 'api-htmltext', label: 'HtmlText' },
   { id: 'api-manage', label: 'HtmlTextManage' },
   { id: 'api-sethtml', label: 'setHTMLText' },
-  { id: 'api-experimental', label: '实验功能' },
+  { id: 'api-experimental', label: '局部与全局样式' },
   { id: 'api-license', label: '授权管理' }
 ];
 
@@ -1243,7 +1432,8 @@ const features = [
   { icon: '📐', title: '文本样式', desc: '字体、大小、颜色、对齐、行高、字间距、阴影、描边等全面控制' },
   { icon: '📝', title: '格式化工具', desc: '加粗、斜体、下划线、删除线、上下标、大小写转换' },
   { icon: '📋', title: '列表支持', desc: '有序列表、无序列表' },
-  { icon: '🔤', title: '自定义字体', desc: '支持传入 Base64 字体文件，实时切换字体族' },
+  { icon: '🔤', title: '自定义与多字体', desc: 'Base64 字体注入、多 @font-face、内嵌编辑下选区换字体' },
+  { icon: '🔡', title: '局部样式', desc: '局部字号（实验）、局部字体、局部字间距；与全局样式分层保存' },
   { icon: '🎡', title: '弧形文字', desc: '基于 SVG TextPath 将文字沿弧形路径排列' },
   { icon: '🔍', title: '画布缩放', desc: '内置 zoom API：放大 / 缩小 / 适合屏幕 / 1:1' },
   { icon: '🔒', title: '锁定比例', desc: '选中元素后启用，拖拽缩放时保持宽高比不变' },
@@ -1554,7 +1744,19 @@ const initParamGroups = [
         name: 'fontBase64',
         type: 'string',
         default: '—',
-        desc: '自定义字体 data URL，配合 fontFamily 注入 @font-face'
+        desc: '主自定义字体 data URL，配合 fontFamily 注入 @font-face'
+      },
+      {
+        name: 'fontFaces',
+        type: 'Record<string, string>',
+        default: '—',
+        desc: '多字体资源表：主字体名 → base64，与局部字体、多 @font-face 回显配合'
+      },
+      {
+        name: 'fonts',
+        type: 'Array<{ family: string; base64: string }>',
+        default: '—',
+        desc: '批量初始化多个自定义字体，等价于写入 fontFaces'
       },
       { name: 'fontWeight', type: 'number | string', default: '—', desc: '字重，如 600、"bold"' },
       { name: 'italic', type: 'boolean', default: 'false', desc: '全局斜体，用 <em> 包裹' },
@@ -1619,7 +1821,7 @@ const htmlTextParams = [
     type: 'string',
     required: false,
     default: '—',
-    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / textStroke / padding 等元数据，兼容字体 style + 内容 HTML 回显'
+    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / fontFaces / hasInlineFont / textStroke / padding 等元数据'
   },
   { name: 'fontSize', type: 'number', required: false, default: '16', desc: '字体大小（像素）' },
   {
@@ -1634,7 +1836,21 @@ const htmlTextParams = [
     type: 'string',
     required: false,
     default: '—',
-    desc: '自定义字体的 Base64 / data URL（如 data:font/woff2;base64,...）。需配合 fontFamily 使用，插件会自动注入 @font-face'
+    desc: '主自定义字体的 Base64 / data URL。需配合 fontFamily 使用，插件会自动注入 @font-face'
+  },
+  {
+    name: 'fontFaces',
+    type: 'Record<string, string>',
+    required: false,
+    default: '—',
+    desc: '多字体资源表：字体主名 → base64。局部字体模式下 HTML 可含多条 @font-face'
+  },
+  {
+    name: 'fonts',
+    type: 'Array<{ family: string; base64: string }>',
+    required: false,
+    default: '—',
+    desc: '初始化时批量传入自定义字体列表，会合并进 fontFaces'
   },
   {
     name: 'fontWeight',
@@ -1807,7 +2023,7 @@ app.tree.add(text)
 // 注意：
 // 1. 不要把 contentHtml strip 成纯文字，否则无法恢复样式。
 // 2. 使用自定义字体时必须补回对应 @font-face，否则会回退到系统字体。
-// 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/textStroke。
+// 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/fontFaces/hasInlineFont/textStroke。
 // 4. 显式传入的 width/fontSize/alignContent 等参数优先级更高。`;
 
 const openInnerEditorExample = `import { PointerEvent } from 'leafer-ui'
@@ -1867,8 +2083,10 @@ const editingFaq = [
     a: 'setHTMLText 作用于当前选中节点；部分格式需要选区或内嵌编辑态才生效。',
     tips: [
       '先选中 HtmlText，再调用 setHTMLText',
-      'bold / italic / color 等字符级格式，通常需要在内嵌编辑态选中文字',
-      'fontSize / lineHeight / alignContent 等块级属性，选中节点后即可修改'
+      'bold / italic / color / font 等：内嵌编辑态选中文字后生效',
+      'fontSize / lineHeight / alignContent：选中节点即可，作用于全局',
+      'inlineFontSize 需先 setFeatures({ inlineFontSize: true })',
+      '局部 font / letterSpacing：内嵌编辑 + 选区；全选 font 会走全局路径'
     ]
   },
   {
@@ -1964,13 +2182,13 @@ canvas?.editor?.cancel()`
     name: 'setFeatures',
     anchor: 'set-features',
     signature: 'htmlTextManage.setFeatures(features): void',
-    desc: '开启或关闭实验功能。实验功能默认关闭，建议只在明确需要时开启。',
+    desc: '开启实验功能。目前仅 inlineFontSize（局部字号）需要显式开启；局部字体 font、局部字间距 letterSpacing 默认可用。',
     params: [
       {
         name: 'features',
         type: '{ inlineFontSize?: boolean }',
         required: true,
-        desc: '实验功能开关。例如 inlineFontSize 表示选区级局部字号'
+        desc: '实验功能开关。当前仅 inlineFontSize（局部字号）需开启'
       }
     ],
     returns: undefined,
@@ -2073,15 +2291,19 @@ const setHtmlTextKeys = [
     valueType: 'string（CSS 颜色值）',
     desc: '文字颜色，例如 "#ff0000"、"rgba(0,0,0,0.5)"；有选区时只改选中文字'
   },
-  { key: 'fontSize', valueType: 'number', desc: '字体大小（像素）；全局应用，不支持局部选区' },
+  { key: 'fontSize', valueType: 'number', desc: '全局字号（像素）；会清除所有 inlineFontSize 局部字号' },
   {
     key: 'inlineFontSize',
     valueType: 'number | string',
-    desc: '实验功能：选区级局部字号。需先调用 htmlTextManage.setFeatures({ inlineFontSize: true })，且只在内嵌编辑状态下有选区时生效'
+    desc: '【实验】选区级局部字号。需 setFeatures({ inlineFontSize: true })，且内嵌编辑 + 有选区'
   },
-  { key: 'fontWeight', valueType: 'number | string', desc: '字重，例如 400、700、"bold"、"normal"；全局应用' },
-  { key: 'lineHeight', valueType: 'number', desc: '行高倍数（相对 fontSize），例如 1.5；全局应用' },
-  { key: 'letterSpacing', valueType: 'number', desc: '字间距（像素）；全局应用' },
+  { key: 'fontWeight', valueType: 'number | string', desc: '字重，全局应用，例如 400、700、"bold"' },
+  { key: 'lineHeight', valueType: 'number | string', desc: '行高，全局应用（倍数或 "40px"）' },
+  {
+    key: 'letterSpacing',
+    valueType: 'number',
+    desc: '字间距（像素）。内嵌编辑 + 有选区 → 局部 span；否则 → 全局 textData.letterSpacing'
+  },
   {
     key: 'textShadow',
     valueType: 'string（CSS text-shadow）',
@@ -2100,8 +2322,58 @@ const setHtmlTextKeys = [
   {
     key: 'font',
     valueType: 'string（fontFamily）',
-    desc: '运行时切换字体族。需同时传第三个参数 base64font；如果是创建节点时初始化字体，优先使用 HtmlText 的 fontBase64'
+    desc: '字体族。内嵌编辑 + 有选区（非全选）→ 局部 span 字体；无选区 / 全选 → 全局 fontFamily。第三个参数 base64font 写入 fontFaces'
   }
+];
+
+// ─── 局部 vs 全局样式总表 ─────────────────────────────────────────────────────
+const formatScopeTable = [
+  {
+    key: 'bold / italic / underline / strike',
+    scope: '局部',
+    scopeKind: 'local',
+    note: '内嵌编辑 + 选区；字符级 Quill 格式'
+  },
+  { key: 'color', scope: '局部', scopeKind: 'local', note: '有选区时只改选中文字；无选区时作用于全部内容' },
+  { key: 'script', scope: '局部', scopeKind: 'local', note: '上下标，需选区' },
+  { key: 'textCase', scope: '局部', scopeKind: 'local', note: '大小写转换，需选区' },
+  {
+    key: 'textShadow',
+    scope: '局部 / 全局',
+    scopeKind: 'mixed',
+    note: '内嵌编辑 + 选区 → span 局部阴影；否则写入 textData 全局阴影'
+  },
+  {
+    key: 'textStroke',
+    scope: '局部 / 全局',
+    scopeKind: 'mixed',
+    note: '内嵌编辑 + 选区 → span 局部描边；否则写入 textData 全局描边'
+  },
+  {
+    key: 'font',
+    scope: '局部 / 全局',
+    scopeKind: 'mixed',
+    note: '内嵌编辑 + 选区（非全选）→ span 局部字体；全选 / 无选区 → 全局 fontFamily，并清除局部字体'
+  },
+  {
+    key: 'inlineFontSize',
+    scope: '局部（实验）',
+    scopeKind: 'experimental',
+    note: '需 setFeatures({ inlineFontSize: true })，仅内嵌编辑 + 选区'
+  },
+  {
+    key: 'letterSpacing',
+    scope: '局部 / 全局',
+    scopeKind: 'mixed',
+    note: '内嵌编辑 + 选区 → span 局部字间距；否则全局 letterSpacing'
+  },
+  { key: 'fontSize', scope: '全局', scopeKind: 'global', note: '更新 textData.fontSize；会清除所有 inlineFontSize' },
+  { key: 'lineHeight', scope: '全局', scopeKind: 'global', note: '写在 <p> 上' },
+  { key: 'fontWeight', scope: '全局', scopeKind: 'global', note: '写在 <p> 上' },
+  { key: 'padding', scope: '全局', scopeKind: 'global', note: '容器内边距' },
+  { key: 'align', scope: '段落', scopeKind: 'block', note: '水平对齐，段落 / 列表行级' },
+  { key: 'alignContent', scope: '全局', scopeKind: 'global', note: '垂直对齐，外层 flex 容器' },
+  { key: 'list', scope: '段落', scopeKind: 'block', note: '有序 / 无序列表，作用于当前行或整段' }
 ];
 
 const setHtmlTextExample = `// 1. 基础文字格式（编辑模式下对选区生效）
@@ -2128,21 +2400,73 @@ setHTMLText('alignContent', 'end')    // 垂直底部
 // 4. 颜色
 setHTMLText('color', '#ff5500')   // 改变文字颜色
 
-// 5. 全局属性
-setHTMLText('fontSize', 24)
+// 5. 全局属性（选中节点即可，无需选区）
+setHTMLText('fontSize', 24)       // 会清除局部字号
 setHTMLText('lineHeight', 1.8)
-setHTMLText('letterSpacing', 2)
-setHTMLText('textShadow', '2px 2px 4px rgba(0,0,0,0.4)')
-setHTMLText('textStroke', '1px #333333')
+setHTMLText('letterSpacing', 2)   // 无选区时全局；编辑中选区 → 局部
 
-// 6. 列表
+// 6. 局部样式（需内嵌编辑 + 文字选区）
+setHTMLText('inlineFontSize', 42) // 需先 setFeatures({ inlineFontSize: true })
+setHTMLText('font', '"Dancing Script", cursive', fontBase64) // 选区局部字体
+
+// 7. 列表
 setHTMLText('list', 'ordered')  // 有序列表
 setHTMLText('list', 'bullet')   // 无序列表
 
-// 7. 运行时切换自定义字体（初始化字体可直接用 HtmlText 的 fontBase64）
+// 8. 阴影 / 描边（编辑中选区 → 局部；否则全局）
+setHTMLText('textShadow', '2px 2px 4px rgba(0,0,0,0.4)')
+setHTMLText('textStroke', '1px #333333')
+
+// 9. 运行时切换自定义字体
 const fontFamily = '"Dancing Script", cursive'
 const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
 setHTMLText('font', fontFamily, fontBase64)`;
+
+const inlineFontUsageExample = `import { setHTMLText } from '@chenyomi/leafer-htmltext-edit'
+
+// 1. 双击进入内嵌编辑器，选中一段文字
+// 2. 局部换字体（第三个参数为 base64 / data URL）
+const fontA = '"Dancing Script", cursive'
+const fontABase64 = 'data:font/woff2;base64,...'
+setHTMLText('font', fontA, fontABase64)
+
+// 3. 全选或无选区时，同一 API 会改全局 fontFamily 并清除局部字体
+setHTMLText('font', '"PingFang SC", sans-serif')`;
+
+const multiFontInitExample = `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
+
+const text = new HtmlText({
+  width: 400,
+  fontSize: 28,
+  fontFamily: '"PingFang SC", sans-serif',
+  fonts: [
+    { family: '"Dancing Script", cursive', base64: 'data:font/woff2;base64,...' },
+    { family: 'YouSheBiaoTiHei-2', base64: 'data:font/woff2;base64,...' },
+  ],
+  content: '全局默认字体，编辑时可选区换成其他字体',
+})
+
+// 或只传 text（HTML 含多条 @font-face + span font-family）
+// new HtmlText({ text: savedHtml })`;
+
+const inlineFontNotes = [
+  {
+    name: 'fontFaces 注册表',
+    desc: '每次 setHTMLText("font", ..., base64) 会把字体写入 textData.fontFaces，保存 HTML 时合并为多条 @font-face'
+  },
+  {
+    name: '全选改字体',
+    desc: '内嵌编辑下全选等同于全局改字体，会清除所有 span 局部 font-family'
+  },
+  {
+    name: '编辑中写回',
+    desc: '局部改字体时编辑过程中不写回 leaf.text，退出内嵌编辑后统一 updateHtmlText，避免混显'
+  },
+  {
+    name: '只存 HTML 回显',
+    desc: 'parseHtmlTextData 会反解全部 @font-face 到 fontFaces；进入编辑时也会从 HTML 合并 fontFaces'
+  }
+];
 
 const inlineFontSizeEnableExample = `import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
 
@@ -2165,33 +2489,42 @@ setHTMLText('fontSize', 24)`;
 const inlineFontSizeLimits = [
   {
     name: '弧形文字',
-    desc: '多字号文本暂不支持弧形文字。开启局部字号后，弧形排版会被跳过，建议使用统一字号后再应用弧形。'
+    desc: '存在局部字号（hasInlineFontSize）时弧形排版会被跳过；建议统一字号后再做弧形'
   },
   {
     name: '锁定比例缩放',
-    desc: '多字号文本不会参与锁定比例下的自动字号收口缩放，避免只缩放全局字号导致局部字号比例错乱。'
+    desc: '多字号文本不参与 lockRatio 下的全局 fontSize 收口缩放，避免局部字号比例错乱'
   },
   {
     name: '全局 fontSize',
-    desc: '全局字号用于统一整段文本字号。调用 fontSize 会清除局部字号，让文本回到单字号模式。'
+    desc: '调用 fontSize 会清除所有 inlineFontSize，文本回到单字号模式'
   },
   {
-    name: '多选批量局部字号',
-    desc: 'inlineFontSize 只在内嵌编辑器中对选区生效，不支持对多个文本节点批量设置局部字号。'
+    name: '与局部字体并存',
+    desc: '同一文本可同时有局部字号与局部字体；各自保存在不同 span style 属性上'
+  },
+  {
+    name: '多选批量',
+    desc: 'inlineFontSize 只对内嵌编辑器内 Quill 选区生效，不支持多节点批量局部字号'
   },
   {
     name: '外部 HTML',
-    desc: '插件自身保存或导出的 HTML 支持恢复局部字号。第三方复杂 HTML 会尽量兼容，但不保证所有样式结构完整还原。'
+    desc: '插件导出 HTML 可恢复局部字号；第三方 HTML 尽量兼容，不保证完整还原'
   }
 ];
 
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
-    version: '2.6.9',
+    version: '2.6.10',
     date: '2026-06',
     tag: 'latest',
-    items: ['发布 v2.6.9']
+    items: [
+      '支持多字体 fontFaces / fonts[] 与局部字体 inlineFontFamily',
+      '支持局部字间距 inlineLetterSpacing',
+      'parseHtmlTextData 反解全部 @font-face；进入编辑时合并 fontFaces',
+      '@font-face 字体名含空格时自动加引号'
+    ]
   },
   {
     version: '2.6.7',

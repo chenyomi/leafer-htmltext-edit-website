@@ -1061,6 +1061,47 @@
   color: #d8d8d8;
 }
 
+.doc-h4 {
+  margin: 1.25rem 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e8e8e8;
+}
+
+.scope-badge {
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.scope-local {
+  background: rgba(76, 175, 80, 0.18);
+  color: #9ee09e;
+}
+
+.scope-global {
+  background: rgba(100, 149, 237, 0.18);
+  color: #9ec0ff;
+}
+
+.scope-mixed {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffd966;
+}
+
+.scope-experimental {
+  background: rgba(255, 87, 34, 0.15);
+  color: #ffab91;
+}
+
+.scope-block {
+  background: rgba(156, 39, 176, 0.15);
+  color: #ce93d8;
+}
+
 @media (max-width: 768px) {
   .init-layer-grid {
     grid-template-columns: 1fr;
