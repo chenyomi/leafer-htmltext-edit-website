@@ -108,15 +108,15 @@
               <i class="pi pi-arrow-up-right"></i>
             </a>
             <a
-              href="https://github.com/chenyomi/leafer-htmltext-edit"
+              href="https://github.com/chenyomi/leafer-htmltext-edit-view"
               target="_blank"
               rel="noopener noreferrer"
               class="doc-resource-card"
             >
               <i class="pi pi-github"></i>
               <div>
-                <strong>GitHub 源码</strong>
-                <span>chenyomi/leafer-htmltext-edit</span>
+                <strong>GitHub示例源码</strong>
+                <span>chenyomi/leafer-htmltext-edit-view</span>
               </div>
               <i class="pi pi-arrow-up-right"></i>
             </a>
@@ -3251,7 +3251,7 @@ const changelog = [
       '重构文档接入指南，按业务路线、初始化、更新、保存、回显、排错梳理使用链路',
       '补充资源拆分存储说明，明确字体、图片、模板等大资源不应重复写入文本数据',
       '新增已有节点更新策略、保存前检查清单和局部样式保存回显示例',
-      '将 npm、GitHub 源码、在线演示入口上移到文档顶部，并修正在线演示链接'
+      '将 npm、实例源码、在线演示入口上移到文档顶部，并修正源码与演示链接'
     ]
   },
   {
