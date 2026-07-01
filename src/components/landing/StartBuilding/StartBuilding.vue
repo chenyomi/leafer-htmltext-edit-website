@@ -12,8 +12,8 @@
           hoverFillColor="#222"
           style="position: absolute; left: 0; top: 0"
         />
-        <h4 class="start-building-title">Case</h4>
-        <p class="start-building-subtitle mt-4">基础付费版功能介绍</p>
+        <h4 class="start-building-title">{{ pricing.caseTitle }}</h4>
+        <p class="start-building-subtitle mt-4">{{ pricing.caseSubtitle }}</p>
         <video
           :poster="posterSrc"
           src="@/assets/video/video.mp4"
@@ -25,7 +25,7 @@
         <div class="text-center">
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <img style="border-radius: 20px; width: 100%" src="@/assets/shu.png" alt="" />
-            <p class="flex-1 w-full absolute">一键竖排文字/段落竖排</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.verticalText }}</p>
           </div>
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
@@ -35,10 +35,10 @@
               :loop="true"
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">轮廓线</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.outline }}</p>
           </div>
         </div>
-        <p class="start-building-subtitle mt-10">其他功能（暂未开放）</p>
+        <p class="start-building-subtitle mt-10">{{ pricing.comingSoon }}</p>
         <div class="text-center">
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
@@ -48,7 +48,7 @@
               :loop="true"
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">括号</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.bracket }}</p>
           </div>
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
@@ -58,7 +58,7 @@
               :loop="true"
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">弧形文字</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.arcText }}</p>
           </div>
         </div>
         <div class="text-center">
@@ -70,7 +70,7 @@
               :loop="true"
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">圆</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.circle }}</p>
           </div>
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
@@ -80,7 +80,7 @@
               :loop="true"
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">线性圆</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.linearCircle }}</p>
           </div>
         </div>
         <div class="text-center">
@@ -92,18 +92,18 @@
               :loop="true"
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">星星</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.star }}</p>
           </div>
           <div
             class="relative inline-block mx-4 my-6"
             style="background: #ffffff; border-radius: 20px; width: 400px"
           ></div>
         </div>
-        <p class="start-building-subtitle mt-10">Playground</p>
-        <p class="start-building-subtitle">基础付费版功能在线体验入口（不包含进阶高级版）</p>
+        <p class="start-building-subtitle mt-10">{{ pricing.playground }}</p>
+        <p class="start-building-subtitle">{{ pricing.playgroundDesc }}</p>
         <router-link custom to="" class="start-building-button">
           <a href="https://stackblitz.com/~/github.com/chenyomi/leafer-htmltext-edit-view" target="_blank">
-            Just Trying Now
+            {{ pricing.tryNow }}
           </a>
         </router-link>
       </div>
@@ -112,35 +112,33 @@
   <section class="start-building-section" id="price">
     <div class="start-building-container">
       <div class="pricing-cards">
-        <ParticleCard class="feature-card pricing-card" :disable-animations="isMobile">
-          <h2>个人版</h2>
-          <p class="pricing-label">早鸟价</p>
+        <ParticleCard
+          v-for="plan in planCards"
+          :key="plan.key"
+          class="feature-card pricing-card"
+          :class="{ 'pricing-card--featured': plan.featured }"
+          :disable-animations="isMobile"
+        >
+          <h2>{{ plan.title }}</h2>
+          <p class="pricing-label">{{ pricing.earlyBird }}</p>
           <GradientText
-            text="¥99"
+            :text="plan.price"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
             class="pricing-price"
           />
-          <p class="pricing-label pricing-label-muted">原价</p>
+          <p class="pricing-label pricing-label-muted">{{ pricing.original }}</p>
           <GradientText
-            text="¥199"
+            :text="plan.originalPrice"
             :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
             :animation-speed="8"
             :show-border="false"
             class="pricing-price pricing-original-price"
           />
+          <p v-if="plan.badge" style="color: #3cff50; font-weight: 600">{{ plan.badge }}</p>
           <div class="pricing-features">
-            <p>基础版本功能</p>
-            <p>1个主域名</p>
-            <p>包含 www 子域名</p>
-            <p>不含泛解析/多子域名</p>
-            <p>本地开发环境</p>
-            <p>支持离线永久授权</p>
-            <p>提供编译包</p>
-            <p>安装包永久授权</p>
-            <p>一年内免费升级</p>
-            <p>专属微信群</p>
+            <p v-for="feature in plan.features" :key="feature">{{ feature }}</p>
           </div>
           <ElectricBorder
             class="pricing-contact-border"
@@ -151,93 +149,7 @@
             :style="{ borderRadius: '16px', width: '150px', margin: '14px auto 0 auto' }"
           >
             <div class="py-3 contact-author-button" @click="showContactModal = true">
-              <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
-            </div>
-          </ElectricBorder>
-        </ParticleCard>
-
-        <ParticleCard class="feature-card pricing-card pricing-card--featured" :disable-animations="isMobile">
-          <h2>专业版</h2>
-          <p class="pricing-label">早鸟价</p>
-          <GradientText
-            text="¥399"
-            :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
-            :animation-speed="8"
-            :show-border="false"
-            class="pricing-price"
-          />
-          <p class="pricing-label pricing-label-muted">原价</p>
-          <GradientText
-            text="¥599"
-            :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
-            :animation-speed="8"
-            :show-border="false"
-            class="pricing-price pricing-original-price"
-          />
-          <p style="color: #3cff50; font-weight: 600">推荐商业项目使用</p>
-          <div class="pricing-features">
-            <p>完整基础版本功能</p>
-            <p>3个域名/子域名</p>
-            <p>本地开发环境</p>
-            <p>支持离线永久授权</p>
-            <p>提供编译包</p>
-            <p>安装包永久授权</p>
-            <p>一年内免费升级</p>
-            <p>优先技术支持</p>
-          </div>
-          <ElectricBorder
-            class="pricing-contact-border"
-            :color="'#7df9ff'"
-            :speed="1"
-            :chaos="0.5"
-            :thickness="2"
-            :style="{ borderRadius: '16px', width: '150px', margin: '14px auto 0 auto' }"
-          >
-            <div class="py-3 contact-author-button" @click="showContactModal = true">
-              <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
-            </div>
-          </ElectricBorder>
-        </ParticleCard>
-
-        <ParticleCard class="feature-card pricing-card" :disable-animations="isMobile">
-          <h2>企业版</h2>
-          <p class="pricing-label">早鸟价</p>
-          <GradientText
-            text="¥999"
-            :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
-            :animation-speed="8"
-            :show-border="false"
-            class="pricing-price"
-          />
-          <p class="pricing-label pricing-label-muted">原价</p>
-          <GradientText
-            text="¥1999"
-            :colors="['#ffaa40', '#9c40ff', '#ffaa40']"
-            :animation-speed="8"
-            :show-border="false"
-            class="pricing-price pricing-original-price"
-          />
-          <div class="pricing-features">
-            <p>完整商业授权功能</p>
-            <p>10个域名/子域名</p>
-            <p>可支持泛域名授权</p>
-            <p>本地开发环境</p>
-            <p>支持离线永久授权</p>
-            <p>提供编译包</p>
-            <p>安装包永久授权</p>
-            <p>一年内免费升级</p>
-            <p>专属微信群/优先支持</p>
-          </div>
-          <ElectricBorder
-            class="pricing-contact-border"
-            :color="'#7df9ff'"
-            :speed="1"
-            :chaos="0.5"
-            :thickness="2"
-            :style="{ borderRadius: '16px', width: '150px', margin: '14px auto 0 auto' }"
-          >
-            <div class="py-3 contact-author-button" @click="showContactModal = true">
-              <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">联系作者</p>
+              <p :style="{ margin: '6px 0 0', color: '#b0f29e' }">{{ pricing.contactAuthor }}</p>
             </div>
           </ElectricBorder>
         </ParticleCard>
@@ -245,203 +157,54 @@
 
       <div class="pricing-extras">
         <ParticleCard class="feature-card pricing-extra-card" :disable-animations="isMobile">
-          <h2>Tips</h2>
+          <h2>{{ pricing.tipsTitle }}</h2>
           <div style="padding: 20px; border-radius: 20px">
-            <p style="text-align: left">
-              1、购买后可在开发环境使用，无需立即绑定域名（域名访问的除外），但仍需安装授权许可证书。
-            </p>
-
-            <p style="text-align: left">2、插件为一次性买断授权，下载的安装包可永久使用。也可以使用npm依赖包。</p>
-            <p style="text-align: left">
-              3、购买后可获得 1 年内免费升级（视版本而定），包括新功能、兼容性更新及 bug
-              修复。免费期结束后，您可继续永久使用已安装版本，无任何功能限制。
-            </p>
-            <p style="text-align: left">
-              4、一个授权仅限
-              1个项目使用。如在多个项目中使用，请购买相应数量的授权，批量需求请联系作者。违规使用（未授权跨项目使用）可能触发授权锁定或限制，本人保留追究权利。
-            </p>
-            <p style="text-align: left">
-              5、个人版的 1 个域名指 1 个主域名，例如 example.com，并包含 www.example.com；不包含 *.example.com
-              泛解析，也不包含 admin.example.com、app.example.com 等多个业务子域名。
-            </p>
-            <p style="text-align: left">
-              6、专业版按域名/子域名单独计数；企业版可按需支持 10 个域名或泛域名授权，适合
-              SaaS、多租户和企业内多个系统。
-            </p>
-            <p style="text-align: left">
-              7、安装包与源码包均内嵌了专属 license 水印标识，可用于追踪源用户身份，不可分发使用。
-            </p>
-            <p style="text-align: left">
-              8、插件为数字商品，购买后即视为交付使用，暂不支持退款。请在购买前确认功能符合需求，如有疑问欢迎联系本人。
-            </p>
-            <p style="text-align: left">9、购买后享有专属微信交流群支持，专业版和企业版优先获得支持。</p>
+            <p v-for="tip in pricing.tips" :key="tip" style="text-align: left">{{ tip }}</p>
           </div>
         </ParticleCard>
         <ParticleCard class="feature-card pricing-extra-card" :disable-animations="isMobile">
-          <h2>Leafer HTMLText Edit - 投资回报分析</h2>
+          <h2>{{ pricing.roiTitle }}</h2>
 
           <div style="padding: 20px; border-radius: 20px">
-            <p class="mb-2" style="text-align: left; font-size: 20px">💰 投资回报 ROI</p>
+            <p class="mb-2" style="text-align: left; font-size: 20px">{{ pricing.roiSections.roi.title }}</p>
             <div class="pl-6">
-              <p style="text-align: left">
-                要自己实现同级别的富文本编辑功能，需要熟悉 Canvas
-                渲染、文本排版引擎、光标定位算法、字体测量机制，还得深入理解 Leafer UI 的渲染流程，可能要投入 2
-                个月左右甚至更久的开发资源。
-              </p>
-              <p style="text-align: left">而我们封装好了所有成熟解法：</p>
-              <p style="text-align: left">一次授权，立刻可用，长期稳定更新</p>
-              <p style="text-align: left">买的是插件，省的是时间，赢的是体验</p>
+              <p v-for="line in pricing.roiSections.roi.paragraphs" :key="line" style="text-align: left">{{ line }}</p>
             </div>
-            <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">📊 成本对比</p>
+
+            <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">{{ pricing.roiSections.cost.title }}</p>
             <div class="pl-6">
               <table style="border-collapse: collapse; border: 1px solid white; min-width: 100%">
                 <thead>
                   <tr>
-                    <th>指标</th>
-                    <th>自研成本</th>
-                    <th>Leafer HTMLText Edit</th>
+                    <th v-for="header in pricing.roiSections.cost.headers" :key="header">{{ header }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>⏰ 开发时间</td>
-                    <td>约2个月</td>
-                    <td>✅ 即装即用</td>
-                  </tr>
-                  <tr>
-                    <td>💵 人力成本</td>
-                    <td>
-                      <p>约6万</p>
-                      <p>(1人 × 3万 × 2个月)</p>
-                    </td>
-                    <td>✅ 节省 99%</td>
-                  </tr>
-                  <tr>
-                    <td>🔧 技术难度</td>
-                    <td>
-                      <p>高，需要深入理解：</p>
-                      <p>Canvas 文本渲染</p>
-                      <p>光标/选区算法</p>
-                      <p>富文本数据结构</p>
-                      <p>IME 输入法兼容</p>
-                      <p>字体度量与排版</p>
-                    </td>
-                    <td>✅ 已完美封装</td>
-                  </tr>
-                  <tr>
-                    <td>🛠️ 维护成本</td>
-                    <td>
-                      <p>高，需持续修复 Bug</p>
-                      <p>跟进浏览器更新</p>
-                    </td>
-                    <td>✅ 定期更新迭代</td>
-                  </tr>
-                  <tr>
-                    <td>🔌 兼容性/集成</td>
-                    <td>
-                      <p>需深度适配 Leafer UI</p>
-                      <p>可能需要改动框架源码</p>
-                    </td>
-                    <td>
-                      <p>✅ 零侵入设计</p>
-                      <p>快速集成，10 分钟上手</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>🎯 适用场景</td>
-                    <td>
-                      <p>仅限特定项目</p>
-                      <p>难以复用</p>
-                    </td>
-                    <td>
-                      <p>✅ 场景广泛</p>
-                      <p>适配各类编辑器需求</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>⚠️ 技术风险</td>
-                    <td>
-                      <p>高，易踩坑：</p>
-                      <p>浏览器兼容性</p>
-                      <p>性能优化难题</p>
-                      <p>边界情况处理</p>
-                    </td>
-                    <td>✅ 风险极低</td>
-                  </tr>
-                  <tr>
-                    <td>📈 ROI</td>
-                    <td>
-                      <p>投入高，周期长</p>
-                      <p>机会成本巨大</p>
-                    </td>
-                    <td>
-                      <p>✅ 超高性价比</p>
-                      <p>节省大量开发时间与人力</p>
-                    </td>
+                  <tr v-for="(row, index) in pricing.roiSections.cost.rows" :key="index">
+                    <td v-for="(cell, cellIndex) in row" :key="cellIndex" class="roi-cell">{{ cell }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">🎯 核心价值</p>
+
+            <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">{{ pricing.roiSections.value.title }}</p>
             <div class="pl-6">
-              <p style="text-align: left">技术门槛高</p>
-              <p style="text-align: left">自研富文本编辑器需要掌握：</p>
-              <p style="text-align: left">Canvas 文本渲染：字体度量、文本绘制、抗锯齿处理</p>
-              <p style="text-align: left">光标与选区：位置计算、拖拽选择、键盘导航</p>
-              <p style="text-align: left">富文本格式：HTML 解析、样式应用、嵌套结构</p>
-              <p style="text-align: left">输入法支持：IME 事件处理、组合文本</p>
-              <p style="text-align: left">性能优化：虚拟滚动、增量渲染、防抖节流</p>
+              <p v-for="line in pricing.roiSections.value.paragraphs" :key="line" style="text-align: left">
+                {{ line }}
+              </p>
             </div>
-            <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">开发周期长</p>
+
+            <p class="mb-3 mt-4" style="text-align: left; font-size: 20px">{{ pricing.roiSections.timeline.title }}</p>
             <div class="pl-6">
               <table style="border-collapse: collapse; border: 1px solid white; min-width: 100%">
                 <thead>
                   <tr>
-                    <th>阶段</th>
-                    <th>预计时间</th>
-                    <th>主要工作</th>
+                    <th v-for="header in pricing.roiSections.timeline.headers" :key="header">{{ header }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>需求分析</td>
-                    <td>0.5 周</td>
-                    <td>调研方案、技术选型</td>
-                  </tr>
-                  <tr>
-                    <td>基础架构</td>
-                    <td>1 周</td>
-                    <td>Canvas 文本引擎、基础编辑</td>
-                  </tr>
-                  <tr>
-                    <td>富文本支持</td>
-                    <td>1.5 周</td>
-                    <td>HTML 解析、样式系统</td>
-                  </tr>
-                  <tr>
-                    <td>交互优化</td>
-                    <td>2 周</td>
-                    <td>光标、选区、快捷键</td>
-                  </tr>
-                  <tr>
-                    <td>兼容性测试</td>
-                    <td>1 周</td>
-                    <td>浏览器兼容、Bug 修复</td>
-                  </tr>
-                  <tr>
-                    <td>性能调优</td>
-                    <td>1 周</td>
-                    <td>渲染优化、内存管理</td>
-                  </tr>
-                  <tr>
-                    <td>文档与测试</td>
-                    <td>1 周</td>
-                    <td>编写文档、单元测试</td>
-                  </tr>
-                  <tr>
-                    <td>总计</td>
-                    <td>8 周 ≈ 2 个月</td>
-                    <td>-</td>
+                  <tr v-for="(row, index) in pricing.roiSections.timeline.rows" :key="index">
+                    <td v-for="(cell, cellIndex) in row" :key="cellIndex">{{ cell }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -453,26 +216,67 @@
 
     <div v-if="showContactModal" class="contact-modal-overlay" @click.self="showContactModal = false">
       <div class="contact-modal">
-        <button class="contact-modal-close" type="button" aria-label="关闭" @click="showContactModal = false">×</button>
-        <h3>联系作者</h3>
-        <p>扫码添加微信，请备注「Leafer 插件授权」。</p>
-        <img src="@/assets/qrcode.jpg" alt="作者微信二维码" />
+        <button
+          class="contact-modal-close"
+          type="button"
+          :aria-label="pricing.contactModalClose"
+          @click="showContactModal = false"
+        >
+          ×
+        </button>
+        <h3>{{ pricing.contactModalTitle }}</h3>
+        <p>{{ pricing.contactModalDesc }}</p>
+        <img src="@/assets/qrcode.jpg" alt="WeChat QR code" />
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Squares from '@/content/Backgrounds/Squares/Squares.vue';
 import '../FeatureCards/FeatureCards.css';
 import './StartBuilding.css';
 import GradientText from '@/content/TextAnimations/GradientText/GradientText.vue';
 import ElectricBorder from '@/content/Animations/ElectricBorder/ElectricBorder.vue';
 import posterSrc from '@/assets/video/video.png';
+import { usePricing } from '@/i18n/pricing';
+
+const pricing = usePricing();
 const isMobile = ref(false);
 const show = ref(false);
 const showContactModal = ref(false);
+
+const planCards = computed(() => [
+  {
+    key: 'personal',
+    title: pricing.value.plans.personal.title,
+    price: '¥99',
+    originalPrice: '¥199',
+    featured: false,
+    badge: '',
+    features: pricing.value.plans.personal.features
+  },
+  {
+    key: 'pro',
+    title: pricing.value.plans.pro.title,
+    price: '¥399',
+    originalPrice: '¥599',
+    featured: true,
+    badge: pricing.value.plans.pro.badge,
+    features: pricing.value.plans.pro.features
+  },
+  {
+    key: 'enterprise',
+    title: pricing.value.plans.enterprise.title,
+    price: '¥999',
+    originalPrice: '¥1999',
+    featured: false,
+    badge: '',
+    features: pricing.value.plans.enterprise.features
+  }
+]);
+
 const checkIsMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
@@ -502,5 +306,8 @@ td {
 }
 td p {
   text-align: left !important;
+}
+.roi-cell {
+  white-space: pre-line;
 }
 </style>

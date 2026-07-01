@@ -26,7 +26,7 @@
           </div>
         </div>
 
-        <div class="category-tabs" aria-label="帖子分类筛选">
+        <div class="category-tabs" :aria-label="t('community.categoryFilterAria')">
           <button
             v-for="item in categoryOptions"
             :key="item.value"

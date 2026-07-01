@@ -17,7 +17,10 @@ const messages = {
       noData: '暂无数据',
       githubLogin: 'GitHub 登录',
       logout: '退出',
-      starGithub: '在 GitHub 上点星'
+      starGithub: '在 GitHub 上点星',
+      searchDocs: '搜索文档',
+      favorites: '收藏',
+      other: '其他'
     },
     common: {
       backHome: '返回首页',
@@ -69,6 +72,7 @@ const messages = {
       mineOnly: '我的帖子',
       discussionsCount: '{count} 个讨论',
       allCategories: '全部分类',
+      categoryFilterAria: '帖子分类筛选',
       loadingPosts: '正在读取帖子...',
       emptyPosts: '暂无帖子，点击右上角发起第一个讨论。',
       pinned: '置顶',
@@ -166,7 +170,10 @@ const messages = {
       noData: 'No data yet',
       githubLogin: 'GitHub Login',
       logout: 'Logout',
-      starGithub: 'Star on GitHub'
+      starGithub: 'Star on GitHub',
+      searchDocs: 'Search Docs',
+      favorites: 'Favorites',
+      other: 'Other'
     },
     common: {
       backHome: 'Back to Home',
@@ -221,6 +228,7 @@ const messages = {
       mineOnly: 'My Posts',
       discussionsCount: '{count} discussions',
       allCategories: 'All Categories',
+      categoryFilterAria: 'Post category filter',
       loadingPosts: 'Loading posts...',
       emptyPosts: 'No posts yet. Start the first discussion from the top right.',
       pinned: 'Pinned',

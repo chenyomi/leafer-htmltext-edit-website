@@ -19,14 +19,14 @@
         <FadeContent blur>
           <router-link to="/docs" class="docs-nav-link">
             <i class="pi pi-book"></i>
-            文档
+            {{ t('nav.docs') }}
           </router-link>
         </FadeContent>
 
         <FadeContent blur>
           <button class="search-button" @click="openSearch">
             <i class="pi pi-search search-icon"></i>
-            <span class="search-text">Search Docs</span>
+            <span class="search-text">{{ t('nav.searchDocs') }}</span>
             <kbd class="search-kbd">/</kbd>
           </button>
         </FadeContent>
@@ -54,7 +54,7 @@
               <div
                 class="flex justify-center items-center bg-[#0b0b0b] px-4 py-2 border border-[#333] rounded-[50px] font-semibold text-white text-xs whitespace-nowrap"
               >
-                Favorites
+                {{ t('nav.favorites') }}
               </div>
             </div>
           </Transition>
@@ -62,7 +62,7 @@
 
         <FadeContent blur>
           <button class="cta-button-docs" @click="openGitHub">
-            Star On GitHub
+            {{ t('nav.starGithub') }}
             <span class="star-count">
               <img :src="Star" alt="Star Icon" />
               {{ stars }}
@@ -102,11 +102,13 @@
           <div class="drawer-separator"></div>
 
           <div class="drawer-section">
-            <p class="section-title">Useful Links</p>
+            <p class="section-title">{{ t('sidebar.usefulLinks') }}</p>
 
-            <router-link to="/docs" @click="closeDrawer" class="drawer-link">文档</router-link>
-            <router-link to="/text-animations/split-text" @click="closeDrawer" class="drawer-link">Docs</router-link>
-            <router-link to="/favorites" @click="closeDrawer" class="drawer-link">Favorites</router-link>
+            <router-link to="/docs" @click="closeDrawer" class="drawer-link">{{ t('nav.docs') }}</router-link>
+            <router-link to="/text-animations/split-text" @click="closeDrawer" class="drawer-link">
+              {{ t('nav.docs') }}
+            </router-link>
+            <router-link to="/favorites" @click="closeDrawer" class="drawer-link">{{ t('nav.favorites') }}</router-link>
 
             <a href="https://github.com/DavidHDev/vue-bits" target="_blank" @click="closeDrawer" class="drawer-link">
               GitHub
@@ -117,10 +119,10 @@
           <div class="drawer-separator"></div>
 
           <div class="drawer-section">
-            <p class="section-title">Other</p>
+            <p class="section-title">{{ t('nav.other') }}</p>
 
             <a href="https://davidhaz.com/" target="_blank" @click="closeDrawer" class="drawer-link">
-              Who made this?
+              {{ t('sidebar.whoMadeThis') }}
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
           </div>
@@ -140,6 +142,9 @@ import FadeContent from '../../content/Animations/FadeContent/FadeContent.vue';
 import Logo from '../../assets/logos/vue-bits-logo.svg';
 import Star from '../../assets/common/star.svg';
 import SearchDialog from '../common/SearchDialog.vue';
+import { useI18n } from '@/i18n';
+
+const { t } = useI18n();
 
 const isDrawerOpen = ref(false);
 const isTransitioning = ref(false);
