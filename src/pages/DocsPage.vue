@@ -519,9 +519,45 @@
           </div>
 
           <p class="doc-p">
-            四个和字体相关的构造参数容易混。先记住：
-            <strong>新建单字体用 fontFamily + fontBase64；多字体和局部字体回显优先存 JSON 或完整 HTML。</strong>
+            四个和字体相关的构造参数容易混。先记住两条路线：
+            <strong>单字体</strong>
+            用
+            <code>fontFamily + fontBase64</code>
+            ，插件开箱即用；
+            <strong>多字体（尤其中文字体）</strong>
+            请由业务侧采用下文约定的
+            <strong>拆分存储 + 回显前注水（hydrate）</strong>
+            方案——
+            <strong>插件本身无需改动</strong>
+            ，只在传入
+            <code>HtmlText</code>
+            前把
+            <code>@font-face</code>
+            拼回
+            <code>text</code>
+            即可。
           </p>
+
+          <div class="callout callout-warning">
+            <strong>为什么不能用外部 URL 引用字体？</strong>
+            插件内层
+            <code>HTMLText</code>
+            会把富文本 HTML 包进
+            <code>data:image/svg+xml</code>
+            的 SVG
+            <code>foreignObject</code>
+            再渲染到画布。这种 SVG 被当作
+            <strong>自包含图片</strong>
+            处理，浏览器
+            <strong>不会</strong>
+            为其中的
+            <code>@font-face { src: url(https://...) }</code>
+            发起网络请求。因此画布回显、导出图里自定义字体
+            <strong>必须</strong>
+            使用
+            <code>data:font/woff2;base64,...</code>
+            内嵌，不能只写 CDN 地址或相对路径。
+          </div>
 
           <h3 class="doc-h3">四个字体参数分别干什么？</h3>
           <div class="params-table-wrap">
@@ -586,13 +622,21 @@
             </table>
           </div>
 
-          <h4 class="doc-h4">写法 1：Leafer JSON（最推荐）</h4>
+          <h4 class="doc-h4">写法 1：Leafer JSON（单字体 / 演示最省事）</h4>
           <p class="doc-p">
             保存
             <code>htmlText.toJSON()</code>
             ，回显
             <code>new HtmlText(json)</code>
-            。字体、局部 span、textData 都在里面。
+            。字体、局部 span、textData 都在里面，适合
+            <strong>单字体、字体体积小、或原型演示</strong>
+            。
+          </p>
+          <p class="doc-p">
+            <strong>多字体 + 中文字体体积大时，不建议直接把 toJSON() 原样入库或长期存档</strong>
+            ——每个文本节点的
+            <code>text</code>
+            里可能重复内嵌多份 base64，整棵画布 JSON 会迅速膨胀。此时请改用写法 3 或下文「业务约定」在存取时瘦身与注水。
           </p>
 
           <h4 class="doc-h4">写法 2：完整 HTML 一个字段</h4>
@@ -640,9 +684,109 @@
             <code>fontBase64</code>
             。如果业务已有多个字体文件，不要只把字体数组传给构造函数后期待自动回显局部字体；请生成完整
             <code>&lt;style&gt;</code>
-            + 内容 HTML，或直接保存
-            <code>toJSON()</code>
-            。
+            + 内容 HTML（写法 2 / 3），或在 Leafer JSON 存取流程里按下文约定拆分与注水。
+          </div>
+
+          <h3 class="doc-h3">多字体推荐：业务侧拆分存储（插件 0 改动）</h3>
+          <p class="doc-p">
+            插件只负责：你传入的
+            <code>text</code>
+            里只要有正确的
+            <code>@font-face</code>
+            （base64）和内容 HTML，就能编辑和渲染。
+            <strong>字体文件放哪、怎么瘦身、怎么入库，由业务项目自己约定</strong>
+            ，不必等插件提供 API。
+          </p>
+
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>阶段</th>
+                  <th>业务库存什么</th>
+                  <th>传给插件什么</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in multiFontWorkflowSteps" :key="row.phase">
+                  <td>
+                    <strong>{{ row.phase }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.store }}</td>
+                  <td class="param-desc">{{ row.pass }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-info">
+            <strong>内嵌编辑 vs 画布渲染：</strong>
+            用户双击编辑时，页面可用
+            <code>addCustomFonts</code>
+            等方式预加载
+            <strong>完整字体 URL</strong>
+            （内层 Quill 用）； 画布 SVG 渲染前仍须把
+            <strong>子集或完整字体的 base64</strong>
+            写进
+            <code>text</code>
+            的
+            <code>@font-face</code>
+            。两者可以分离。
+          </div>
+
+          <h4 class="doc-h4">推荐字段约定（示例）</h4>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(multiFontStorageSchemaExample, 'multi-font-schema')">
+              <i class="pi" :class="copiedKey === 'multi-font-schema' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ multiFontStorageSchemaExample }}</code></pre>
+          </div>
+
+          <h4 class="doc-h4">回显前注水（hydrate）流程</h4>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(multiFontHydrateExample, 'multi-font-hydrate')">
+              <i class="pi" :class="copiedKey === 'multi-font-hydrate' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ multiFontHydrateExample }}</code></pre>
+          </div>
+
+          <h4 class="doc-h4">体积优化建议</h4>
+          <ul class="doc-ul">
+            <li>
+              <strong>子集化（强烈推荐）：</strong>
+              按文本实际用到的字符生成 woff2 子集再转 base64。完整中文字库几 MB，子集往往只有几十 KB。
+            </li>
+            <li>
+              <strong>全局去重：</strong>
+              同一字体在多个文本节点出现时，存一份字体资源，各节点只存
+              <code>fontId</code>
+              列表，不要每个节点各嵌一份 base64。
+            </li>
+            <li>
+              <strong>导出 Leafer JSON 前 strip：</strong>
+              从各节点
+              <code>text</code>
+              去掉
+              <code>@font-face</code>
+              ，字体元数据提到文档级
+              <code>fonts</code>
+              表；打开文档时再 hydrate。
+            </li>
+            <li>
+              <strong>最终导出图片且不需再编辑：</strong>
+              可考虑转曲（文字转 path），不再携带字体数据——会丢失可编辑性，仅适合定稿导出。
+            </li>
+          </ul>
+
+          <div class="callout callout-warning">
+            <strong>不要做的事：</strong>
+            ① 在持久化数据里只存
+            <code>font-family</code>
+            名字、指望画布自动找系统字体（自定义字体会回退）； ② 在
+            <code>@font-face</code>
+            里写
+            <code>url(/fonts/xxx.woff2)</code>
+            或 CDN 地址后期待 SVG 渲染正确（会失败）； ③ 把完整 base64 字库重复写进每条文本记录或每个节点 JSON。
           </div>
         </section>
 
@@ -664,11 +808,19 @@
 
           <h3 class="doc-h3">先选存储方案</h3>
           <p class="doc-p">
-            如果不确定怎么存，优先存
+            如果不确定怎么存，
+            <strong>单字体</strong>
+            可优先
             <code>toJSON()</code>
-            。它会把外层位置、宽高、内层 HTML、局部字体、局部字号、局部字间距等一起保存；再次回显时直接传回
+            。
+            <strong>多字体且含大体积中文字库</strong>
+            时，请用
+            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">多字体与回显</a>
+            中的拆分存储 + hydrate 约定，不要把完整 base64 长期塞进 JSON 或数据库。
+            <code>toJSON()</code>
+            会把外层位置、宽高、内层 HTML、局部样式等一起保存；回显时
             <code>new HtmlText(json)</code>
-            即可。
+            即可，但存盘前建议按业务需要做字体瘦身。
           </p>
           <div class="params-table-wrap">
             <table class="params-table">
@@ -747,6 +899,14 @@
             覆盖画布或用
             <code>add</code>
             追加 JSON 数据即可。
+            <strong>若画布含多字体大体积字库</strong>
+            ，建议在
+            <code>toJSON()</code>
+            后由业务 strip 各节点内嵌字体、在
+            <code>set()</code>
+            前 hydrate，详见
+            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">多字体与回显</a>
+            。
           </p>
           <div class="code-block-wrap">
             <button class="copy-btn" @click="copyCode(scenePersistenceExample, 'scene-persistence')">
@@ -2006,8 +2166,8 @@ const dataBoundaryRules = [
   },
   {
     name: '资源和内容',
-    meaning: '字体、图片、模板资源可能很大，内容 HTML / 节点 JSON 是轻量状态',
-    suggestion: '大资源单独存，文本里存 id、url、font-family、assetId 等引用'
+    meaning: '字体、图片、模板资源可能很大；画布 SVG 渲染字体时必须 base64 内嵌，不能仅靠 URL',
+    suggestion: '存储用 fontIds + contentHtml；回显前 hydrate 为 base64 @font-face（推荐子集化）'
   },
   {
     name: '运行时和持久化',
@@ -2127,7 +2287,8 @@ const text = new HtmlText({
 })
 app.tree.add(text)`;
 
-const initScenarioMultiFontCode = `// 字体库按 id 查出多条 base64，拼进一个 <style>
+const initScenarioMultiFontCode = `// 多字体：字体库查出 base64（推荐子集化），拼进一个 <style>
+// 存储时可只存 contentHtml + fontIds，回显前再执行同样拼接（见专章 hydrate 示例）
 const fontStyle = \`<style>
 @font-face { font-family: 'YouSheBiaoTiHei-2'; src: url(data:font/woff2;base64,AAA...) format('woff2'); }
 @font-face { font-family: 'Dancing Script'; src: url(data:font/woff2;base64,BBB...) format('woff2'); }
@@ -2175,18 +2336,18 @@ const fontFieldsGuide = [
 const fontEchoModes = [
   {
     name: 'Leafer JSON',
-    storage: '之前调过 htmlText.toJSON()',
+    storage: 'htmlText.toJSON()（适合单字体；多字体大库需配合 strip/hydrate）',
     how: 'new HtmlText(savedJson)'
   },
   {
     name: '完整 HTML',
-    storage: '一个字符串含 <style>多条@font-face + 内容',
+    storage: '一个字符串含 <style>多条@font-face(base64) + 内容',
     how: 'new HtmlText({ text: savedHtml })'
   },
   {
-    name: '字体+内容拆开',
-    storage: 'fontStyle 一列、contentHtml 一列',
-    how: 'new HtmlText({ text: fontStyle + contentHtml })'
+    name: '字体+内容拆开（多字体推荐）',
+    storage: 'contentHtml + fontIds[]，字体进字体库不进文本表',
+    how: 'hydrate 后 new HtmlText({ text: fontStyle + contentHtml })'
   },
   {
     name: '运行时选区换字体',
@@ -2194,6 +2355,69 @@ const fontEchoModes = [
     how: 'setHTMLText("font", family, base64)'
   }
 ];
+
+const multiFontWorkflowSteps = [
+  {
+    phase: '编辑中',
+    store: '可不持久化字体二进制；页面预加载字体 URL 供 Quill',
+    pass: '用户正常编辑，插件写回 leaf.text（含 @font-face base64）'
+  },
+  {
+    phase: '保存',
+    store: 'contentHtml（无 @font-face）+ fontIds[] + 可选 usedChars',
+    pass: '从 text 剥离 @font-face 与 fontBase64 / fontFaces 大字段'
+  },
+  {
+    phase: '回显 / 打开文档',
+    store: '仍只读 contentHtml + fontIds',
+    pass: '按 fontId 取字体 → 子集化(推荐) → base64 @font-face → 拼成 text 再 new HtmlText'
+  },
+  {
+    phase: 'Leafer 整页导出',
+    store: 'scene JSON 中文本节点同样瘦身；fonts 表放文档级',
+    pass: 'fromJSON / set 之前对树 walk 一遍 hydrate'
+  }
+];
+
+const multiFontStorageSchemaExample = `// 业务库 / 接口返回示例（插件不解析这些字段，由你的项目约定）
+{
+  "id": "text_001",
+  "contentHtml": "<div><p style=\\"font-size:28px;\\"><span style=\\"font-family:YouSheBiaoTiHei-2;\\">标题</span><span style=\\"font-family:'Dancing Script',cursive;\\">副标题</span></p></div>",
+  "fontIds": ["font_youshe_biaotihei_2", "font_dancing_script"],
+  // 可选：各字体在本段文字里用到的字符，供子集化
+  "usedChars": {
+    "font_youshe_biaotihei_2": "标题正文用到的字",
+    "font_dancing_script": "Subtitle"
+  }
+}
+
+// 字体库单独一张表 / 对象存储，不进每条文本记录：
+// { id, family, url }  —— url 指向完整 woff2，仅供 hydrate 时读取`;
+
+const multiFontHydrateExample = `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
+
+// 1. 从业务库读出轻量记录
+const record = await api.getText(recordId)
+const { contentHtml, fontIds, usedChars } = record
+
+// 2. 查字体库，生成 @font-face（必须是 data:font/woff2;base64,...，不能是 http URL）
+const fonts = await fontApi.getFonts(fontIds)
+const fontFaceRules = await Promise.all(
+  fonts.map(async (font) => {
+    // 推荐：按 usedChars[font.id] 做子集后再转 base64
+    const base64 = await fontApi.toSubsetBase64(font, usedChars?.[font.id])
+    return \`@font-face{font-family:'\${font.family}';src:url(\${base64}) format('woff2');}\`
+  }),
+)
+const fontStyle = \`<style>\${fontFaceRules.join('')}</style>\`
+
+// 3. 拼成插件认识的 text，再创建或更新节点
+const text = new HtmlText({
+  text: fontStyle + contentHtml,
+})
+app.tree.add(text)
+
+// Leafer 整页 JSON：在 app.tree.set(scene) 之前对 HtmlText 子树做同样 hydrate`;
 
 const initScenarios = [
   {
@@ -2228,13 +2452,14 @@ const initScenarios = [
   },
   {
     id: 'split-storage',
-    title: '场景 E：字体与内容分开存储',
+    title: '场景 E：字体与内容分开存储（多字体推荐）',
     mode: 'text = fontStyle + contentHtml',
-    desc: '字体由字体管理器维护，正文单独存 HTML。回显时拼接为 text 字段。多字体时在一个 <style> 里写多条 @font-face。',
+    desc: '字体由字体管理器维护，正文单独存 HTML。回显时拼接为 text 字段。插件无需改动，由业务在传入前 hydrate。',
     tips: [
-      '自定义字体必须补回对应 @font-face（几种字体写几条）',
-      'contentHtml 里 <span style="font-family:..."> 要和 @font-face 名字一致',
-      '显式传入的 width/fontSize 等参数优先级高于反解值'
+      '存储：contentHtml 不含 @font-face；fontIds 指向字体库',
+      '回显：字体库生成 base64 @font-face（推荐子集化），再 fontStyle + contentHtml',
+      '多字体时在一个 <style> 里写多条 @font-face，不能写外部 URL',
+      'contentHtml 里 <span style="font-family:..."> 要和 @font-face 名字一致'
     ],
     lang: 'main.ts',
     code: initScenarioSplitStorageCode
@@ -2468,19 +2693,19 @@ const persistenceChoices = [
     scene: '只管理文本元素，但要保留局部样式',
     save: 'htmlText.toJSON()',
     restore: 'new HtmlText(textJson)',
-    note: '推荐。局部字体、局部字号、描边、宽高都能保留'
+    note: '单字体推荐。多字体大库请 strip 字体后存 contentHtml + fontIds，回显前 hydrate'
   },
   {
     scene: '业务数据库只允许保存 HTML 字符串',
     save: 'inner HTMLText.text',
     restore: 'new HtmlText({ text })',
-    note: '可用，但必须保留 style、p/span 内联样式和 @font-face'
+    note: '可用，但必须保留 span 样式；@font-face 须为 base64，不能仅靠外部 URL'
   },
   {
-    scene: '字体资源和正文分表保存',
-    save: 'fontId + contentHtml',
-    restore: 'new HtmlText({ text: fontStyle + contentHtml })',
-    note: '字体 base64 大，单独存字体库；回显前按 fontId 拼 @font-face'
+    scene: '字体资源和正文分表保存（多字体推荐）',
+    save: 'fontIds[] + contentHtml（无 @font-face）',
+    restore: 'hydrate → new HtmlText({ text: fontStyle + contentHtml })',
+    note: '字体不进文本表；回显前由字体库生成 base64 @font-face'
   },
   {
     scene: '只存纯文本',
@@ -2493,9 +2718,9 @@ const persistenceChoices = [
 const storageSeparationRules = [
   {
     name: '字体文件',
-    storage: '字体库、对象存储或 CDN。数据库只存 fontId、family、url/base64 索引',
-    reference: 'contentHtml 中保留 font-family；业务记录里保存用到的 fontId 列表',
-    restore: '按 fontId 查字体，生成 <style>@font-face...</style>，再与 contentHtml 拼成 text'
+    storage: '字体库、对象存储。库内可存 url 指向完整 woff2',
+    reference: '文本记录：contentHtml 保留 font-family；另存 fontIds[]、可选 usedChars',
+    restore: '读取字体文件 → 子集化(推荐) → 生成 base64 @font-face → 与 contentHtml 拼 text'
   },
   {
     name: '图片 / 贴图',
@@ -2536,8 +2761,8 @@ const saveChecklist = [
   },
   {
     name: '字体资源是否可恢复',
-    why: 'HTML 里只有 font-family 名字时，浏览器找不到自定义字体会回退',
-    action: '保存 fontId / font-family 映射；回显时补齐对应 @font-face'
+    why: 'HTML 里只有 font-family 名字时画布找不到自定义字体会回退；SVG 也不能用外部 URL',
+    action: '保存 fontIds；回显时 hydrate 为 base64 @font-face（推荐子集化）再拼 text'
   },
   {
     name: '大资源是否重复入库',
@@ -2628,7 +2853,7 @@ const updateStrategies = [
     name: '替换字体资源',
     api: 'new HtmlText({ text: fontStyle + contentHtml })',
     keep: 'HTML 内的 span 样式保留，字体由新的 @font-face 提供',
-    note: '适合字体库迁移、字体 CDN 地址变化、base64 改 url'
+    note: '适合字体库迁移、换字库版本；@font-face 仍须 base64，不能改成外部 URL'
   }
 ];
 
@@ -2706,7 +2931,11 @@ const fonts = await fontApi.getFonts(fontIds)
 // - fontStyle 负责加载自定义字体，由字体库动态生成
 // - contentHtml 负责保留字号、颜色、描边、宽高和对齐等样式
 const fontStyle = fonts
-  .map((font) => \`@font-face{font-family:'\${font.family}';src:url(\${font.urlOrBase64}) format('woff2');}\`)
+  .map((font) => {
+    // 必须是 data:font/woff2;base64,... —— SVG 渲染无法使用 http(s) URL
+    const base64 = font.subsetBase64 ?? font.base64
+    return \`@font-face{font-family:'\${font.family}';src:url(\${base64}) format('woff2');}\`
+  })
   .join('')
 
 const text = new HtmlText({
@@ -2721,9 +2950,10 @@ app.tree.add(text)
 
 // 注意：
 // 1. 不要把 contentHtml strip 成纯文字，否则无法恢复样式。
-// 2. 使用自定义字体时必须补回对应 @font-face，否则会回退到系统字体。
-// 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/textStroke/padding 等基础样式。
-// 4. 显式传入的 width/fontSize/alignContent 等参数优先级更高。`;
+// 2. 画布渲染时 @font-face 必须是 base64 内嵌；字体库里的 url 仅供 hydrate 时读取并转换。
+// 3. 多字体 + 大体积中文字库：优先子集化后再转 base64，不要整库内嵌进每条记录。
+// 4. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/textStroke/padding 等基础样式。
+// 5. 显式传入的 width/fontSize/alignContent 等参数优先级更高。`;
 
 const openInnerEditorExample = `import { PointerEvent } from 'leafer-ui'
 import { HtmlText, htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
