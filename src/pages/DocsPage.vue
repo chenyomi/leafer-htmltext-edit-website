@@ -93,20 +93,45 @@
             <img src="https://img.shields.io/npm/l/@chenyomi/leafer-htmltext-edit.svg" alt="license" />
             <img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" />
           </div>
-          <div class="doc-npm-link">
+          <div class="doc-resource-links">
             <a
               href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit"
               target="_blank"
               rel="noopener noreferrer"
-              class="npm-link-btn"
+              class="doc-resource-card"
             >
-              <svg width="16" height="16" viewBox="0 0 780 250" fill="currentColor" aria-hidden="true">
-                <path
-                  d="M240,250h100v-50h100V0H240V250z M340,50h50v100h-50V50z M480,0v200h100V50h50v150h50V50h50v150h50V0H480z M0,200h100V50h50v150h50V0H0V200z"
-                />
-              </svg>
-              在 npm 查看
-              <i class="pi pi-arrow-up-right" style="font-size: 0.75rem"></i>
+              <i class="pi pi-box"></i>
+              <div>
+                <strong>npm 包</strong>
+                <span>@chenyomi/leafer-htmltext-edit</span>
+              </div>
+              <i class="pi pi-arrow-up-right"></i>
+            </a>
+            <a
+              href="https://github.com/chenyomi/leafer-htmltext-edit"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="doc-resource-card"
+            >
+              <i class="pi pi-github"></i>
+              <div>
+                <strong>GitHub 源码</strong>
+                <span>chenyomi/leafer-htmltext-edit</span>
+              </div>
+              <i class="pi pi-arrow-up-right"></i>
+            </a>
+            <a
+              href="https://chenyomi.github.io/leafer-htmltext-edit-view/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="doc-resource-card"
+            >
+              <i class="pi pi-play-circle"></i>
+              <div>
+                <strong>在线演示</strong>
+                <span>chenyomi.github.io/leafer-htmltext-edit-view</span>
+              </div>
+              <i class="pi pi-arrow-up-right"></i>
             </a>
           </div>
 
@@ -1772,38 +1797,6 @@
             </ul>
           </div>
         </section>
-
-        <!-- ─── 底部链接 ─── -->
-        <section class="doc-footer-links">
-          <a
-            href="https://www.npmjs.com/package/@chenyomi/leafer-htmltext-edit"
-            target="_blank"
-            class="footer-link-card"
-          >
-            <i class="pi pi-box"></i>
-            <div>
-              <strong>npm 包</strong>
-              <span>@chenyomi/leafer-htmltext-edit</span>
-            </div>
-            <i class="pi pi-arrow-up-right"></i>
-          </a>
-          <a href="https://github.com/chenyomi/leafer-htmltext-edit" target="_blank" class="footer-link-card">
-            <i class="pi pi-github"></i>
-            <div>
-              <strong>GitHub 仓库</strong>
-              <span>chenyomi/leafer-htmltext-edit</span>
-            </div>
-            <i class="pi pi-arrow-up-right"></i>
-          </a>
-          <a href="https://github.com/chenyomi/leafer-htmltext-edit-view" target="_blank" class="footer-link-card">
-            <i class="pi pi-play-circle"></i>
-            <div>
-              <strong>在线演示</strong>
-              <span>leafer-htmltext-edit-view</span>
-            </div>
-            <i class="pi pi-arrow-up-right"></i>
-          </a>
-        </section>
       </div>
     </main>
   </div>
@@ -3251,9 +3244,20 @@ const inlineFontSizeLimits = [
 // ─── Changelog ────────────────────────────────────────────────────────────────
 const changelog = [
   {
+    version: '2.6.11',
+    date: '2026-07',
+    tag: 'latest',
+    items: [
+      '重构文档接入指南，按业务路线、初始化、更新、保存、回显、排错梳理使用链路',
+      '补充资源拆分存储说明，明确字体、图片、模板等大资源不应重复写入文本数据',
+      '新增已有节点更新策略、保存前检查清单和局部样式保存回显示例',
+      '将 npm、GitHub 源码、在线演示入口上移到文档顶部，并修正在线演示链接'
+    ]
+  },
+  {
     version: '2.6.10',
     date: '2026-06',
-    tag: 'latest',
+    tag: 'minor',
     items: [
       '支持多 @font-face 与局部字体 inlineFontFamily',
       '支持局部字间距 inlineLetterSpacing',
