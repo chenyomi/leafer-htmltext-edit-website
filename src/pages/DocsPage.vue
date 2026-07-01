@@ -286,6 +286,34 @@
             开发不受限；生产域名需有效 License。
           </div>
 
+          <h3 class="doc-h3">先想清楚：你在接哪一种业务？</h3>
+          <p class="doc-p">
+            这个插件既能当「画布里的富文本节点」，也能接进模板系统、素材库、字体库或业务表单。不同业务的重点不一样，先按下面这张表选路线，会比直接看
+            API 更不容易绕。
+          </p>
+          <div class="params-table-wrap">
+            <table class="params-table init-mode-table">
+              <thead>
+                <tr>
+                  <th>业务目标</th>
+                  <th>推荐主数据</th>
+                  <th>创建 / 回显</th>
+                  <th>编辑后保存</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in integrationRoutes" :key="row.goal">
+                  <td>
+                    <strong>{{ row.goal }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.data }}</td>
+                  <td class="param-desc">{{ row.restore }}</td>
+                  <td class="param-desc">{{ row.save }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <h3 class="doc-h3" id="content-modes">第二层：节点内容初始化方式</h3>
           <p class="doc-p">
             创建
@@ -340,8 +368,6 @@
                 、
                 <code>fontFamily</code>
                 、
-                <code>fontFaces</code>
-                、
                 <code>padding</code>
                 等元数据；但你
                 <strong>显式传入的参数优先级更高</strong>
@@ -366,6 +392,28 @@
                 <code>Hello World</code>
               </li>
             </ul>
+          </div>
+
+          <h3 class="doc-h3">不要混用的几件事</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>容易混的事</th>
+                  <th>正确理解</th>
+                  <th>建议</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in dataBoundaryRules" :key="row.name">
+                  <td>
+                    <strong>{{ row.name }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.meaning }}</td>
+                  <td class="param-desc">{{ row.suggestion }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <h3 class="doc-h3" id="init-scenarios">按场景初始化</h3>
@@ -447,7 +495,7 @@
 
           <p class="doc-p">
             四个和字体相关的构造参数容易混。先记住：
-            <strong>单字体用前两个，多字体用后两个；回显优先存 JSON 或完整 HTML。</strong>
+            <strong>新建单字体用 fontFamily + fontBase64；多字体和局部字体回显优先存 JSON 或完整 HTML。</strong>
           </p>
 
           <h3 class="doc-h3">四个字体参数分别干什么？</h3>
@@ -480,11 +528,7 @@
             <code>fontFamily + fontBase64</code>
             只能注册
             <strong>一个</strong>
-            主自定义字体。一段文字里要用多种自定义字体，必须用
-            <code>fonts[]</code>
-            /
-            <code>fontFaces</code>
-            ，或在
+            主自定义字体。一段文字里要回显多种自定义字体，最稳妥的方式是在
             <code>text</code>
             的
             <code>&lt;style&gt;</code>
@@ -539,9 +583,7 @@
             <code>&lt;p&gt;/&lt;span&gt;</code>
             。只传
             <code>new HtmlText({ text })</code>
-            ，不必再传
-            <code>fontFaces</code>
-            。
+            即可，不必再额外传字体资源字段 。
           </p>
 
           <h4 class="doc-h4">写法 3：字体和内容分开存（场景 E）</h4>
@@ -562,12 +604,20 @@
             标签各写一个。
           </p>
 
-          <h4 class="doc-h4">写法 4：构造时传 fonts[]（新建时常用）</h4>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(multiFontInitExample, 'multi-font-init-guide')">
-              <i class="pi" :class="copiedKey === 'multi-font-init-guide' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ multiFontInitExample }}</code></pre>
+          <div class="callout callout-info">
+            当前公开类型里稳定的构造入口是
+            <code>content</code>
+            、
+            <code>text</code>
+            、
+            <code>fontFamily</code>
+            和
+            <code>fontBase64</code>
+            。如果业务已有多个字体文件，不要只把字体数组传给构造函数后期待自动回显局部字体；请生成完整
+            <code>&lt;style&gt;</code>
+            + 内容 HTML，或直接保存
+            <code>toJSON()</code>
+            。
           </div>
         </section>
 
@@ -586,6 +636,80 @@
             <a href="#content-modes" @click.prevent="scrollTo('content-modes')">初始化方式</a>
             对应的方案即可，不必重复拼 HTML。
           </p>
+
+          <h3 class="doc-h3">先选存储方案</h3>
+          <p class="doc-p">
+            如果不确定怎么存，优先存
+            <code>toJSON()</code>
+            。它会把外层位置、宽高、内层 HTML、局部字体、局部字号、局部字间距等一起保存；再次回显时直接传回
+            <code>new HtmlText(json)</code>
+            即可。
+          </p>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>你的业务数据</th>
+                  <th>保存什么</th>
+                  <th>回显怎么传</th>
+                  <th>适合程度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in persistenceChoices" :key="row.scene">
+                  <td class="param-desc">{{ row.scene }}</td>
+                  <td>
+                    <code>{{ row.save }}</code>
+                  </td>
+                  <td>
+                    <code>{{ row.restore }}</code>
+                  </td>
+                  <td class="param-desc">{{ row.note }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">为什么要拆分存储？</h3>
+          <p class="doc-p">
+            <code>fontStyle + contentHtml</code>
+            不是插件强制的数据格式，而是业务上常见的
+            <strong>轻量存储方案</strong>
+            ：字体 base64
+            往往很大，如果每个文本节点都把完整字体写进数据库，会造成大量重复。更合理的做法是字体、图片等大资源单独入库或走
+            CDN，文本节点只保存引用和必要的 HTML 样式；回显时再把资源拼回
+            <code>text</code>
+            传给
+            <code>HtmlText</code>
+            。
+          </p>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>资源 / 数据</th>
+                  <th>建议存哪里</th>
+                  <th>文本节点里存什么</th>
+                  <th>回显时怎么还原</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in storageSeparationRules" :key="row.name">
+                  <td>
+                    <strong>{{ row.name }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.storage }}</td>
+                  <td class="param-desc">{{ row.reference }}</td>
+                  <td class="param-desc">{{ row.restore }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout callout-info">
+            <strong>判断原则：</strong>
+            会被多个文本、多个模板重复使用，或者体积明显大的内容，不要塞进每条文本记录。字体文件、图片、素材、模板资源适合单独存；位置、宽高、颜色、描边、局部
+            span 样式这类轻量状态适合跟文本 JSON 或 HTML 一起存。
+          </div>
 
           <h3 class="doc-h3">纯 Leafer 项目：保存整棵画布</h3>
           <p class="doc-p">
@@ -621,13 +745,67 @@
             <pre class="code-block"><code>{{ textPersistenceExample }}</code></pre>
           </div>
 
+          <h3 class="doc-h3">更新已有节点：三种常见方式</h3>
+          <p class="doc-p">
+            回显不是只有
+            <code>new HtmlText()</code>
+            。如果画布上已经有文本节点，需要按你更新的是「整份节点」「纯内容」还是「工具栏样式」选择不同入口。
+          </p>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>你要更新什么</th>
+                  <th>用哪个入口</th>
+                  <th>会保留什么</th>
+                  <th>注意点</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in updateStrategies" :key="row.name">
+                  <td>
+                    <strong>{{ row.name }}</strong>
+                  </td>
+                  <td>
+                    <code>{{ row.api }}</code>
+                  </td>
+                  <td class="param-desc">{{ row.keep }}</td>
+                  <td class="param-desc">{{ row.note }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(updateExistingTextExample, 'update-existing-text')">
+              <i class="pi" :class="copiedKey === 'update-existing-text' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ updateExistingTextExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">局部样式后的保存与回显</h3>
+          <p class="doc-p">
+            局部字体、局部字号、局部字间距都不是单独传一个
+            <code>style</code>
+            字段回去，而是写进内部
+            <code>HTMLText.text</code>
+            的
+            <code>&lt;span style&gt;</code>
+            里。用户编辑完成后保存节点 JSON，回显时原样传回，局部样式才不会丢。
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(localStylePersistenceExample, 'local-style-persistence')">
+              <i class="pi" :class="copiedKey === 'local-style-persistence' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ localStylePersistenceExample }}</code></pre>
+          </div>
+
           <h3 class="doc-h3">特殊场景：只保存 HTML 内容</h3>
           <p class="doc-p">
             业务把字体和内容分开存储时，回显请使用
             <code>text</code>
             字段，把
             <code>@font-face</code>
-            与内容 HTML 拼在一起传入。完整示例见
+            与内容 HTML 拼在一起传入。这通常是为了避免把很大的字体 base64 重复保存到每条文本数据里。完整示例见
             <a href="#init-scenarios" @click.prevent="scrollTo('init-scenarios')">初始化指南 · 场景 4</a>
             。
           </p>
@@ -650,24 +828,15 @@
             <code>text</code>
             初始化或回显时，插件会通过
             <code>parseHtmlTextData</code>
-            反解全部
-            <code>fontFaces</code>
-            及
-            <code>hasInlineFont</code>
-            等标记；进入编辑时也会把 HTML 里的
+            反解基础样式；进入编辑时也会把 HTML 里的
             <code>@font-face</code>
-            合并进
-            <code>textData</code>
-            。
+            注入到编辑器环境 。
           </p>
           <ul class="doc-ul">
             <li>
               推荐：保存
               <code>HtmlText.toJSON()</code>
-              或整棵 Leafer JSON，可同时保留
-              <code>textData.fontFaces</code>
-              与
-              <code>text</code>
+              或整棵 Leafer JSON，可同时保留节点位置、textData 与内部 HTML
             </li>
             <li>
               只存 HTML：必须保留完整
@@ -679,10 +848,11 @@
               样式
             </li>
             <li>
-              初始化多字体：传
-              <code>fonts: [{ family, base64 }, ...]</code>
-              或
-              <code>fontFaces: Record&lt;string, string&gt;</code>
+              初始化多字体：优先把多条
+              <code>@font-face</code>
+              和内容 HTML 一起作为
+              <code>text</code>
+              传入
             </li>
           </ul>
 
@@ -702,6 +872,28 @@
             <strong>全部</strong>
             <code>@font-face</code>
             （多字体场景可能有多条）。只剩纯文本时无法恢复字号、字体、描边、颜色、宽高和对齐等视觉效果。
+          </div>
+
+          <h3 class="doc-h3">保存前检查清单</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>检查项</th>
+                  <th>为什么重要</th>
+                  <th>推荐做法</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in saveChecklist" :key="row.name">
+                  <td>
+                    <strong>{{ row.name }}</strong>
+                  </td>
+                  <td class="param-desc">{{ row.why }}</td>
+                  <td class="param-desc">{{ row.action }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
@@ -1368,11 +1560,9 @@
             <code>textData.fontFamily</code>
             并清除局部字体。自定义字体请传第三个参数
             <code>base64font</code>
-            ，插件会写入
-            <code>textData.fontFaces</code>
-            并在 HTML
+            ，插件会写入内部 HTML 的
             <code>&lt;style&gt;</code>
-            中合并多个
+            中，并在需要时合并多个
             <code>@font-face</code>
             。
           </p>
@@ -1381,12 +1571,6 @@
               <i class="pi" :class="copiedKey === 'inline-font-usage' ? 'pi-check' : 'pi-copy'"></i>
             </button>
             <pre class="code-block"><code>{{ inlineFontUsageExample }}</code></pre>
-          </div>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(multiFontInitExample, 'multi-font-init')">
-              <i class="pi" :class="copiedKey === 'multi-font-init' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ multiFontInitExample }}</code></pre>
           </div>
           <div class="params-table-wrap">
             <table class="params-table">
@@ -1484,11 +1668,7 @@
           <div class="callout callout-info">
             插件导出的 HTML 会保留局部字号 / 局部字体 / 局部字间距，并通过
             <code>parseHtmlTextData</code>
-            反解
-            <code>hasInlineFont</code>
-            、
-            <code>fontFaces</code>
-            等标记。只存
+            反解基础样式。只存
             <code>text</code>
             回显时，务必保留
             <code>&lt;style&gt;</code>
@@ -1787,12 +1967,73 @@ const pluginBootstrapSteps = [
   }
 ];
 
+const integrationRoutes = [
+  {
+    goal: '画布 / 设计稿编辑器',
+    data: '整棵 Leafer JSON',
+    restore: '初始化插件后 app.tree.set(sceneJson)',
+    save: '保存 app.tree.toJSON()，最完整'
+  },
+  {
+    goal: '业务表单里嵌一个富文本框',
+    data: '单个 HtmlText JSON 或完整 text HTML',
+    restore: 'new HtmlText(savedData)',
+    save: '保存 htmlText.toJSON()；只需要 HTML 时保存内部 HTMLText.text'
+  },
+  {
+    goal: '模板系统 / 海报生成',
+    data: '模板 JSON + 用户覆盖字段',
+    restore: '先加载模板，再替换指定文本节点',
+    save: '模板和用户内容分开存，避免每份作品复制整套模板'
+  },
+  {
+    goal: '字体库 / 素材库接入',
+    data: '文本存引用，大资源单独存',
+    restore: '按 fontId、assetId 查资源，再拼回 text 或节点 JSON',
+    save: '文本记录不重复保存字体 base64、图片 base64'
+  },
+  {
+    goal: '跨系统导入 HTML',
+    data: '完整 HTML 字符串',
+    restore: 'new HtmlText({ text: savedHtml })',
+    save: '保留 <style>、<p style>、<span style>，不要转成纯文本'
+  }
+];
+
+const dataBoundaryRules = [
+  {
+    name: 'content 和 text',
+    meaning: 'content 是给插件包装的原始内容；text 是已经完整成型的 HTML',
+    suggestion: '新建简单文本用 content；回显、导入、保留局部样式用 text。两者同时传时 text 优先'
+  },
+  {
+    name: '全局样式和局部样式',
+    meaning: 'fontSize、lineHeight 等全局样式在 textData / 段落上；局部样式在 span style 上',
+    suggestion: '整段改样式用 setHTMLText 的全局 key；几个字改样式必须双击进入编辑并拖选'
+  },
+  {
+    name: '资源和内容',
+    meaning: '字体、图片、模板资源可能很大，内容 HTML / 节点 JSON 是轻量状态',
+    suggestion: '大资源单独存，文本里存 id、url、font-family、assetId 等引用'
+  },
+  {
+    name: '运行时和持久化',
+    meaning: 'Quill 实例、DOM、当前光标、临时选区只存在运行时',
+    suggestion: '数据库只保存 JSON / HTML / 业务引用，不保存编辑器对象'
+  },
+  {
+    name: '新增和更新',
+    meaning: 'new HtmlText 是创建新节点；existing.set(...) 是同步已有节点',
+    suggestion: '打开历史数据用 new；替换画布上已有元素用 set 或 setHTMLText'
+  }
+];
+
 const initModes = [
   {
     name: 'content + 样式参数',
     scene: '新建文本、工具栏创建、简单模板',
-    fields: 'content, fontSize, color, fonts[]...',
-    behavior: '插件按样式属性自动拼 HTML；多字体用 fonts[] / fontFaces'
+    fields: 'content, fontSize, color, fontFamily...',
+    behavior: '插件按样式属性自动拼 HTML；自定义单字体用 fontFamily + fontBase64'
   },
   {
     name: 'text 完整 HTML',
@@ -1925,16 +2166,16 @@ const fontFieldsGuide = [
     when: '只有一个自定义字体时，和 fontFamily 一起传'
   },
   {
-    name: 'fontFaces',
-    type: 'Record<string, string>',
-    role: '字体名 → base64 字典，可注册多种自定义字体',
-    when: '新建时已知多种字体；或从 HTML 反解后落在 textData 里'
+    name: 'text',
+    type: 'string',
+    role: '完整 HTML 输入，可包含 <style>@font-face</style> 和 span 局部样式',
+    when: '回显多字体、局部字体、局部字号、跨系统导入时优先使用'
   },
   {
-    name: 'fonts',
-    type: 'Array<{family, base64}>',
-    role: '和 fontFaces 相同，只是数组写法，插件内部会转成 fontFaces',
-    when: '新建多字体文本，比手写 <style> 省事'
+    name: 'base64font',
+    type: 'string',
+    role: 'setHTMLText("font", family, base64font) 的第三个参数',
+    when: '用户在内嵌编辑器里给选区局部换自定义字体'
   }
 ];
 
@@ -1955,9 +2196,9 @@ const fontEchoModes = [
     how: 'new HtmlText({ text: fontStyle + contentHtml })'
   },
   {
-    name: 'fonts[] 新建',
-    storage: '字体 id → base64 字典',
-    how: 'new HtmlText({ fonts: [...], content: "..." })'
+    name: '运行时选区换字体',
+    storage: '编辑完成后保存 toJSON() 或完整 HTML',
+    how: 'setHTMLText("font", family, base64)'
   }
 ];
 
@@ -2045,18 +2286,6 @@ const initParamGroups = [
         default: '—',
         desc: '主自定义字体 data URL，配合 fontFamily 注入 @font-face'
       },
-      {
-        name: 'fontFaces',
-        type: 'Record<string, string>',
-        default: '—',
-        desc: '多字体资源表：主字体名 → base64，与局部字体、多 @font-face 回显配合'
-      },
-      {
-        name: 'fonts',
-        type: 'Array<{ family: string; base64: string }>',
-        default: '—',
-        desc: '批量初始化多个自定义字体，等价于写入 fontFaces'
-      },
       { name: 'fontWeight', type: 'number | string', default: '—', desc: '字重，如 600、"bold"' },
       { name: 'italic', type: 'boolean', default: 'false', desc: '全局斜体，用 <em> 包裹' },
       { name: 'lineHeight', type: 'number | string', default: '1.5', desc: '行高倍数或 "40px"' },
@@ -2120,7 +2349,7 @@ const htmlTextParams = [
     type: 'string',
     required: false,
     default: '—',
-    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / fontFaces / hasInlineFont / textStroke / padding 等元数据'
+    desc: '完整 HTML 字符串，直接用作文本内容，优先级高于 content。传入时会自动从 HTML 反解 width / height / fontSize / fontFamily / textStroke / padding 等基础元数据'
   },
   { name: 'fontSize', type: 'number', required: false, default: '16', desc: '字体大小（像素）' },
   {
@@ -2136,20 +2365,6 @@ const htmlTextParams = [
     required: false,
     default: '—',
     desc: '主自定义字体的 Base64 / data URL。需配合 fontFamily 使用，插件会自动注入 @font-face'
-  },
-  {
-    name: 'fontFaces',
-    type: 'Record<string, string>',
-    required: false,
-    default: '—',
-    desc: '多字体资源表：字体主名 → base64。局部字体模式下 HTML 可含多条 @font-face'
-  },
-  {
-    name: 'fonts',
-    type: 'Array<{ family: string; base64: string }>',
-    required: false,
-    default: '—',
-    desc: '初始化时批量传入自定义字体列表，会合并进 fontFaces'
   },
   {
     name: 'fontWeight',
@@ -2249,6 +2464,105 @@ const htmlTextExample = `const text = new HtmlText({
 })
 app.tree.add(text)`;
 
+const persistenceChoices = [
+  {
+    scene: '设计稿、画布页面、模板编辑器',
+    save: 'app.tree.toJSON()',
+    restore: 'app.tree.set(sceneJson)',
+    note: '最完整，图形、图片、文本位置和样式一起恢复'
+  },
+  {
+    scene: '只管理文本元素，但要保留局部样式',
+    save: 'htmlText.toJSON()',
+    restore: 'new HtmlText(textJson)',
+    note: '推荐。局部字体、局部字号、描边、宽高都能保留'
+  },
+  {
+    scene: '业务数据库只允许保存 HTML 字符串',
+    save: 'inner HTMLText.text',
+    restore: 'new HtmlText({ text })',
+    note: '可用，但必须保留 style、p/span 内联样式和 @font-face'
+  },
+  {
+    scene: '字体资源和正文分表保存',
+    save: 'fontId + contentHtml',
+    restore: 'new HtmlText({ text: fontStyle + contentHtml })',
+    note: '字体 base64 大，单独存字体库；回显前按 fontId 拼 @font-face'
+  },
+  {
+    scene: '只存纯文本',
+    save: 'content',
+    restore: 'new HtmlText({ content, ...style })',
+    note: '只能恢复基础文字，无法恢复局部样式'
+  }
+];
+
+const storageSeparationRules = [
+  {
+    name: '字体文件',
+    storage: '字体库、对象存储或 CDN。数据库只存 fontId、family、url/base64 索引',
+    reference: 'contentHtml 中保留 font-family；业务记录里保存用到的 fontId 列表',
+    restore: '按 fontId 查字体，生成 <style>@font-face...</style>，再与 contentHtml 拼成 text'
+  },
+  {
+    name: '图片 / 贴图',
+    storage: '素材库、对象存储或 CDN',
+    reference: '节点 JSON 里存 src、assetId、裁剪参数、位置和尺寸',
+    restore: '先确保图片地址可访问，再恢复 Leafer Image / 节点 JSON'
+  },
+  {
+    name: '业务模板',
+    storage: '模板表或模板文件，作为可复用母版',
+    reference: '文档只存 templateId 和用户覆盖的字段',
+    restore: '加载模板 JSON，再把用户修改过的文本、图片、样式覆盖进去'
+  },
+  {
+    name: '轻量样式',
+    storage: '直接跟文本 JSON 或 HTML 一起存',
+    reference: 'fontSize、color、textStroke、padding、局部 span style 等',
+    restore: '直接 new HtmlText(json) 或 new HtmlText({ text })'
+  },
+  {
+    name: '编辑器运行状态',
+    storage: '不建议持久化',
+    reference: 'Quill 实例、DOM、光标、临时选区不入库',
+    restore: '重新 init 插件；保存内容本身即可'
+  }
+];
+
+const saveChecklist = [
+  {
+    name: '是否退出内嵌编辑',
+    why: '编辑中内容先在 Quill 里，退出后才稳定写回内部 HTMLText.text',
+    action: '保存按钮触发前先关闭内嵌编辑器，或确认 updateHtmlText 已完成'
+  },
+  {
+    name: '是否保留完整 HTML',
+    why: '局部字体、局部字号、颜色、描边等都可能在 <span style> 里',
+    action: '只存 HTML 时不要清洗成纯文本，不要丢 <style>、<p style>、<span style>'
+  },
+  {
+    name: '字体资源是否可恢复',
+    why: 'HTML 里只有 font-family 名字时，浏览器找不到自定义字体会回退',
+    action: '保存 fontId / font-family 映射；回显时补齐对应 @font-face'
+  },
+  {
+    name: '大资源是否重复入库',
+    why: '字体 base64、图片 base64、素材 JSON 重复写入会让数据库迅速膨胀',
+    action: '资源进素材库或 CDN，文本节点只保存引用'
+  },
+  {
+    name: '是否保存运行时对象',
+    why: 'Quill、DOM、selection、editor.target 刷新页面后都不可复用',
+    action: '只保存 JSON、HTML、业务 id；页面加载后重新 init'
+  },
+  {
+    name: '更新方式是否匹配',
+    why: '用完整 set 会覆盖节点；只改 inner.text 才能保留外层布局',
+    action: '整份数据用 set；只改文案用内部 HTMLText.text；样式交互用 setHTMLText'
+  }
+];
+
 const scenePersistenceExample = `import { App } from 'leafer-ui'
 import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
 
@@ -2298,23 +2612,116 @@ existingText?.set(nextTextJson)
 // 如果保存的是 Leafer 原始 JSON，且 HtmlText 已注册，也可以直接 add
 // app.tree.add(textJson)`;
 
+const updateStrategies = [
+  {
+    name: '整份节点数据',
+    api: 'existing.set(textJson)',
+    keep: '以 JSON 为准，位置、宽高、内部 HTML、textData 一起更新',
+    note: '适合接口返回完整节点数据；注意不要误覆盖用户刚编辑但未保存的状态'
+  },
+  {
+    name: '只替换富文本内容',
+    api: 'inner.set({ text })',
+    keep: '外层 HtmlText 的位置、缩放、旋转、拖拽状态保留',
+    note: '适合模板变量替换、AI 改写文案、从业务字段重建 HTML'
+  },
+  {
+    name: '工具栏改样式',
+    api: 'setHTMLText(key, value)',
+    keep: '按当前选中节点或 Quill 选区应用样式',
+    note: '需要先选中节点；局部样式还需要双击进入编辑并拖选文字'
+  },
+  {
+    name: '替换字体资源',
+    api: 'new HtmlText({ text: fontStyle + contentHtml })',
+    keep: 'HTML 内的 span 样式保留，字体由新的 @font-face 提供',
+    note: '适合字体库迁移、字体 CDN 地址变化、base64 改 url'
+  }
+];
+
+const updateExistingTextExample = `import { HtmlText, setHTMLText } from '@chenyomi/leafer-htmltext-edit'
+
+// 方式 1：接口返回完整 HtmlText JSON，直接同步已有节点
+const existing = app.findId(textId)
+const nextJson = await api.getTextElement(textId)
+existing?.set(nextJson.data)
+
+// 方式 2：只替换内部 HTML，保留外层位置、宽高、旋转
+const textBox = app.findId(textId) as HtmlText | undefined
+const inner = textBox?.findOne('HTMLText')
+inner?.set({
+  text: nextFullHtml, // 必须是完整 HTML；自定义字体要带 @font-face
+})
+
+// 方式 3：工具栏交互，基于当前选中节点或选中文字改样式
+app.editor.target = textBox
+setHTMLText('fontSize', 32)
+setHTMLText('color', '#ff5500')
+
+// 方式 4：模板变量替换，只改内容，不动文本框布局
+const html = textBox?.findOne('HTMLText')
+const replacedText = html?.text.replace('{{title}}', form.title)
+html?.set({ text: replacedText })`;
+
+const localStylePersistenceExample = `import { setHTMLText, htmlTextManage, HtmlText } from '@chenyomi/leafer-htmltext-edit'
+
+// 例子：用户给一段文字局部换字体后保存
+// 1. 页面已经选中 HtmlText，并双击进入内嵌编辑器
+// 2. 用户拖选几个字
+setHTMLText('font', '"Dancing Script", cursive', 'data:font/woff2;base64,...')
+
+// 局部字号是实验功能，需要先开启；局部字体不需要开启
+htmlTextManage.setFeatures({ inlineFontSize: true })
+setHTMLText('inlineFontSize', 42)
+setHTMLText('letterSpacing', 4)
+
+// 3. 让用户退出内嵌编辑器后保存外层 HtmlText 的 JSON
+//    退出时插件会把 Quill 内容写回内部 HTMLText.text
+const textJson = htmlText.toJSON()
+await api.saveTextElement({
+  id: htmlText.id,
+  data: textJson,
+})
+
+// 4. 回显时不要重新拆 style + text，直接传回 JSON
+const saved = await api.getTextElement(id)
+const restored = new HtmlText(saved.data)
+app.tree.add(restored)
+
+// 如果业务只能保存 HTML，也请保存内部 HTMLText.text 的完整字符串
+const inner = htmlText.findOne('HTMLText')
+await api.saveHtml({
+  id: htmlText.id,
+  text: inner?.text,
+})
+
+const { text } = await api.getHtml(id)
+app.tree.add(new HtmlText({ text }))`;
+
 const htmlOnlyPersistenceExample = `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
 
 // 推荐优先保存 Leafer JSON。只有业务已经拆分存储时，才使用这种方式：
 // 1. contentHtml：保存内容 HTML，必须保留 <p style="..."> / <span style="...">
-// 2. fontStyle：回显时由字体管理器按 font-family 拼回 @font-face
+// 2. fontId：数据库只保存字体引用，不在每条文本里重复保存很大的 base64
+// 3. fontStyle：回显时由字体管理器按 fontId / font-family 拼回 @font-face
 const contentHtml = '<div style="width:980px;height:294px;display:flex;flex-direction:column;justify-content:flex-start;"><p class="ql-align-center" style="font-size:70px;line-height:1.5;font-family:YouSheBiaoTiHei-2;"><span style="-webkit-text-stroke:6px rgb(0,66,104);color:rgb(253,225,5);font-family:YouSheBiaoTiHei-2;">上海最新人事！</span></p></div>'
 
+const fontIds = ['font_youshe_biaotihei_2']
+const fonts = await fontApi.getFonts(fontIds)
+
 // text 是 HtmlText 的完整 HTML 输入：
-// - fontStyle 负责加载自定义字体
+// - fontStyle 负责加载自定义字体，由字体库动态生成
 // - contentHtml 负责保留字号、颜色、描边、宽高和对齐等样式
-const fontStyle = '<style>@font-face{font-family:\\'YouSheBiaoTiHei-2\\';src:url(data:font/woff2;base64,...) format(\\'woff2\\');}</style>'
+const fontStyle = fonts
+  .map((font) => \`@font-face{font-family:'\${font.family}';src:url(\${font.urlOrBase64}) format('woff2');}\`)
+  .join('')
+
 const text = new HtmlText({
   x: 100,
   y: 100,
   editable: true,
   draggable: true,
-  text: fontStyle + contentHtml,
+  text: \`<style>\${fontStyle}</style>\` + contentHtml,
 })
 
 app.tree.add(text)
@@ -2322,7 +2729,7 @@ app.tree.add(text)
 // 注意：
 // 1. 不要把 contentHtml strip 成纯文字，否则无法恢复样式。
 // 2. 使用自定义字体时必须补回对应 @font-face，否则会回退到系统字体。
-// 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/fontFaces/hasInlineFont/textStroke。
+// 3. 传入 text 后插件会自动解析 width/height/fontSize/fontFamily/textStroke/padding 等基础样式。
 // 4. 显式传入的 width/fontSize/alignContent 等参数优先级更高。`;
 
 const openInnerEditorExample = `import { PointerEvent } from 'leafer-ui'
@@ -2633,7 +3040,7 @@ const setHtmlTextKeys = [
   {
     key: 'font',
     valueType: 'string + base64font?',
-    desc: '有拖选且非全选→局部字体 span；否则→整段 fontFamily。第三个参数写入 fontFaces'
+    desc: '有拖选且非全选→局部字体 span；否则→整段 fontFamily。第三个参数用于注入自定义字体'
   }
 ];
 
@@ -2777,26 +3184,10 @@ setHTMLText('font', fontA, fontABase64)
 // 3. 全选或无选区时，同一 API 会改全局 fontFamily 并清除局部字体
 setHTMLText('font', '"PingFang SC", sans-serif')`;
 
-const multiFontInitExample = `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
-
-const text = new HtmlText({
-  width: 400,
-  fontSize: 28,
-  fontFamily: '"PingFang SC", sans-serif',
-  fonts: [
-    { family: '"Dancing Script", cursive', base64: 'data:font/woff2;base64,...' },
-    { family: 'YouSheBiaoTiHei-2', base64: 'data:font/woff2;base64,...' },
-  ],
-  content: '全局默认字体，编辑时可选区换成其他字体',
-})
-
-// 或只传 text（HTML 含多条 @font-face + span font-family）
-// new HtmlText({ text: savedHtml })`;
-
 const inlineFontNotes = [
   {
-    name: 'fontFaces 注册表',
-    desc: '每次 setHTMLText("font", ..., base64) 会把字体写入 textData.fontFaces，保存 HTML 时合并为多条 @font-face'
+    name: '@font-face 注入',
+    desc: '每次 setHTMLText("font", ..., base64) 会让导出的 HTML 带上对应 @font-face；多种局部字体会形成多条 @font-face'
   },
   {
     name: '全选改字体',
@@ -2808,7 +3199,7 @@ const inlineFontNotes = [
   },
   {
     name: '只存 HTML 回显',
-    desc: 'parseHtmlTextData 会反解全部 @font-face 到 fontFaces；进入编辑时也会从 HTML 合并 fontFaces'
+    desc: '只存 HTML 时必须保留 <style> 里的全部 @font-face；进入编辑时插件会把这些字体注入编辑器环境'
   }
 ];
 
@@ -2864,9 +3255,9 @@ const changelog = [
     date: '2026-06',
     tag: 'latest',
     items: [
-      '支持多字体 fontFaces / fonts[] 与局部字体 inlineFontFamily',
+      '支持多 @font-face 与局部字体 inlineFontFamily',
       '支持局部字间距 inlineLetterSpacing',
-      'parseHtmlTextData 反解全部 @font-face；进入编辑时合并 fontFaces',
+      '进入编辑时会注入 HTML 中的 @font-face',
       '@font-face 字体名含空格时自动加引号'
     ]
   },
