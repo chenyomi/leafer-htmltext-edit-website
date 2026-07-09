@@ -39,6 +39,10 @@ export const docsZhCN = {
       label: 'HtmlTextManage'
     },
     {
+      id: 'api-format-painter',
+      label: '格式刷'
+    },
+    {
       id: 'api-sethtml',
       label: 'setHTMLText'
     },
@@ -72,6 +76,11 @@ export const docsZhCN = {
       icon: '📝',
       title: '格式化工具',
       desc: '加粗、斜体、下划线、删除线、上下标、大小写转换'
+    },
+    {
+      icon: '🧹',
+      title: '格式刷',
+      desc: '复制选区或整段文本格式，再应用到其它选区或文本节点'
     },
     {
       icon: '📋',
@@ -1088,11 +1097,44 @@ export const docsZhCN = {
       desc: '插件导出 HTML 可恢复局部字号；第三方 HTML 尽量兼容，不保证完整还原'
     }
   ],
+  formatPainterApis: [
+    {
+      name: 'copyHTMLTextFormat',
+      signature: 'copyHTMLTextFormat(): HTMLTextCopiedFormat | null',
+      desc: '复制当前 HTMLText 的格式快照。内嵌编辑且有选区时复制选区格式；外框选中时复制整个对象的文本样式、段落格式和 textData。'
+    },
+    {
+      name: 'applyHTMLTextFormat',
+      signature: 'applyHTMLTextFormat(format?): boolean',
+      desc: '把最近复制的格式或传入的格式应用到当前 HTMLText。内嵌编辑选区会应用到选中文字；外框选中或全选时会作为整段对象样式应用。'
+    },
+    {
+      name: 'getCopiedHTMLTextFormat',
+      signature: 'getCopiedHTMLTextFormat(): HTMLTextCopiedFormat | null',
+      desc: '读取当前缓存的格式快照，常用于控制格式刷按钮的选中状态。'
+    },
+    {
+      name: 'clearCopiedHTMLTextFormat',
+      signature: 'clearCopiedHTMLTextFormat(): void',
+      desc: '清空已复制的格式快照，适合取消格式刷状态或页面切换时调用。'
+    }
+  ],
   changelog: [
+    {
+      version: '2.6.13',
+      date: '2026-07',
+      tag: 'latest',
+      items: [
+        '新增格式刷 API：copyHTMLTextFormat、applyHTMLTextFormat、getCopiedHTMLTextFormat、clearCopiedHTMLTextFormat',
+        '支持复制内嵌编辑选区格式或整段 HtmlText 对象格式，并应用到其它选区或对象',
+        '进入编辑态前会从当前 HTML 反向同步 textData，减少字号、字体、字间距、阴影和描边回显不一致',
+        '优化 textStroke unset / none / 0px 等状态解析，避免清除描边后再次编辑出现旧样式'
+      ]
+    },
     {
       version: '2.6.11',
       date: '2026-07',
-      tag: 'latest',
+      tag: 'minor',
       items: [
         '重构文档接入指南，按业务路线、初始化、更新、保存、回显、排错梳理使用链路',
         '补充资源拆分存储说明，明确字体、图片、模板等大资源不应重复写入文本数据',
@@ -1830,6 +1872,30 @@ setHTMLText('textStroke', '1px #333333')
 const fontFamily = '"Dancing Script", cursive'
 const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
 setHTMLText('font', fontFamily, fontBase64)`,
+    formatPainterExample: `import {
+  copyHTMLTextFormat,
+  applyHTMLTextFormat,
+  getCopiedHTMLTextFormat,
+  clearCopiedHTMLTextFormat,
+} from '@chenyomi/leafer-htmltext-edit'
+
+// 1. 选中一个 HtmlText；或双击进入编辑后拖选一段文字
+const copied = copyHTMLTextFormat()
+if (!copied) {
+  console.warn('请先选中可编辑的 HtmlText，并确认授权可用')
+}
+
+// 2. 选中目标 HtmlText；或在内嵌编辑器里拖选目标文字
+const ok = applyHTMLTextFormat()
+if (!ok) {
+  console.warn('没有可应用的格式，或当前目标不是 HtmlText')
+}
+
+// 3. 工具栏状态
+const active = !!getCopiedHTMLTextFormat()
+
+// 4. 退出格式刷
+clearCopiedHTMLTextFormat()`,
     inlineFontUsageExample: `import { setHTMLText } from '@chenyomi/leafer-htmltext-edit'
 
 // 1. 双击进入内嵌编辑器，选中一段文字
@@ -2243,6 +2309,15 @@ if (!ok) {
     apiManage: {
       title: 'API · HtmlTextManage',
       intro: '是单例编辑器管理器，负责 Quill 实例的生命周期管理和批量编辑操作。'
+    },
+    apiFormatPainter: {
+      title: 'API · 格式刷',
+      intro: '用于复制当前文本格式，',
+      introSuffix: '用于粘贴格式。它会区分「内嵌编辑选区」和「外框选中对象」，适合做工具栏里的格式刷按钮。',
+      callout:
+        '格式刷依赖当前选中的 HtmlText 和授权能力。复制选区时以选区第一个有效文字片段为样本；复制整段对象时会尽量保留全局 textData、段落对齐、局部字体、局部字间距、阴影和描边。',
+      methodsTitle: '方法列表',
+      exampleTitle: '示例'
     },
     apiSetHtml: {
       title: 'API · setHTMLText',

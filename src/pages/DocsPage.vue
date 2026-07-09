@@ -1074,6 +1074,74 @@
           </div>
         </section>
 
+        <!-- ─── API: Format Painter ─── -->
+        <section :id="'api-format-painter'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              {{ doc.ui.apiFormatPainter.title }}
+              <a :href="'#api-format-painter'" class="anchor-link" @click.prevent="scrollTo('api-format-painter')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            <code>copyHTMLTextFormat</code>
+            {{ doc.ui.apiFormatPainter.intro }}
+            <code>applyHTMLTextFormat</code>
+            {{ doc.ui.apiFormatPainter.introSuffix }}
+          </p>
+
+          <div class="callout callout-info">{{ doc.ui.apiFormatPainter.callout }}</div>
+
+          <div class="code-block-wrap">
+            <button
+              class="copy-btn"
+              @click="
+                copyCode(
+                  `import { copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, clearCopiedHTMLTextFormat } from '@chenyomi/leafer-htmltext-edit'`,
+                  'import-format-painter'
+                )
+              "
+            >
+              <i class="pi" :class="copiedKey === 'import-format-painter' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre
+              class="code-block"
+            ><code>import { copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, clearCopiedHTMLTextFormat } from '@chenyomi/leafer-htmltext-edit'</code></pre>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormatPainter.methodsTitle }}</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>{{ doc.ui.shared.tableHeaders.name }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.invoke }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="api in doc.formatPainterApis" :key="api.name">
+                  <td>
+                    <code>{{ api.name }}</code>
+                  </td>
+                  <td>
+                    <code>{{ api.signature }}</code>
+                  </td>
+                  <td class="param-desc">{{ api.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormatPainter.exampleTitle }}</h3>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.formatPainterExample, 'format-painter-ex')">
+              <i class="pi" :class="copiedKey === 'format-painter-ex' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.formatPainterExample }}</code></pre>
+          </div>
+        </section>
+
         <!-- ─── API: setHTMLText ─── -->
         <section :id="'api-sethtml'" class="doc-section">
           <div class="section-anchor-wrap">

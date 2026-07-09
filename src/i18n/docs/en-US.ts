@@ -39,6 +39,10 @@ export const docsEnUS = {
       label: 'HtmlTextManage'
     },
     {
+      id: 'api-format-painter',
+      label: 'Format Painter'
+    },
+    {
       id: 'api-sethtml',
       label: 'setHTMLText'
     },
@@ -72,6 +76,11 @@ export const docsEnUS = {
       icon: '📝',
       title: 'Formatting Tools',
       desc: 'Bold, italic, underline, strikethrough, superscript/subscript, and case conversion'
+    },
+    {
+      icon: '🧹',
+      title: 'Format Painter',
+      desc: 'Copy selection or object text formatting, then apply it to another selection or text node'
     },
     {
       icon: '📋',
@@ -1093,11 +1102,44 @@ export const docsEnUS = {
       desc: 'Plugin-exported HTML can restore local font size; third-party HTML is best-effort, not guaranteed'
     }
   ],
+  formatPainterApis: [
+    {
+      name: 'copyHTMLTextFormat',
+      signature: 'copyHTMLTextFormat(): HTMLTextCopiedFormat | null',
+      desc: 'Copies a formatting snapshot from the current HTMLText. In inline editing with a selection, it copies the selection; when the outer node is selected, it copies whole-object text styles, paragraph formats, and textData.'
+    },
+    {
+      name: 'applyHTMLTextFormat',
+      signature: 'applyHTMLTextFormat(format?): boolean',
+      desc: 'Applies the latest copied format, or a passed format, to the current HTMLText. Inline selection targets selected text; outer selection or select-all applies it as whole-object styling.'
+    },
+    {
+      name: 'getCopiedHTMLTextFormat',
+      signature: 'getCopiedHTMLTextFormat(): HTMLTextCopiedFormat | null',
+      desc: 'Reads the cached formatting snapshot, useful for active toolbar state.'
+    },
+    {
+      name: 'clearCopiedHTMLTextFormat',
+      signature: 'clearCopiedHTMLTextFormat(): void',
+      desc: 'Clears the copied snapshot, useful when leaving format-painter mode or changing pages.'
+    }
+  ],
   changelog: [
+    {
+      version: '2.6.13',
+      date: '2026-07',
+      tag: 'latest',
+      items: [
+        'Added format-painter APIs: copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, and clearCopiedHTMLTextFormat',
+        'Support copying inline selection formatting or whole HtmlText object formatting, then applying it to another selection or object',
+        'Sync textData back from current HTML before entering edit mode to reduce mismatches in size, font, letter spacing, shadow, and stroke restore',
+        'Improved textStroke unset / none / 0px parsing to avoid old stroke styles reappearing after clearing'
+      ]
+    },
     {
       version: '2.6.11',
       date: '2026-07',
-      tag: 'latest',
+      tag: 'minor',
       items: [
         'Restructured integration docs by business route, init, update, save, restore, and troubleshooting',
         'Added asset split-storage guidance — fonts, images, templates should not be duplicated in text data',
@@ -1844,6 +1886,30 @@ setHTMLText('textStroke', '1px #333333')
 const fontFamily = '"Dancing Script", cursive'
 const fontBase64 = 'data:font/woff2;charset=utf-8;base64,...'
 setHTMLText('font', fontFamily, fontBase64)`,
+    formatPainterExample: `import {
+  copyHTMLTextFormat,
+  applyHTMLTextFormat,
+  getCopiedHTMLTextFormat,
+  clearCopiedHTMLTextFormat,
+} from '@chenyomi/leafer-htmltext-edit'
+
+// 1. Select an HtmlText; or double-click into editing and select a text range
+const copied = copyHTMLTextFormat()
+if (!copied) {
+  console.warn('Select an editable HtmlText first and make sure the license is available')
+}
+
+// 2. Select target HtmlText; or select target text inside the inline editor
+const ok = applyHTMLTextFormat()
+if (!ok) {
+  console.warn('No format to apply, or current target is not HtmlText')
+}
+
+// 3. Toolbar state
+const active = !!getCopiedHTMLTextFormat()
+
+// 4. Leave format-painter mode
+clearCopiedHTMLTextFormat()`,
     inlineFontUsageExample: `import { setHTMLText } from '@chenyomi/leafer-htmltext-edit'
 
 // 1. Double-click into inline editor, select a range
@@ -2261,6 +2327,16 @@ with selection`,
     apiManage: {
       title: 'API · HtmlTextManage',
       intro: 'Singleton editor manager for Quill lifecycle and batch editing.'
+    },
+    apiFormatPainter: {
+      title: 'API · Format Painter',
+      intro: 'copies the current text formatting, and ',
+      introSuffix:
+        'pastes it. It distinguishes inline-edit selections from outer selected objects, so it fits toolbar format-painter buttons.',
+      callout:
+        'Format painter depends on the current selected HtmlText and license capability. Selection copy samples the first valid text segment; object copy preserves global textData, paragraph alignment, local fonts, local letter spacing, shadow, and stroke as much as possible.',
+      methodsTitle: 'Methods',
+      exampleTitle: 'Example'
     },
     apiSetHtml: {
       title: 'API · setHTMLText',
