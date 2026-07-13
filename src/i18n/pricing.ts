@@ -7,14 +7,8 @@ const pricingZhCN = {
   caseSubtitle: '基础付费版功能介绍',
   demoLabels: {
     verticalText: '一键竖排文字/段落竖排',
-    outline: '轮廓线',
-    bracket: '括号',
-    arcText: '弧形文字',
-    circle: '圆',
-    linearCircle: '线性圆',
-    star: '星星'
+    outline: '轮廓线'
   },
-  comingSoon: '其他功能（暂未开放）',
   playground: 'Playground',
   playgroundDesc: '基础付费版功能在线体验入口（不包含进阶高级版）',
   tryNow: '立即体验',
@@ -144,14 +138,8 @@ const pricingEnUS = {
   caseSubtitle: 'Paid tier feature overview',
   demoLabels: {
     verticalText: 'One-click vertical text / paragraph layout',
-    outline: 'Outline stroke',
-    bracket: 'Brackets',
-    arcText: 'Arc text',
-    circle: 'Circle',
-    linearCircle: 'Linear circle',
-    star: 'Star'
+    outline: 'Outline stroke'
   },
-  comingSoon: 'More features (coming soon)',
   playground: 'Playground',
   playgroundDesc: 'Online trial for paid-tier basics (advanced tier not included)',
   tryNow: 'Try Now',

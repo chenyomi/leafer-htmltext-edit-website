@@ -17,7 +17,10 @@
         <video
           :poster="posterSrc"
           src="@/assets/video/video.mp4"
-          controls
+          autoplay
+          muted
+          loop
+          playsinline
           class="w-200"
           style="border-radius: 20px"
         ></video>
@@ -29,75 +32,15 @@
           </div>
           <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
             <video
-              controls
               src="@/assets/video/lunkuo.mov"
-              :autoplay="true"
-              :loop="true"
+              autoplay
+              muted
+              loop
+              playsinline
               style="border-radius: 20px; width: 100%"
             ></video>
             <p class="flex-1 w-full absolute">{{ pricing.demoLabels.outline }}</p>
           </div>
-        </div>
-        <p class="start-building-subtitle mt-10">{{ pricing.comingSoon }}</p>
-        <div class="text-center">
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
-            <video
-              controls
-              src="@/assets/video/br.mov"
-              :autoplay="true"
-              :loop="true"
-              style="border-radius: 20px; width: 100%"
-            ></video>
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.bracket }}</p>
-          </div>
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
-            <video
-              controls
-              src="@/assets/video/cir_.mp4"
-              :autoplay="true"
-              :loop="true"
-              style="border-radius: 20px; width: 100%"
-            ></video>
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.arcText }}</p>
-          </div>
-        </div>
-        <div class="text-center">
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
-            <video
-              controls
-              src="@/assets/video/cirshape.mov"
-              :autoplay="true"
-              :loop="true"
-              style="border-radius: 20px; width: 100%"
-            ></video>
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.circle }}</p>
-          </div>
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
-            <video
-              controls
-              src="@/assets/video/line.mov"
-              :autoplay="true"
-              :loop="true"
-              style="border-radius: 20px; width: 100%"
-            ></video>
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.linearCircle }}</p>
-          </div>
-        </div>
-        <div class="text-center">
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
-            <video
-              controls
-              src="@/assets/video/star.mov"
-              :autoplay="true"
-              :loop="true"
-              style="border-radius: 20px; width: 100%"
-            ></video>
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.star }}</p>
-          </div>
-          <div
-            class="relative inline-block mx-4 my-6"
-            style="background: #ffffff; border-radius: 20px; width: 400px"
-          ></div>
         </div>
         <p class="start-building-subtitle mt-10">{{ pricing.playground }}</p>
         <p class="start-building-subtitle">{{ pricing.playgroundDesc }}</p>
