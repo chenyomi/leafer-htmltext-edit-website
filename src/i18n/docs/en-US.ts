@@ -18,7 +18,7 @@ export const docsEnUS = {
     },
     {
       id: 'font-echo-guide',
-      label: 'Multi-Font & Restore'
+      label: 'Custom Fonts'
     },
     {
       id: 'data-persistence',
@@ -39,10 +39,6 @@ export const docsEnUS = {
       label: 'HtmlTextManage'
     },
     {
-      id: 'api-format-painter',
-      label: 'Format Painter'
-    },
-    {
       id: 'api-sethtml',
       label: 'setHTMLText'
     },
@@ -53,6 +49,20 @@ export const docsEnUS = {
     {
       id: 'api-license',
       label: 'License'
+    }
+  ],
+  advancedItems: [
+    {
+      id: 'api-format-painter',
+      label: 'Format Painter'
+    },
+    {
+      id: 'api-lab',
+      label: 'Lab'
+    },
+    {
+      id: 'api-formula',
+      label: 'Addon · Formula'
     }
   ],
   moreItems: [
@@ -95,7 +105,17 @@ export const docsEnUS = {
     {
       icon: '🔡',
       title: 'Local Styles',
-      desc: 'Local font size (experimental), local font family, local letter spacing — layered with global styles'
+      desc: 'Local font family and local letter spacing — layered with global styles'
+    },
+    {
+      icon: '🧪',
+      title: 'Lab',
+      desc: 'Experimental features require setFeatures; currently local font size inlineFontSize'
+    },
+    {
+      icon: '∑',
+      title: 'Formula Addon',
+      desc: 'Separate package @chenyomi/leafer-htmltext-formula with bundled KaTeX for inline formulas'
     },
     {
       icon: '🎡',
@@ -216,8 +236,7 @@ export const docsEnUS = {
     },
     {
       name: 'Assets vs content',
-      meaning:
-        'Fonts, images, and template assets can be large; canvas SVG rendering requires base64-embedded fonts, not URL-only references',
+      meaning: 'Fonts, images, and templates can be large; canvas SVG font rendering must embed base64, not URL alone',
       suggestion: 'Store fontIds + contentHtml; hydrate to base64 @font-face before restore (subsetting recommended)'
     },
     {
@@ -244,12 +263,6 @@ export const docsEnUS = {
       scene: 'Business stores HTML only, template restore, cross-system import',
       fields: 'text',
       behavior: 'Rendered as-is; Quill CSS auto-completed if missing; metadata like fontSize / padding parsed from HTML'
-    },
-    {
-      name: 'text = font + content',
-      scene: 'Font library and body text stored separately',
-      fields: 'text: fontStyle + contentHtml',
-      behavior: 'fontStyle injects @font-face; contentHtml preserves inline styles'
     },
     {
       name: 'Leafer JSON restore',
@@ -1079,27 +1092,33 @@ export const docsEnUS = {
   inlineFontSizeLimits: [
     {
       name: 'Arc text',
-      desc: 'Arc layout is skipped when local font sizes exist (hasInlineFontSize); unify font size before applying arc'
+      effect: 'Unavailable',
+      desc: 'Arc layout is skipped when local font sizes exist; text stays straight. Unify size with global fontSize before applying arc.'
     },
     {
-      name: 'Lock aspect ratio scaling',
-      desc: 'Multi-size text does not participate in global fontSize scaling under lockRatio to avoid local size ratio errors'
+      name: 'Lock-ratio scaling',
+      effect: 'Unavailable',
+      desc: 'Multi-size text does not participate in global fontSize scaling under lockRatio. Drag-resize will not keep local sizes in locked proportion.'
+    },
+    {
+      name: 'Batch local size on multi-select',
+      effect: 'Unsupported',
+      desc: 'inlineFontSize only applies to the Quill selection in the current inline editor. You cannot set local size on a few characters across multiple nodes at once.'
     },
     {
       name: 'Global fontSize',
-      desc: 'Calling fontSize clears all inlineFontSize; text returns to single-size mode'
+      effect: 'Clears local sizes',
+      desc: "setHTMLText('fontSize', n) removes all inlineFontSize and returns the text to a single size. This overwrites; it does not coexist."
     },
     {
-      name: 'Coexist with local font',
-      desc: 'Same text can have both local font size and local font; each saved on different span style properties'
+      name: 'Third-party HTML restore',
+      effect: 'Not guaranteed',
+      desc: 'HTML exported by this plugin can restore local sizes; complex third-party HTML is best-effort only.'
     },
     {
-      name: 'Multi-select batch',
-      desc: 'inlineFontSize only applies to Quill selection in inline editor; no batch local size across multiple nodes'
-    },
-    {
-      name: 'External HTML',
-      desc: 'Plugin-exported HTML can restore local font size; third-party HTML is best-effort, not guaranteed'
+      name: 'Local font family',
+      effect: 'Can coexist',
+      desc: 'The same text can have both local size and local font, on different span style properties. That does not make other features safe.'
     }
   ],
   formatPainterApis: [
@@ -1124,11 +1143,61 @@ export const docsEnUS = {
       desc: 'Clears the copied snapshot, useful when leaving format-painter mode or changing pages.'
     }
   ],
+  formulaApis: [
+    {
+      name: 'installHtmlTextFormula',
+      signature: 'installHtmlTextFormula(): void',
+      desc: 'Manually install formula support (Quill formula blot, clipboard, canvas measure). Called automatically on import; later calls are no-ops.'
+    },
+    {
+      name: 'insertHTMLTextFormula',
+      signature: 'insertHTMLTextFormula(latex): void',
+      desc: 'Insert a formula into the selected HtmlText. With inline editing open, inserts at the caret; otherwise hydrates current HTML first, then inserts.'
+    },
+    {
+      name: 'renderFormulaHtml',
+      signature: 'renderFormulaHtml(latex): string',
+      desc: 'Returns an HTML snippet with ql-formula, for HtmlText initial text or splicing into an existing paragraph.'
+    }
+  ],
+  formulaNotes: [
+    {
+      name: 'Install on import',
+      desc: 'Importing the formula package auto-runs installHtmlTextFormula(). Import @chenyomi/leafer-htmltext-edit first, or import the formula package alone (it pulls the peer).'
+    },
+    {
+      name: 'Bundled KaTeX',
+      desc: 'Formulas render with bundled KaTeX; you do not need to install katex yourself'
+    },
+    {
+      name: 'When to insert',
+      desc: 'Most reliable after double-click edit, at the caret. insertHTMLTextFormula does nothing if no node is selected'
+    },
+    {
+      name: 'Save & restore',
+      desc: 'Formulas persist as span.ql-formula with LaTeX in data-value. Keep that node on restore; the addon re-renders'
+    },
+    {
+      name: 'License',
+      desc: 'The formula addon is free MIT and does not check or bind the core license key. The core editor still uses its own license'
+    }
+  ],
   changelog: [
+    {
+      version: 'formula 1.0.1',
+      date: '2026-08',
+      tag: 'latest',
+      items: [
+        'Published addon @chenyomi/leafer-htmltext-formula with bundled KaTeX; installs on import',
+        'Added insertHTMLTextFormula / renderFormulaHtml for inserting formulas during inline editing',
+        'Formula addon is free MIT and does not check the core license',
+        'Docs split Lab (setFeatures / local font size) out of Local & Global Styles, and added an Advanced nav group'
+      ]
+    },
     {
       version: '2.6.13',
       date: '2026-07',
-      tag: 'latest',
+      tag: 'minor',
       items: [
         'Added format-painter APIs: copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, and clearCopiedHTMLTextFormat',
         'Support copying inline selection formatting or whole HtmlText object formatting, then applying it to another selection or object',
@@ -1306,20 +1375,6 @@ export const docsEnUS = {
       codeKey: 'initScenarioTextCode'
     },
     {
-      id: 'split-storage',
-      title: 'Scenario E: Split font and content storage (multi-font recommended)',
-      mode: 'text = fontStyle + contentHtml',
-      desc: 'Fonts managed by font library; body stored as HTML. Merge as text on restore. No plugin changes — business hydrates before passing in.',
-      tips: [
-        'Store: contentHtml without @font-face; fontIds point to font library',
-        'Restore: font library generates base64 @font-face (subsetting recommended), then fontStyle + contentHtml',
-        'Multiple fonts: multiple @font-face in one <style>, not external URLs',
-        'contentHtml <span style="font-family:..."> must match @font-face names'
-      ],
-      lang: 'main.ts',
-      codeKey: 'initScenarioSplitStorageCode'
-    },
-    {
       id: 'json',
       title: 'Scenario D: Leafer JSON restore',
       mode: 'toJSON()',
@@ -1380,7 +1435,7 @@ export const docsEnUS = {
       name: 'setFeatures',
       anchor: 'set-features',
       signature: 'htmlTextManage.setFeatures(features): void',
-      desc: 'Enable experimental features. Currently only inlineFontSize (local font size) must be enabled explicitly; local font and local letterSpacing work by default.',
+      desc: 'Enable experimental features. Currently only inlineFontSize (local font size) must be enabled explicitly — see Lab. Local font and local letterSpacing work by default.',
       params: [
         {
           name: 'features',
@@ -1591,8 +1646,7 @@ const text = new HtmlText({
   draggable: true,
 })
 app.tree.add(text)`,
-    initScenarioMultiFontCode: `// Multi-font: fetch base64 from font library (subsetting recommended), merge into one <style>
-// Store contentHtml + fontIds only; merge the same way before restore (see hydrate chapter)
+    initScenarioMultiFontCode: `// Several custom fonts: multiple @font-face in one <style> (must be base64)
 const fontStyle = \`<style>
 @font-face { font-family: 'YouSheBiaoTiHei-2'; src: url(data:font/woff2;base64,AAA...) format('woff2'); }
 @font-face { font-family: 'Dancing Script'; src: url(data:font/woff2;base64,BBB...) format('woff2'); }
@@ -1936,6 +1990,28 @@ setHTMLText('inlineFontSize', 42)
 // To restore uniform size, use global fontSize.
 // Unifies whole paragraph and clears local size markers.
 setHTMLText('fontSize', 24)`,
+    formulaImportExample: `import { htmlTextManage, HtmlText } from '@chenyomi/leafer-htmltext-edit'
+import {
+  insertHTMLTextFormula,
+  renderFormulaHtml
+} from '@chenyomi/leafer-htmltext-formula'
+
+await htmlTextManage.init(app)
+// Importing the formula package auto-runs installHtmlTextFormula()`,
+    formulaInsertExample: `import { insertHTMLTextFormula } from '@chenyomi/leafer-htmltext-formula'
+
+// 1. Select an HtmlText (preferably double-click to edit, caret at insert position)
+// 2. Insert a LaTeX formula
+insertHTMLTextFormula(String.raw\`E=mc^2\`)`,
+    formulaInitExample: `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
+import { renderFormulaHtml } from '@chenyomi/leafer-htmltext-formula'
+
+const quadratic = renderFormulaHtml(String.raw\`x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}\`)
+
+const text = new HtmlText({
+  fontSize: 22,
+  text: '<p>When ' + renderFormulaHtml(String.raw\`a \\ne 0\`) + ', they are ' + quadratic + '</p>'
+})`,
     manageInitExample: `import { App } from 'leafer-ui'
 import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
 
@@ -2069,6 +2145,7 @@ no selection`,
 with selection`,
         inlineBehavior: 'Behavior',
         relatedCapability: 'Related capability',
+        effect: 'Effect',
         multiSizeBehavior: 'Behavior with mixed font sizes'
       },
       badges: {
@@ -2080,6 +2157,7 @@ with selection`,
     sidebar: {
       guideTitle: 'Guide',
       apiTitle: 'API Reference',
+      advancedTitle: 'Advanced',
       moreTitle: 'More',
       mobileNav: 'Documentation'
     },
@@ -2102,7 +2180,9 @@ with selection`,
       calloutSuffix: '. Recommended with Vite or Webpack.',
       installVia: 'Install via package manager:',
       peerDepsTitle: 'Peer Dependencies',
-      peerDepsDesc: 'Ensure the following peer dependencies are installed:'
+      peerDepsDesc: 'Ensure the following peer dependencies are installed:',
+      addonTitle: 'Optional addons',
+      addonDesc: 'Formula support is a separate package. Skip it if you only need the core editor. To add formulas:'
     },
     quickStart: {
       title: 'Quick Start',
@@ -2130,7 +2210,7 @@ with selection`,
         'This plugin works as a rich-text node on a canvas and in template systems, asset libraries, font libraries, or business forms. Pick a route from the table below before diving into APIs.',
       contentModesTitle: 'Layer 2: Node content initialization',
       contentModesDesc: 'When creating',
-      contentModesMiddle: ', there are four common content sources. Pick the right one, then add styles and layout.',
+      contentModesMiddle: ', there are three common content sources. Pick the right one, then add styles and layout.',
       priorityTitle: 'Priority rules (avoid restore issues):',
       priorityRules: [
         'When both text and content are passed, text wins and content is ignored',
@@ -2151,50 +2231,24 @@ with selection`,
       paramsEnd: '.'
     },
     fontEchoGuide: {
-      title: 'Multi-Font & Restore',
-      introSingle: 'Single font',
-      introMulti: 'Multiple fonts (especially CJK)',
-      introHydrate: 'split storage + hydrate before restore',
-      introNoPluginChange: 'no plugin changes required',
-      whyNoUrlTitle: "Why can't fonts use external URLs?",
+      title: 'Custom Fonts',
+      intro:
+        'Custom fonts have two ways in: one font uses fontFamily + fontBase64; several fonts go into @font-face inside text. Saving is still toJSON() or full HTML — same as normal text. No extra business storage format.',
+      whyNoUrlTitle: 'Custom fonts must be base64',
       whyNoUrlBody:
-        'The inner HTMLText layer wraps rich-text HTML inside an SVG foreignObject in a data:image/svg+xml payload before rendering to the canvas. The browser treats that SVG as a self-contained image and will not fetch @font-face { src: url(https://...) } resources inside it. For canvas restore and export, custom fonts must be embedded as data:font/woff2;base64,... — CDN URLs or relative paths alone will not work.',
-      fontParamsTitle: 'What do the four font parameters do?',
+        'The canvas wraps HTML in SVG. The browser will not fetch URLs inside @font-face. Use data:font/woff2;base64,... — CDN or relative paths drop fonts on canvas.',
+      singleTitle: 'One custom font',
+      singleDesc: 'Pass the family name and the font file together at creation. The plugin writes one @font-face.',
       singleFontWarning:
-        "Only one primary custom font can be registered. For multiple custom fonts in one text, put multiple @font-face rules in text's <style>.",
-      echoModesTitle: 'Multi-font restore: three approaches (pick one)',
-      mode1Title: 'Approach 1: Leafer JSON (single font / quickest for demos)',
-      mode1Desc1:
-        'Save htmlText.toJSON(), restore with new HtmlText(json). Fonts, local spans, textData included — good for',
-      mode1Strong: 'single font, small font files, or prototypes',
-      mode1Desc2: 'For multiple fonts + large CJK libraries, do not store raw toJSON() long-term',
-      mode1Desc2Suffix:
-        "— each node's text may duplicate base64 and bloat the canvas JSON. Use approach 3 or business strip/hydrate below.",
-      mode2Title: 'Approach 2: Full HTML in one field',
-      mode2Desc:
-        'text includes <style> (multiple @font-face) + <p>/<span> with font-family. Pass new HtmlText({ text }) only — no extra font resource fields.',
-      mode3Title: 'Approach 3: Split font and content (Scenario E)',
-      mode3Note: 'Note: multiple fonts go in one <style> with multiple @font-face — not one per <style> tag.',
-      stableApiCallout:
-        'Stable constructor entries are content, text, fontFamily, and fontBase64. If you have multiple font files, do not pass a font array and expect auto local-font restore; build full <style> + content HTML (approach 2/3) or strip/hydrate in Leafer JSON flow per conventions below.',
-      bizSplitTitle: 'Multi-font recommended: business-side split storage (zero plugin changes)',
-      bizSplitDesc:
-        "The plugin only needs correct @font-face (base64) and content HTML in text to edit and render. Where fonts live, slimming, and persistence are your project's conventions — no plugin API required.",
-      innerVsCanvasTitle: 'Inline editing vs canvas rendering:',
-      innerVsCanvas:
-        "While editing, preload full font URLs (e.g. addCustomFonts) for inner Quill; before canvas SVG render, base64 subset or full font must be in text's @font-face. These can be separate.",
-      schemaTitle: 'Recommended field schema (example)',
-      hydrateTitle: 'Pre-restore hydrate flow',
-      optimizeTitle: 'Size optimization tips',
-      optimizeItems: [
-        'Subsetting (strongly recommended): build woff2 subset from characters actually used, then base64. Full CJK fonts are MB-scale; subsets are often tens of KB.',
-        'Global dedup: when the same font appears on many nodes, store one font resource; nodes keep fontId lists only — not base64 per node.',
-        "Strip before Leafer JSON export: remove @font-face from each node's text; lift font metadata to document-level fonts table; hydrate on open.",
-        'Final image export with no further editing: consider outlining (text to path) — loses editability, suitable for final export only.'
-      ],
-      dontDoTitle: 'Do not:',
-      dontDo:
-        '① Persist only font-family names and expect the canvas to find system fonts (custom fonts fall back); ② Use url(/fonts/xxx.woff2) or CDN in @font-face and expect SVG render to work (it fails); ③ Duplicate full base64 font libraries in every text record or node JSON.'
+        'This registers one primary custom font. For several custom fonts in one paragraph, use “Several custom fonts” below.',
+      multiTitle: 'Several custom fonts',
+      multiDesc:
+        'Do not pass a font array. Put one <style> (multiple @font-face, all base64) plus content with font-family into text, then new HtmlText({ text }).',
+      multiNote: 'Keep all @font-face rules in the same <style>. span font-family must match those names.',
+      fontParamsTitle: 'Related parameters',
+      saveHintTitle: 'Saving:',
+      saveHint:
+        'After editing, save htmlText.toJSON() or the inner HTML. Multi-font already lives in HTML @font-face — do not persist a separate font table.'
     },
     dataPersistence: {
       title: 'Save & Restore',
@@ -2218,7 +2272,7 @@ with selection`,
         'Do not put content reused across many texts/templates or obviously large blobs in every text record. Font files, images, assets, and templates belong separately; position, size, color, stroke, and local span styles belong with text JSON or HTML.',
       leaferSceneTitle: 'Pure Leafer project: save full canvas',
       leaferSceneDesc:
-        'If graphics, images, and text are all Leafer-managed, export the canvas as JSON. On next visit, create App, init htmlTextManage, then set or add JSON. For multi-font large libraries, strip embedded fonts after toJSON() and hydrate before set() — see',
+        'If graphics, images, and text are all Leafer-managed, export the canvas as JSON. On next visit, create App, init htmlTextManage, then set or add JSON.',
       leaferSceneLink: 'Multi-Font & Restore',
       leaferSceneEnd: '.',
       mixedTitle: 'Mixed business: store text nodes separately',
@@ -2232,8 +2286,8 @@ with selection`,
         'Local font, local font size, and local letter spacing are not a separate style field — they live in inner HTMLText.text <span style>. Save node JSON after editing; pass JSON back as-is on restore so local styles are not lost.',
       htmlOnlyTitle: 'Special case: HTML content only',
       htmlOnlyDesc:
-        'When business splits font and content, restore via text with @font-face and content HTML merged. Avoids duplicating large font base64 per text row. Full example in',
-      htmlOnlyLink: 'Initialization Guide · Scenario 4',
+        'When you only persist HTML, restore with text and the full HTML. Custom fonts must include @font-face (base64). Example in',
+      htmlOnlyLink: 'Custom Fonts',
       htmlOnlyEnd: '.',
       multiFontHtmlTitle: 'Multi-font and HTML restore',
       multiFontHtmlDesc:
@@ -2244,7 +2298,7 @@ with selection`,
         'Multi-font init: pass multiple @font-face and content HTML together as text'
       ],
       saveWarning:
-        'Do not persist Quill instances, DOM, or editor runtime state. Save HtmlText.toJSON() or full Leafer JSON; before restore, import HtmlText and complete htmlTextManage.init(app) so double-click edit, selection, and zoom work. HTML-only restore fits existing split-storage businesses; if saving HTML only, keep <p style="...">, <span style="..."> inline styles and all @font-face for custom fonts (multiple in multi-font cases). Plain text alone cannot restore size, font, stroke, color, dimensions, or alignment.',
+        'Do not persist Quill instances, DOM, or editor runtime state. Save HtmlText.toJSON() or full Leafer JSON. Before restore, import HtmlText and finish htmlTextManage.init(app). If saving HTML only, keep inline styles and all @font-face. Plain text alone cannot restore size, font, stroke, color, or alignment.',
       checklistTitle: 'Pre-save checklist'
     },
     editingGuide: {
@@ -2346,7 +2400,7 @@ with selection`,
         '「three operation scenarios」first — most confusion is from not double-clicking or not selecting text.',
       quickNoteTitle: 'Quick reference:',
       quickNote:
-        'Whole-paragraph font size / line height / weight → select node only; bold / color a few chars → double-click, select, then call; local size / font / letter spacing → double-click + selection (size also needs setFeatures({ inlineFontSize: true })).',
+        'Whole-paragraph font size / line height / weight → select node only; bold / color a few chars → double-click, select, then call; local font / letter spacing → double-click + selection; local size → see Lab, also needs setFeatures({ inlineFontSize: true }).',
       signatureTitle: 'Function signature',
       paramsTitle: 'Parameters',
       setHtmlParams: [
@@ -2399,16 +2453,62 @@ with selection`,
       letterSpacingTitle: 'Local letter spacing (letterSpacing)',
       letterSpacingDesc:
         'setHTMLText(\'letterSpacing\', n) with inline edit and selection writes span style="letter-spacing:..."; otherwise updates global textData.letterSpacing and clears local markers. Like local font size: global on <p>, local on <span>.',
-      inlineFontSizeTitle: 'Local font size inlineFontSize (experimental)',
-      inlineFontSizeWarning:
-        'Only style still requiring htmlTextManage.setFeatures({ inlineFontSize: true }). When off, fontSize, local font, arc text, and other stable features are unaffected.',
-      inlineFontSizeDesc:
-        'Does not replace fontSize: fontSize is global for the whole text object; inlineFontSize is saved as span style="font-size: ...". Global fontSize clears all local sizes.',
-      enableTitle: 'How to enable',
-      usageTitle: 'Usage',
-      limitsTitle: 'Local font size effects and limits',
+      labCalloutTitle: 'Local font size:',
+      labCallout: 'still experimental, now documented in',
+      labLink: 'Lab',
+      labCalloutSuffix: '. Enable it with setFeatures first.',
       exportCallout:
         'Exported HTML keeps local font size / local font / local letter spacing; parseHtmlTextData parses base styles. For text-only restore, keep all @font-face in <style> and <span style>; third-party complex HTML is best-effort, not guaranteed.'
+    },
+    apiLab: {
+      title: 'Lab',
+      intro:
+        'Experimental features are off by default and do not affect stable local font, local letter spacing, or arc text. Turn them on only when you need them.',
+      warning:
+        "Currently only inlineFontSize (local font size) requires htmlTextManage.setFeatures({ inlineFontSize: true }). Without it, setHTMLText('inlineFontSize', n) does nothing.",
+      localStylesPrefix: 'Local vs global scenarios, fonts, and letter spacing remain in',
+      localStylesLink: 'Local & Global Styles',
+      localStylesSuffix: '. This page covers the experiment switch and local font size only.',
+      setFeaturesTitle: 'Enable experiments with setFeatures',
+      setFeaturesDesc: 'Turn on only the flags you need. The only current field is inlineFontSize.',
+      inlineFontSizeTitle: 'Local font size inlineFontSize',
+      inlineFontSizeWarning:
+        'Does not replace fontSize. fontSize is global for the whole text object; inlineFontSize is saved as span style="font-size: ...". Calling global fontSize clears all local sizes.',
+      inlineFontSizeDesc:
+        'Requires: setFeatures enabled + double-click inline edit + a dragged selection. A blinking caret, outer selection, or multi-select will not change local size.',
+      cautionTitle: 'Use with caution',
+      caution:
+        'Local font size is experimental. Once a paragraph has mixed sizes, some stable features become unavailable. If the product does not need mixed sizes, do not enable setFeatures({ inlineFontSize: true }).',
+      disabledTitle: 'These features will not work after enabling',
+      disabled: [
+        'Arc text: skipped when local sizes exist; text will not follow an arc',
+        'Lock-ratio scaling: mixed-size text does not participate in lockRatio fontSize scaling; drag-resize will not keep local sizes in locked proportion',
+        'Batch local size on multi-select: only the current inline selection is affected; you cannot change a few characters across multiple nodes at once'
+      ],
+      usageTitle: 'Usage',
+      limitsTitle: 'Effects and limits'
+    },
+    apiFormula: {
+      title: 'Addon · Formula',
+      intro: 'Formulas live in a separate package',
+      introSuffix:
+        '. The core editor stays unchanged — import both packages. KaTeX is bundled, so you do not install katex yourself.',
+      licenseCallout:
+        'This addon is free MIT. It does not check or bind the htmltext-edit license key. @chenyomi/leafer-htmltext-edit still uses its own license.',
+      installTitle: 'Install',
+      installDesc:
+        'Install with the core package. Installing the formula package alone also works — it pulls the peer.',
+      importTitle: 'Import order',
+      importDesc:
+        'Import leafer-htmltext-edit first, then the formula package. Importing the formula package auto-runs installHtmlTextFormula() (Quill formula blot, clipboard, canvas measure).',
+      apiTitle: 'API',
+      insertTitle: 'Insert while editing',
+      insertDesc:
+        'After double-click edit, insert at the caret. When you leave inline editing, the addon paints the formula into HTMLText.',
+      initTitle: 'Create text that already contains formulas',
+      initDesc:
+        'Use renderFormulaHtml to build snippets, then pass them in HtmlText text. Good for “add formula text” or restore.',
+      notesTitle: 'Notes'
     },
     apiLicense: {
       title: 'API · License',

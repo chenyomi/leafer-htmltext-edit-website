@@ -47,6 +47,20 @@
         </div>
 
         <div class="nav-group">
+          <p class="nav-group-title">{{ doc.ui.sidebar.advancedTitle }}</p>
+          <a
+            v-for="item in doc.advancedItems"
+            :key="item.id"
+            :href="'#' + item.id"
+            class="nav-item"
+            :class="{ active: activeSection === item.id }"
+            @click.prevent="scrollTo(item.id)"
+          >
+            {{ item.label }}
+          </a>
+        </div>
+
+        <div class="nav-group">
           <p class="nav-group-title">{{ doc.ui.sidebar.moreTitle }}</p>
           <a
             v-for="item in doc.moreItems"
@@ -205,6 +219,15 @@
             </button>
             <pre class="code-block"><code>{{ peerDepsInstall }}</code></pre>
           </div>
+
+          <h3 class="doc-h3">{{ doc.ui.installation.addonTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.installation.addonDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(formulaInstall, 'formula-install')">
+              <i class="pi" :class="copiedKey === 'formula-install' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ formulaInstall }}</code></pre>
+          </div>
         </section>
 
         <!-- ─── 快速开始 ─── -->
@@ -311,31 +334,6 @@
             {{ doc.ui.initGuide.licenseCalloutDev }}
           </div>
 
-          <h3 class="doc-h3">{{ doc.ui.initGuide.businessQuestionTitle }}</h3>
-          <p class="doc-p">{{ doc.ui.initGuide.businessQuestionDesc }}</p>
-          <div class="params-table-wrap">
-            <table class="params-table init-mode-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.goal }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.recommendedData }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.createRestore }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.saveAfterEdit }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in doc.integrationRoutes" :key="row.goal">
-                  <td>
-                    <strong>{{ row.goal }}</strong>
-                  </td>
-                  <td class="param-desc">{{ row.data }}</td>
-                  <td class="param-desc">{{ row.restore }}</td>
-                  <td class="param-desc">{{ row.save }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
           <h3 class="doc-h3" id="content-modes">{{ doc.ui.initGuide.contentModesTitle }}</h3>
           <p class="doc-p">
             {{ doc.ui.initGuide.contentModesDesc }}
@@ -375,36 +373,7 @@
             </ul>
           </div>
 
-          <h3 class="doc-h3">{{ doc.ui.initGuide.dontMixTitle }}</h3>
-          <div class="params-table-wrap">
-            <table class="params-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.confusable }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.correctUnderstanding }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.suggestion }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in doc.dataBoundaryRules" :key="row.name">
-                  <td>
-                    <strong>{{ row.name }}</strong>
-                  </td>
-                  <td class="param-desc">{{ row.meaning }}</td>
-                  <td class="param-desc">{{ row.suggestion }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
           <h3 class="doc-h3" id="init-scenarios">{{ doc.ui.initGuide.scenariosTitle }}</h3>
-          <p class="doc-p">
-            {{ doc.ui.initGuide.scenariosDesc }}
-            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">
-              {{ doc.ui.initGuide.scenariosLink }}
-            </a>
-            {{ doc.ui.initGuide.scenariosSuffix }}
-          </p>
 
           <div v-for="scenario in initScenarios" :key="scenario.id" class="init-scenario-block">
             <h4 class="init-scenario-title">
@@ -467,7 +436,7 @@
           </div>
         </section>
 
-        <!-- ─── 多字体与回显 ─── -->
+        <!-- ─── 自定义字体 ─── -->
         <section :id="'font-echo-guide'" class="doc-section">
           <div class="section-anchor-wrap">
             <h2 class="doc-h2">
@@ -476,23 +445,35 @@
             </h2>
           </div>
 
-          <p class="doc-p">
-            <strong>{{ doc.ui.fontEchoGuide.introSingle }}</strong>
-            <code>fontFamily + fontBase64</code>
-            ;
-            <strong>{{ doc.ui.fontEchoGuide.introMulti }}</strong>
-            {{ doc.ui.fontEchoGuide.introHydrate }}
-            —
-            <strong>{{ doc.ui.fontEchoGuide.introNoPluginChange }}</strong>
-            <code>HtmlText</code>
-            <code>@font-face</code>
-            <code>text</code>
-          </p>
+          <p class="doc-p">{{ doc.ui.fontEchoGuide.intro }}</p>
 
           <div class="callout callout-warning">
             <strong>{{ doc.ui.fontEchoGuide.whyNoUrlTitle }}</strong>
             {{ doc.ui.fontEchoGuide.whyNoUrlBody }}
           </div>
+
+          <h3 class="doc-h3">{{ doc.ui.fontEchoGuide.singleTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.fontEchoGuide.singleDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.initScenarioFullStyleCode, 'single-font')">
+              <i class="pi" :class="copiedKey === 'single-font' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.initScenarioFullStyleCode }}</code></pre>
+          </div>
+          <div class="callout callout-warning">
+            <code>fontFamily + fontBase64</code>
+            {{ doc.ui.fontEchoGuide.singleFontWarning }}
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.fontEchoGuide.multiTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.fontEchoGuide.multiDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.initScenarioMultiFontCode, 'multi-font-echo')">
+              <i class="pi" :class="copiedKey === 'multi-font-echo' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.initScenarioMultiFontCode }}</code></pre>
+          </div>
+          <p class="doc-p">{{ doc.ui.fontEchoGuide.multiNote }}</p>
 
           <h3 class="doc-h3">{{ doc.ui.fontEchoGuide.fontParamsTitle }}</h3>
           <div class="params-table-wrap">
@@ -520,112 +501,9 @@
             </table>
           </div>
 
-          <div class="callout callout-warning">
-            <code>fontFamily + fontBase64</code>
-            {{ doc.ui.fontEchoGuide.singleFontWarning }}
-          </div>
-
-          <h3 class="doc-h3">{{ doc.ui.fontEchoGuide.echoModesTitle }}</h3>
-          <div class="params-table-wrap">
-            <table class="params-table init-mode-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.writeMode }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.howYouStore }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.howToPass }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in doc.fontEchoModes" :key="row.name">
-                  <td>
-                    <strong>{{ row.name }}</strong>
-                  </td>
-                  <td class="param-desc">{{ row.storage }}</td>
-                  <td class="param-desc">
-                    <code>{{ row.how }}</code>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <h4 class="doc-h4">{{ doc.ui.fontEchoGuide.mode1Title }}</h4>
-          <p class="doc-p">
-            {{ doc.ui.fontEchoGuide.mode1Desc1 }}
-            <strong>{{ doc.ui.fontEchoGuide.mode1Strong }}</strong>
-          </p>
-          <p class="doc-p">
-            <strong>{{ doc.ui.fontEchoGuide.mode1Desc2 }}</strong>
-            {{ doc.ui.fontEchoGuide.mode1Desc2Suffix }}
-          </p>
-
-          <h4 class="doc-h4">{{ doc.ui.fontEchoGuide.mode2Title }}</h4>
-          <p class="doc-p">{{ doc.ui.fontEchoGuide.mode2Desc }}</p>
-
-          <h4 class="doc-h4">{{ doc.ui.fontEchoGuide.mode3Title }}</h4>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(doc.code.initScenarioMultiFontCode, 'multi-font-echo')">
-              <i class="pi" :class="copiedKey === 'multi-font-echo' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ doc.code.initScenarioMultiFontCode }}</code></pre>
-          </div>
-          <p class="doc-p">{{ doc.ui.fontEchoGuide.mode3Note }}</p>
-
-          <div class="callout callout-info">{{ doc.ui.fontEchoGuide.stableApiCallout }}</div>
-
-          <h3 class="doc-h3">{{ doc.ui.fontEchoGuide.bizSplitTitle }}</h3>
-          <p class="doc-p">{{ doc.ui.fontEchoGuide.bizSplitDesc }}</p>
-
-          <div class="params-table-wrap">
-            <table class="params-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.phase }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.businessStore }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.passToPlugin }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in doc.multiFontWorkflowSteps" :key="row.phase">
-                  <td>
-                    <strong>{{ row.phase }}</strong>
-                  </td>
-                  <td class="param-desc">{{ row.store }}</td>
-                  <td class="param-desc">{{ row.pass }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
           <div class="callout callout-info">
-            <strong>{{ doc.ui.fontEchoGuide.innerVsCanvasTitle }}</strong>
-            {{ doc.ui.fontEchoGuide.innerVsCanvas }}
-          </div>
-
-          <h4 class="doc-h4">{{ doc.ui.fontEchoGuide.schemaTitle }}</h4>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(doc.code.multiFontStorageSchemaExample, 'multi-font-schema')">
-              <i class="pi" :class="copiedKey === 'multi-font-schema' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ doc.code.multiFontStorageSchemaExample }}</code></pre>
-          </div>
-
-          <h4 class="doc-h4">{{ doc.ui.fontEchoGuide.hydrateTitle }}</h4>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(doc.code.multiFontHydrateExample, 'multi-font-hydrate')">
-              <i class="pi" :class="copiedKey === 'multi-font-hydrate' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ doc.code.multiFontHydrateExample }}</code></pre>
-          </div>
-
-          <h4 class="doc-h4">{{ doc.ui.fontEchoGuide.optimizeTitle }}</h4>
-          <ul class="doc-ul">
-            <li v-for="(item, i) in doc.ui.fontEchoGuide.optimizeItems" :key="i">{{ item }}</li>
-          </ul>
-
-          <div class="callout callout-warning">
-            <strong>{{ doc.ui.fontEchoGuide.dontDoTitle }}</strong>
-            {{ doc.ui.fontEchoGuide.dontDo }}
+            <strong>{{ doc.ui.fontEchoGuide.saveHintTitle }}</strong>
+            {{ doc.ui.fontEchoGuide.saveHint }}
           </div>
         </section>
 
@@ -647,80 +525,8 @@
             {{ doc.ui.dataPersistence.introSuffix }}
           </p>
 
-          <h3 class="doc-h3">{{ doc.ui.dataPersistence.chooseTitle }}</h3>
-          <p class="doc-p">
-            {{ doc.ui.dataPersistence.chooseDesc1 }}
-            <strong>{{ doc.ui.dataPersistence.chooseSingle }}</strong>
-            {{ doc.ui.dataPersistence.chooseSingleAction }}
-            <strong>{{ doc.ui.dataPersistence.chooseMulti }}</strong>
-            {{ doc.ui.dataPersistence.chooseMultiAction }}
-            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">
-              {{ doc.ui.dataPersistence.chooseMultiLink }}
-            </a>
-            {{ doc.ui.dataPersistence.chooseMultiSuffix }}
-          </p>
-          <div class="params-table-wrap">
-            <table class="params-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.yourBusinessData }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.whatToSave }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.howToRestore }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.fitLevel }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in doc.persistenceChoices" :key="row.scene">
-                  <td class="param-desc">{{ row.scene }}</td>
-                  <td>
-                    <code>{{ row.save }}</code>
-                  </td>
-                  <td>
-                    <code>{{ row.restore }}</code>
-                  </td>
-                  <td class="param-desc">{{ row.note }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <h3 class="doc-h3">{{ doc.ui.dataPersistence.whySplitTitle }}</h3>
-          <p class="doc-p">{{ doc.ui.dataPersistence.whySplitDesc }}</p>
-          <div class="params-table-wrap">
-            <table class="params-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.resourceData }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.whereToStore }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.nodeStores }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.howToRestoreResource }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in doc.storageSeparationRules" :key="row.name">
-                  <td>
-                    <strong>{{ row.name }}</strong>
-                  </td>
-                  <td class="param-desc">{{ row.storage }}</td>
-                  <td class="param-desc">{{ row.reference }}</td>
-                  <td class="param-desc">{{ row.restore }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="callout callout-info">
-            <strong>{{ doc.ui.dataPersistence.judgeCalloutTitle }}</strong>
-            {{ doc.ui.dataPersistence.judgeCallout }}
-          </div>
-
           <h3 class="doc-h3">{{ doc.ui.dataPersistence.leaferSceneTitle }}</h3>
-          <p class="doc-p">
-            {{ doc.ui.dataPersistence.leaferSceneDesc }}
-            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">
-              {{ doc.ui.dataPersistence.leaferSceneLink }}
-            </a>
-            {{ doc.ui.dataPersistence.leaferSceneEnd }}
-          </p>
+          <p class="doc-p">{{ doc.ui.dataPersistence.leaferSceneDesc }}</p>
           <div class="code-block-wrap">
             <button class="copy-btn" @click="copyCode(doc.code.scenePersistenceExample, 'scene-persistence')">
               <i class="pi" :class="copiedKey === 'scene-persistence' ? 'pi-check' : 'pi-copy'"></i>
@@ -785,7 +591,7 @@
           <h3 class="doc-h3">{{ doc.ui.dataPersistence.htmlOnlyTitle }}</h3>
           <p class="doc-p">
             {{ doc.ui.dataPersistence.htmlOnlyDesc }}
-            <a href="#init-scenarios" @click.prevent="scrollTo('init-scenarios')">
+            <a href="#font-echo-guide" @click.prevent="scrollTo('font-echo-guide')">
               {{ doc.ui.dataPersistence.htmlOnlyLink }}
             </a>
             {{ doc.ui.dataPersistence.htmlOnlyEnd }}
@@ -796,12 +602,6 @@
             </button>
             <pre class="code-block"><code>{{ doc.code.htmlOnlyPersistenceExample }}</code></pre>
           </div>
-
-          <h3 class="doc-h3">{{ doc.ui.dataPersistence.multiFontHtmlTitle }}</h3>
-          <p class="doc-p">{{ doc.ui.dataPersistence.multiFontHtmlDesc }}</p>
-          <ul class="doc-ul">
-            <li v-for="(item, i) in doc.ui.dataPersistence.multiFontHtmlItems" :key="i">{{ item }}</li>
-          </ul>
 
           <div class="callout callout-warning">{{ doc.ui.dataPersistence.saveWarning }}</div>
 
@@ -1074,74 +874,6 @@
           </div>
         </section>
 
-        <!-- ─── API: Format Painter ─── -->
-        <section :id="'api-format-painter'" class="doc-section">
-          <div class="section-anchor-wrap">
-            <h2 class="doc-h2">
-              {{ doc.ui.apiFormatPainter.title }}
-              <a :href="'#api-format-painter'" class="anchor-link" @click.prevent="scrollTo('api-format-painter')">#</a>
-            </h2>
-          </div>
-
-          <p class="doc-p">
-            <code>copyHTMLTextFormat</code>
-            {{ doc.ui.apiFormatPainter.intro }}
-            <code>applyHTMLTextFormat</code>
-            {{ doc.ui.apiFormatPainter.introSuffix }}
-          </p>
-
-          <div class="callout callout-info">{{ doc.ui.apiFormatPainter.callout }}</div>
-
-          <div class="code-block-wrap">
-            <button
-              class="copy-btn"
-              @click="
-                copyCode(
-                  `import { copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, clearCopiedHTMLTextFormat } from '@chenyomi/leafer-htmltext-edit'`,
-                  'import-format-painter'
-                )
-              "
-            >
-              <i class="pi" :class="copiedKey === 'import-format-painter' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre
-              class="code-block"
-            ><code>import { copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, clearCopiedHTMLTextFormat } from '@chenyomi/leafer-htmltext-edit'</code></pre>
-          </div>
-
-          <h3 class="doc-h3">{{ doc.ui.apiFormatPainter.methodsTitle }}</h3>
-          <div class="params-table-wrap">
-            <table class="params-table">
-              <thead>
-                <tr>
-                  <th>{{ doc.ui.shared.tableHeaders.name }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.invoke }}</th>
-                  <th>{{ doc.ui.shared.tableHeaders.desc }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="api in doc.formatPainterApis" :key="api.name">
-                  <td>
-                    <code>{{ api.name }}</code>
-                  </td>
-                  <td>
-                    <code>{{ api.signature }}</code>
-                  </td>
-                  <td class="param-desc">{{ api.desc }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <h3 class="doc-h3">{{ doc.ui.apiFormatPainter.exampleTitle }}</h3>
-          <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(doc.code.formatPainterExample, 'format-painter-ex')">
-              <i class="pi" :class="copiedKey === 'format-painter-ex' ? 'pi-check' : 'pi-copy'"></i>
-            </button>
-            <pre class="code-block"><code>{{ doc.code.formatPainterExample }}</code></pre>
-          </div>
-        </section>
-
         <!-- ─── API: setHTMLText ─── -->
         <section :id="'api-sethtml'" class="doc-section">
           <div class="section-anchor-wrap">
@@ -1374,35 +1106,147 @@
           <h3 class="doc-h3">{{ doc.ui.apiExperimental.letterSpacingTitle }}</h3>
           <p class="doc-p">{{ doc.ui.apiExperimental.letterSpacingDesc }}</p>
 
-          <h3 class="doc-h3">{{ doc.ui.apiExperimental.inlineFontSizeTitle }}</h3>
-          <div class="callout callout-warning">
-            <code>inlineFontSize</code>
-            {{ doc.ui.apiExperimental.inlineFontSizeWarning }}
+          <div class="callout callout-info">
+            <strong>{{ doc.ui.apiExperimental.labCalloutTitle }}</strong>
+            {{ doc.ui.apiExperimental.labCallout }}
+            <a href="#api-lab" @click.prevent="scrollTo('api-lab')">{{ doc.ui.apiExperimental.labLink }}</a>
+            {{ doc.ui.apiExperimental.labCalloutSuffix }}
           </div>
-          <p class="doc-p">{{ doc.ui.apiExperimental.inlineFontSizeDesc }}</p>
 
-          <h4 class="doc-h4">{{ doc.ui.apiExperimental.enableTitle }}</h4>
+          <div class="callout callout-info">{{ doc.ui.apiExperimental.exportCallout }}</div>
+        </section>
+
+        <!-- ─── 进阶: 格式刷 ─── -->
+        <section :id="'api-format-painter'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              {{ doc.ui.apiFormatPainter.title }}
+              <a :href="'#api-format-painter'" class="anchor-link" @click.prevent="scrollTo('api-format-painter')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            <code>copyHTMLTextFormat</code>
+            {{ doc.ui.apiFormatPainter.intro }}
+            <code>applyHTMLTextFormat</code>
+            {{ doc.ui.apiFormatPainter.introSuffix }}
+          </p>
+
+          <div class="callout callout-info">{{ doc.ui.apiFormatPainter.callout }}</div>
+
           <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(doc.code.inlineFontSizeEnableExample, 'inline-size-enable')">
-              <i class="pi" :class="copiedKey === 'inline-size-enable' ? 'pi-check' : 'pi-copy'"></i>
+            <button
+              class="copy-btn"
+              @click="
+                copyCode(
+                  `import { copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, clearCopiedHTMLTextFormat } from '@chenyomi/leafer-htmltext-edit'`,
+                  'import-format-painter'
+                )
+              "
+            >
+              <i class="pi" :class="copiedKey === 'import-format-painter' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre
+              class="code-block"
+            ><code>import { copyHTMLTextFormat, applyHTMLTextFormat, getCopiedHTMLTextFormat, clearCopiedHTMLTextFormat } from '@chenyomi/leafer-htmltext-edit'</code></pre>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormatPainter.methodsTitle }}</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>{{ doc.ui.shared.tableHeaders.name }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.invoke }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="api in doc.formatPainterApis" :key="api.name">
+                  <td>
+                    <code>{{ api.name }}</code>
+                  </td>
+                  <td>
+                    <code>{{ api.signature }}</code>
+                  </td>
+                  <td class="param-desc">{{ api.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormatPainter.exampleTitle }}</h3>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.formatPainterExample, 'format-painter-ex')">
+              <i class="pi" :class="copiedKey === 'format-painter-ex' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.formatPainterExample }}</code></pre>
+          </div>
+        </section>
+
+        <!-- ─── 进阶: 实验室 ─── -->
+        <section :id="'api-lab'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              {{ doc.ui.apiLab.title }}
+              <a :href="'#api-lab'" class="anchor-link" @click.prevent="scrollTo('api-lab')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">{{ doc.ui.apiLab.intro }}</p>
+          <div class="callout callout-warning">{{ doc.ui.apiLab.warning }}</div>
+          <p class="doc-p">
+            {{ doc.ui.apiLab.localStylesPrefix }}
+            <a href="#api-experimental" @click.prevent="scrollTo('api-experimental')">
+              {{ doc.ui.apiLab.localStylesLink }}
+            </a>
+            {{ doc.ui.apiLab.localStylesSuffix }}
+          </p>
+
+          <h3 class="doc-h3">{{ doc.ui.apiLab.setFeaturesTitle }}</h3>
+          <p class="doc-p">
+            <code>htmlTextManage.setFeatures</code>
+            {{ doc.ui.apiLab.setFeaturesDesc }}
+          </p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.inlineFontSizeEnableExample, 'lab-set-features')">
+              <i class="pi" :class="copiedKey === 'lab-set-features' ? 'pi-check' : 'pi-copy'"></i>
             </button>
             <pre class="code-block"><code>{{ doc.code.inlineFontSizeEnableExample }}</code></pre>
           </div>
 
-          <h4 class="doc-h4">{{ doc.ui.apiExperimental.usageTitle }}</h4>
+          <h3 class="doc-h3">{{ doc.ui.apiLab.inlineFontSizeTitle }}</h3>
+          <div class="callout callout-warning">
+            <strong>{{ doc.ui.apiLab.cautionTitle }}</strong>
+            <p>{{ doc.ui.apiLab.caution }}</p>
+            <p>
+              <strong>{{ doc.ui.apiLab.disabledTitle }}</strong>
+            </p>
+            <ul class="doc-ul">
+              <li v-for="(item, i) in doc.ui.apiLab.disabled" :key="i">{{ item }}</li>
+            </ul>
+          </div>
+          <div class="callout callout-warning">
+            <code>inlineFontSize</code>
+            {{ doc.ui.apiLab.inlineFontSizeWarning }}
+          </div>
+          <p class="doc-p">{{ doc.ui.apiLab.inlineFontSizeDesc }}</p>
+
+          <h4 class="doc-h4">{{ doc.ui.apiLab.usageTitle }}</h4>
           <div class="code-block-wrap">
-            <button class="copy-btn" @click="copyCode(doc.code.inlineFontSizeUsageExample, 'inline-size-usage')">
-              <i class="pi" :class="copiedKey === 'inline-size-usage' ? 'pi-check' : 'pi-copy'"></i>
+            <button class="copy-btn" @click="copyCode(doc.code.inlineFontSizeUsageExample, 'lab-inline-size')">
+              <i class="pi" :class="copiedKey === 'lab-inline-size' ? 'pi-check' : 'pi-copy'"></i>
             </button>
             <pre class="code-block"><code>{{ doc.code.inlineFontSizeUsageExample }}</code></pre>
           </div>
 
-          <h4 class="doc-h4">{{ doc.ui.apiExperimental.limitsTitle }}</h4>
+          <h4 class="doc-h4">{{ doc.ui.apiLab.limitsTitle }}</h4>
           <div class="params-table-wrap">
             <table class="params-table">
               <thead>
                 <tr>
                   <th>{{ doc.ui.shared.tableHeaders.relatedCapability }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.effect }}</th>
                   <th>{{ doc.ui.shared.tableHeaders.multiSizeBehavior }}</th>
                 </tr>
               </thead>
@@ -1411,13 +1255,111 @@
                   <td>
                     <code>{{ item.name }}</code>
                   </td>
+                  <td>
+                    <strong>{{ item.effect }}</strong>
+                  </td>
                   <td class="param-desc">{{ item.desc }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
+        </section>
 
-          <div class="callout callout-info">{{ doc.ui.apiExperimental.exportCallout }}</div>
+        <!-- ─── 进阶: 拓展插件 · 公式 ─── -->
+        <section :id="'api-formula'" class="doc-section">
+          <div class="section-anchor-wrap">
+            <h2 class="doc-h2">
+              {{ doc.ui.apiFormula.title }}
+              <a :href="'#api-formula'" class="anchor-link" @click.prevent="scrollTo('api-formula')">#</a>
+            </h2>
+          </div>
+
+          <p class="doc-p">
+            {{ doc.ui.apiFormula.intro }}
+            <code>@chenyomi/leafer-htmltext-formula</code>
+            {{ doc.ui.apiFormula.introSuffix }}
+          </p>
+          <div class="callout callout-info">{{ doc.ui.apiFormula.licenseCallout }}</div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormula.installTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.apiFormula.installDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(formulaInstall, 'formula-pkg')">
+              <i class="pi" :class="copiedKey === 'formula-pkg' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ formulaInstall }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormula.importTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.apiFormula.importDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.formulaImportExample, 'formula-import')">
+              <i class="pi" :class="copiedKey === 'formula-import' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.formulaImportExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormula.apiTitle }}</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>{{ doc.ui.shared.tableHeaders.name }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.invoke }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="api in doc.formulaApis" :key="api.name">
+                  <td>
+                    <code>{{ api.name }}</code>
+                  </td>
+                  <td>
+                    <code>{{ api.signature }}</code>
+                  </td>
+                  <td class="param-desc">{{ api.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormula.insertTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.apiFormula.insertDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.formulaInsertExample, 'formula-insert')">
+              <i class="pi" :class="copiedKey === 'formula-insert' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.formulaInsertExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormula.initTitle }}</h3>
+          <p class="doc-p">{{ doc.ui.apiFormula.initDesc }}</p>
+          <div class="code-block-wrap">
+            <button class="copy-btn" @click="copyCode(doc.code.formulaInitExample, 'formula-init')">
+              <i class="pi" :class="copiedKey === 'formula-init' ? 'pi-check' : 'pi-copy'"></i>
+            </button>
+            <pre class="code-block"><code>{{ doc.code.formulaInitExample }}</code></pre>
+          </div>
+
+          <h3 class="doc-h3">{{ doc.ui.apiFormula.notesTitle }}</h3>
+          <div class="params-table-wrap">
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>{{ doc.ui.shared.tableHeaders.scenario }}</th>
+                  <th>{{ doc.ui.shared.tableHeaders.inlineBehavior }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in doc.formulaNotes" :key="item.name">
+                  <td>
+                    <code>{{ item.name }}</code>
+                  </td>
+                  <td class="param-desc">{{ item.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <!-- ─── API: 授权管理 ─── -->
@@ -1530,6 +1472,7 @@ const installCommands: Record<PM, string> = {
   yarn: 'yarn add @chenyomi/leafer-htmltext-edit'
 };
 const peerDepsInstall = `npm install leafer-ui @leafer-ui/core @leafer-in/editor @leafer-in/html quill`;
+const formulaInstall = `npm install @chenyomi/leafer-htmltext-edit @chenyomi/leafer-htmltext-formula`;
 
 const activeSection = ref('introduction');
 const isSidebarOpen = ref(false);

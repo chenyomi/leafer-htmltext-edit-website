@@ -6,8 +6,7 @@ const pricingZhCN = {
   caseTitle: 'Case',
   caseSubtitle: '基础付费版功能介绍',
   demoLabels: {
-    verticalText: '一键竖排文字/段落竖排',
-    outline: '轮廓线'
+    formula: '拓展插件 · 公式'
   },
   playground: 'Playground',
   playgroundDesc: '基础付费版功能在线体验入口（不包含进阶高级版）',
@@ -137,8 +136,7 @@ const pricingEnUS = {
   caseTitle: 'Case',
   caseSubtitle: 'Paid tier feature overview',
   demoLabels: {
-    verticalText: 'One-click vertical text / paragraph layout',
-    outline: 'Outline stroke'
+    formula: 'Addon · Formula'
   },
   playground: 'Playground',
   playgroundDesc: 'Online trial for paid-tier basics (advanced tier not included)',

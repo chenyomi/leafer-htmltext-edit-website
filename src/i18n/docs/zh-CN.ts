@@ -18,7 +18,7 @@ export const docsZhCN = {
     },
     {
       id: 'font-echo-guide',
-      label: '多字体与回显'
+      label: '自定义字体'
     },
     {
       id: 'data-persistence',
@@ -39,10 +39,6 @@ export const docsZhCN = {
       label: 'HtmlTextManage'
     },
     {
-      id: 'api-format-painter',
-      label: '格式刷'
-    },
-    {
       id: 'api-sethtml',
       label: 'setHTMLText'
     },
@@ -53,6 +49,20 @@ export const docsZhCN = {
     {
       id: 'api-license',
       label: '授权管理'
+    }
+  ],
+  advancedItems: [
+    {
+      id: 'api-format-painter',
+      label: '格式刷'
+    },
+    {
+      id: 'api-lab',
+      label: '实验室'
+    },
+    {
+      id: 'api-formula',
+      label: '拓展插件 · 公式'
     }
   ],
   moreItems: [
@@ -95,7 +105,17 @@ export const docsZhCN = {
     {
       icon: '🔡',
       title: '局部样式',
-      desc: '局部字号（实验）、局部字体、局部字间距；与全局样式分层保存'
+      desc: '局部字体、局部字间距；与全局样式分层保存'
+    },
+    {
+      icon: '🧪',
+      title: '实验室',
+      desc: '实验能力需 setFeatures 显式开启；目前为局部字号 inlineFontSize'
+    },
+    {
+      icon: '∑',
+      title: '公式拓展',
+      desc: '独立包 @chenyomi/leafer-htmltext-formula，内置 KaTeX，可在文本中插入公式'
     },
     {
       icon: '🎡',
@@ -233,25 +253,19 @@ export const docsZhCN = {
       name: 'content + 样式参数',
       scene: '新建文本、工具栏创建、简单模板',
       fields: 'content, fontSize, color, fontFamily...',
-      behavior: '插件按样式属性自动拼 HTML；自定义单字体用 fontFamily + fontBase64'
+      behavior: '插件按样式属性自动拼 HTML；一个自定义字体再加 fontFamily + fontBase64'
     },
     {
       name: 'text 完整 HTML',
       scene: '业务只存 HTML、模板回显、跨系统导入',
       fields: 'text',
-      behavior: '原样渲染；缺 Quill CSS 会自动补全；从 HTML 反解 fontSize / padding 等元数据'
-    },
-    {
-      name: 'text = 字体 + 内容',
-      scene: '字体库与正文分开存储',
-      fields: 'text: fontStyle + contentHtml',
-      behavior: 'fontStyle 注入 @font-face，contentHtml 保留内联样式'
+      behavior: '原样渲染；缺 Quill CSS 会自动补全；从 HTML 反解 fontSize / padding 等'
     },
     {
       name: 'Leafer JSON 回显',
       scene: '纯 Leafer 项目、保存过 toJSON()',
       fields: '整份节点 JSON',
-      behavior: '最完整，位置、样式、textData 一次恢复'
+      behavior: '最完整，位置、样式、内部 HTML 一次恢复'
     }
   ],
   initParamGroups: [
@@ -1074,27 +1088,33 @@ export const docsZhCN = {
   inlineFontSizeLimits: [
     {
       name: '弧形文字',
-      desc: '存在局部字号（hasInlineFontSize）时弧形排版会被跳过；建议统一字号后再做弧形'
+      effect: '不可用',
+      desc: '存在局部字号时弧形排版会被跳过，文字保持直线。要做弧形，必须先用全局 fontSize 统一字号。'
     },
     {
       name: '锁定比例缩放',
-      desc: '多字号文本不参与 lockRatio 下的全局 fontSize 收口缩放，避免局部字号比例错乱'
+      effect: '不可用',
+      desc: '多字号文本不参与 lockRatio 下的全局 fontSize 收口。拖拽缩放时字号比例不会按锁定比例变化。'
+    },
+    {
+      name: '多选批量改局部字号',
+      effect: '不支持',
+      desc: 'inlineFontSize 只作用于当前内嵌编辑器里的 Quill 选区，不能一次给多个节点里的某几个字改字号。'
     },
     {
       name: '全局 fontSize',
-      desc: '调用 fontSize 会清除所有 inlineFontSize，文本回到单字号模式'
+      effect: '会清除局部字号',
+      desc: "调用 setHTMLText('fontSize', n) 会清掉所有 inlineFontSize，文本回到单字号。这不是并存，是覆盖。"
     },
     {
-      name: '与局部字体并存',
-      desc: '同一文本可同时有局部字号与局部字体；各自保存在不同 span style 属性上'
+      name: '第三方 HTML 回显',
+      effect: '不保证',
+      desc: '插件自己导出的 HTML 可恢复局部字号；外部复杂 HTML 尽量兼容，不保证完整还原。'
     },
     {
-      name: '多选批量',
-      desc: 'inlineFontSize 只对内嵌编辑器内 Quill 选区生效，不支持多节点批量局部字号'
-    },
-    {
-      name: '外部 HTML',
-      desc: '插件导出 HTML 可恢复局部字号；第三方 HTML 尽量兼容，不保证完整还原'
+      name: '与局部字体',
+      effect: '可以并存',
+      desc: '同一文本可同时有局部字号与局部字体，各自写在不同 span style 属性上。这不意味着其他能力也安全。'
     }
   ],
   formatPainterApis: [
@@ -1119,11 +1139,61 @@ export const docsZhCN = {
       desc: '清空已复制的格式快照，适合取消格式刷状态或页面切换时调用。'
     }
   ],
+  formulaApis: [
+    {
+      name: 'installHtmlTextFormula',
+      signature: 'installHtmlTextFormula(): void',
+      desc: '手动安装公式能力（注册 Quill formula blot、剪贴板、画布测量）。导入包时会自动调用，重复调用无效。'
+    },
+    {
+      name: 'insertHTMLTextFormula',
+      signature: 'insertHTMLTextFormula(latex): void',
+      desc: '往当前选中的 HtmlText 插入公式。已进入内嵌编辑时插在光标处；未进入编辑时会先灌入现有 HTML 再插入。'
+    },
+    {
+      name: 'renderFormulaHtml',
+      signature: 'renderFormulaHtml(latex): string',
+      desc: '生成带 ql-formula 的 HTML 片段，适合作为 HtmlText 的初始 text，或拼进已有段落。'
+    }
+  ],
+  formulaNotes: [
+    {
+      name: '导入即安装',
+      desc: 'import 公式包时会自动 installHtmlTextFormula()；请先导入 @chenyomi/leafer-htmltext-edit，或只导入公式包（它会带上 peer）'
+    },
+    {
+      name: 'KaTeX 内置',
+      desc: '公式用打包进来的 KaTeX 渲染，使用方不用再装 katex'
+    },
+    {
+      name: '插入时机',
+      desc: '双击进入编辑后在光标处插入最稳妥；未选中节点时 insertHTMLTextFormula 不会生效'
+    },
+    {
+      name: '保存回显',
+      desc: '公式保存在 span.ql-formula 上，data-value 是 LaTeX；回显时保留该节点即可，插件会重新渲染'
+    },
+    {
+      name: '授权',
+      desc: '公式包 MIT 免费，不校验、不绑定核心包授权密钥；核心编辑器仍按其自身协议授权'
+    }
+  ],
   changelog: [
+    {
+      version: 'formula 1.0.1',
+      date: '2026-08',
+      tag: 'latest',
+      items: [
+        '发布拓展插件 @chenyomi/leafer-htmltext-formula：内置 KaTeX，导入即安装',
+        '提供 insertHTMLTextFormula / renderFormulaHtml，可在内嵌编辑中插入公式',
+        '公式插件 MIT 免费，不校验核心包授权',
+        '文档将实验室（setFeatures / 局部字号）从局部样式拆出，并新增「进阶」导航'
+      ]
+    },
     {
       version: '2.6.13',
       date: '2026-07',
-      tag: 'latest',
+      tag: 'minor',
       items: [
         '新增格式刷 API：copyHTMLTextFormat、applyHTMLTextFormat、getCopiedHTMLTextFormat、clearCopiedHTMLTextFormat',
         '支持复制内嵌编辑选区格式或整段 HtmlText 对象格式，并应用到其它选区或对象',
@@ -1295,20 +1365,6 @@ export const docsZhCN = {
       codeKey: 'initScenarioTextCode'
     },
     {
-      id: 'split-storage',
-      title: '场景 E：字体与内容分开存储（多字体推荐）',
-      mode: 'text = fontStyle + contentHtml',
-      desc: '字体由字体管理器维护，正文单独存 HTML。回显时拼接为 text 字段。插件无需改动，由业务在传入前 hydrate。',
-      tips: [
-        '存储：contentHtml 不含 @font-face；fontIds 指向字体库',
-        '回显：字体库生成 base64 @font-face（推荐子集化），再 fontStyle + contentHtml',
-        '多字体时在一个 <style> 里写多条 @font-face，不能写外部 URL',
-        'contentHtml 里 <span style="font-family:..."> 要和 @font-face 名字一致'
-      ],
-      lang: 'main.ts',
-      codeKey: 'initScenarioSplitStorageCode'
-    },
-    {
       id: 'json',
       title: '场景 D：Leafer JSON 回显',
       mode: 'toJSON()',
@@ -1366,7 +1422,7 @@ export const docsZhCN = {
       name: 'setFeatures',
       anchor: 'set-features',
       signature: 'htmlTextManage.setFeatures(features): void',
-      desc: '开启实验功能。目前仅 inlineFontSize（局部字号）需要显式开启；局部字体 font、局部字间距 letterSpacing 默认可用。',
+      desc: '开启实验功能。目前仅 inlineFontSize（局部字号）需要显式开启，详见「实验室」；局部字体 font、局部字间距 letterSpacing 默认可用。',
       params: [
         {
           name: 'features',
@@ -1577,8 +1633,7 @@ const text = new HtmlText({
   draggable: true,
 })
 app.tree.add(text)`,
-    initScenarioMultiFontCode: `// 多字体：字体库查出 base64（推荐子集化），拼进一个 <style>
-// 存储时可只存 contentHtml + fontIds，回显前再执行同样拼接（见专章 hydrate 示例）
+    initScenarioMultiFontCode: `// 多个自定义字体：多条 @font-face 写在同一个 <style> 里（必须 base64）
 const fontStyle = \`<style>
 @font-face { font-family: 'YouSheBiaoTiHei-2'; src: url(data:font/woff2;base64,AAA...) format('woff2'); }
 @font-face { font-family: 'Dancing Script'; src: url(data:font/woff2;base64,BBB...) format('woff2'); }
@@ -1922,6 +1977,28 @@ setHTMLText('inlineFontSize', 42)
 // 如果需要恢复统一字号，使用全局 fontSize。
 // 这会统一整段文本字号，并清除局部字号标记。
 setHTMLText('fontSize', 24)`,
+    formulaImportExample: `import { htmlTextManage, HtmlText } from '@chenyomi/leafer-htmltext-edit'
+import {
+  insertHTMLTextFormula,
+  renderFormulaHtml
+} from '@chenyomi/leafer-htmltext-formula'
+
+await htmlTextManage.init(app)
+// 导入公式包时会自动 installHtmlTextFormula()`,
+    formulaInsertExample: `import { insertHTMLTextFormula } from '@chenyomi/leafer-htmltext-formula'
+
+// 1. 选中 HtmlText（建议双击进入内嵌编辑，光标放在插入位置）
+// 2. 插入 LaTeX 公式
+insertHTMLTextFormula(String.raw\`E=mc^2\`)`,
+    formulaInitExample: `import { HtmlText } from '@chenyomi/leafer-htmltext-edit'
+import { renderFormulaHtml } from '@chenyomi/leafer-htmltext-formula'
+
+const quadratic = renderFormulaHtml(String.raw\`x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}\`)
+
+const text = new HtmlText({
+  fontSize: 22,
+  text: '<p>When ' + renderFormulaHtml(String.raw\`a \\ne 0\`) + ', they are ' + quadratic + '</p>'
+})`,
     manageInitExample: `import { App } from 'leafer-ui'
 import { htmlTextManage } from '@chenyomi/leafer-htmltext-edit'
 
@@ -2055,6 +2132,7 @@ if (!ok) {
 有拖选`,
         inlineBehavior: '行为',
         relatedCapability: '关联能力',
+        effect: '影响',
         multiSizeBehavior: '多字号文本下的行为'
       },
       badges: {
@@ -2066,6 +2144,7 @@ if (!ok) {
     sidebar: {
       guideTitle: '指南',
       apiTitle: 'API 参考',
+      advancedTitle: '进阶',
       moreTitle: '更多',
       mobileNav: '文档导航'
     },
@@ -2088,7 +2167,9 @@ if (!ok) {
       calloutSuffix: '，建议配合 Vite 或 Webpack 使用。',
       installVia: '通过包管理器安装：',
       peerDepsTitle: 'Peer Dependencies',
-      peerDepsDesc: '请确保已安装以下同级依赖：'
+      peerDepsDesc: '请确保已安装以下同级依赖：',
+      addonTitle: '拓展插件（可选）',
+      addonDesc: '公式能力由独立包提供，不装也不影响核心编辑器。需要公式时安装：'
     },
     quickStart: {
       title: '快速开始',
@@ -2115,7 +2196,7 @@ if (!ok) {
         '这个插件既能当「画布里的富文本节点」，也能接进模板系统、素材库、字体库或业务表单。不同业务的重点不一样，先按下面这张表选路线，会比直接看 API 更不容易绕。',
       contentModesTitle: '第二层：节点内容初始化方式',
       contentModesDesc: '创建',
-      contentModesMiddle: '时，内容来源有四种常见方式。先选对方式，再补样式和布局参数。',
+      contentModesMiddle: '时，内容来源有三种常见方式。先选对方式，再补样式和布局参数。',
       priorityTitle: '优先级规则（避免回显错乱）：',
       priorityRules: [
         '同时传 text 和 content 时，以 text 为准，content 会被忽略',
@@ -2136,49 +2217,23 @@ if (!ok) {
       paramsEnd: '。'
     },
     fontEchoGuide: {
-      title: '多字体与回显',
-      introSingle: '单字体',
-      introMulti: '多字体（尤其中文字体）',
-      introHydrate: '拆分存储 + 回显前注水（hydrate）',
-      introNoPluginChange: '插件本身无需改动',
-      whyNoUrlTitle: '为什么不能用外部 URL 引用字体？',
+      title: '自定义字体',
+      intro:
+        '自定义字体只有两种传法：一个字体用 fontFamily + fontBase64；多个字体写进 text 的 @font-face。保存还是 toJSON() 或完整 HTML，和普通文本一样，不用另做一套业务存储。',
+      whyNoUrlTitle: '自定义字体必须写成 base64',
       whyNoUrlBody:
-        '插件内层 HTMLText 会把富文本 HTML 包进 data:image/svg+xml 的 SVG foreignObject 再渲染到画布。这种 SVG 被当作自包含图片处理，浏览器不会为其中的 @font-face { src: url(https://...) } 发起网络请求。因此画布回显、导出图里自定义字体必须使用 data:font/woff2;base64,... 内嵌，不能只写 CDN 地址或相对路径。',
-      fontParamsTitle: '四个字体参数分别干什么？',
-      singleFontWarning:
-        '只能注册一个主自定义字体。一段文字里要回显多种自定义字体，最稳妥的方式是在 text 的 <style> 里写多条 @font-face 。',
-      echoModesTitle: '多字体回显：三种写法（选一种即可）',
-      mode1Title: '写法 1：Leafer JSON（单字体 / 演示最省事）',
-      mode1Desc1: '保存 htmlText.toJSON() ，回显 new HtmlText(json) 。字体、局部 span、textData 都在里面，适合',
-      mode1Strong: '单字体、字体体积小、或原型演示',
-      mode1Desc2: '多字体 + 中文字体体积大时，不建议直接把 toJSON() 原样入库或长期存档',
-      mode1Desc2Suffix:
-        '——每个文本节点的 text 里可能重复内嵌多份 base64，整棵画布 JSON 会迅速膨胀。此时请改用写法 3 或下文「业务约定」在存取时瘦身与注水。',
-      mode2Title: '写法 2：完整 HTML 一个字段',
-      mode2Desc:
-        'text 里自带 <style> （可含多条 @font-face ）+ 带 font-family 的 <p>/<span> 。只传 new HtmlText({ text }) 即可，不必再额外传字体资源字段 。',
-      mode3Title: '写法 3：字体和内容分开存（场景 E）',
-      mode3Note: '注意：多字体时在一个 <style> 里写多条 @font-face ，不是多个 <style> 标签各写一个。',
-      stableApiCallout:
-        '当前公开类型里稳定的构造入口是 content 、 text 、 fontFamily 和 fontBase64 。如果业务已有多个字体文件，不要只把字体数组传给构造函数后期待自动回显局部字体；请生成完整 <style> + 内容 HTML（写法 2 / 3），或在 Leafer JSON 存取流程里按下文约定拆分与注水。',
-      bizSplitTitle: '多字体推荐：业务侧拆分存储（插件 0 改动）',
-      bizSplitDesc:
-        '插件只负责：你传入的 text 里只要有正确的 @font-face （base64）和内容 HTML，就能编辑和渲染。字体文件放哪、怎么瘦身、怎么入库，由业务项目自己约定 ，不必等插件提供 API。',
-      innerVsCanvasTitle: '内嵌编辑 vs 画布渲染：',
-      innerVsCanvas:
-        '用户双击编辑时，页面可用 addCustomFonts 等方式预加载完整字体 URL （内层 Quill 用）； 画布 SVG 渲染前仍须把子集或完整字体的 base64 写进 text 的 @font-face 。两者可以分离。',
-      schemaTitle: '推荐字段约定（示例）',
-      hydrateTitle: '回显前注水（hydrate）流程',
-      optimizeTitle: '体积优化建议',
-      optimizeItems: [
-        '子集化（强烈推荐）：按文本实际用到的字符生成 woff2 子集再转 base64。完整中文字库几 MB，子集往往只有几十 KB。',
-        '全局去重：同一字体在多个文本节点出现时，存一份字体资源，各节点只存 fontId 列表，不要每个节点各嵌一份 base64。',
-        '导出 Leafer JSON 前 strip：从各节点 text 去掉 @font-face ，字体元数据提到文档级 fonts 表；打开文档时再 hydrate。',
-        '最终导出图片且不需再编辑：可考虑转曲（文字转 path），不再携带字体数据——会丢失可编辑性，仅适合定稿导出。'
-      ],
-      dontDoTitle: '不要做的事：',
-      dontDo:
-        '① 在持久化数据里只存 font-family 名字、指望画布自动找系统字体（自定义字体会回退）； ② 在 @font-face 里写 url(/fonts/xxx.woff2) 或 CDN 地址后期待 SVG 渲染正确（会失败）； ③ 把完整 base64 字库重复写进每条文本记录或每个节点 JSON。'
+        '画布把 HTML 包进 SVG 再绘制，浏览器不会去请求 @font-face 里的网址。所以必须写成 data:font/woff2;base64,... ，只写 CDN 或相对路径时画布上会丢字体。',
+      singleTitle: '一个自定义字体',
+      singleDesc: '创建时把字体名和字体文件一起传入。插件会自动写成一条 @font-face。',
+      singleFontWarning: '只能注册一个主自定义字体。一段字里要多种自定义字体，用下面的「多个自定义字体」。',
+      multiTitle: '多个自定义字体',
+      multiDesc:
+        '不要传字体数组。在 text 里放一个 <style>（多条 @font-face，全部 base64）和带 font-family 的内容，然后 new HtmlText({ text })。',
+      multiNote: '多条 @font-face 写在同一个 <style> 里。span 上的 font-family 必须和 @font-face 同名。',
+      fontParamsTitle: '相关参数',
+      saveHintTitle: '保存：',
+      saveHint:
+        '编辑完成后保存 htmlText.toJSON() 或内部 HTML 即可。多字体已经写在 HTML 的 @font-face 里，不必再存一份字体表。'
     },
     dataPersistence: {
       title: '数据保存与回显',
@@ -2202,7 +2257,7 @@ if (!ok) {
         '会被多个文本、多个模板重复使用，或者体积明显大的内容，不要塞进每条文本记录。字体文件、图片、素材、模板资源适合单独存；位置、宽高、颜色、描边、局部 span 样式这类轻量状态适合跟文本 JSON 或 HTML 一起存。',
       leaferSceneTitle: '纯 Leafer 项目：保存整棵画布',
       leaferSceneDesc:
-        '如果页面里的图形、图片、文本都由 Leafer 管理，推荐直接把画布导出成 JSON 存储。下次进入页面时先创建 App 、初始化 htmlTextManage ，再用 set 覆盖画布或用 add 追加 JSON 数据即可。 若画布含多字体大体积字库 ，建议在 toJSON() 后由业务 strip 各节点内嵌字体、在 set() 前 hydrate，详见',
+        '如果页面里的图形、图片、文本都由 Leafer 管理，推荐直接把画布导出成 JSON 存储。下次进入页面时先创建 App 、初始化 htmlTextManage ，再用 set 覆盖画布或用 add 追加 JSON 数据即可。',
       leaferSceneLink: '多字体与回显',
       leaferSceneEnd: '。',
       mixedTitle: '混合业务项目：文本节点单独存储',
@@ -2215,9 +2270,8 @@ if (!ok) {
       localStyleDesc:
         '局部字体、局部字号、局部字间距都不是单独传一个 style 字段回去，而是写进内部 HTMLText.text 的 <span style> 里。用户编辑完成后保存节点 JSON，回显时原样传回，局部样式才不会丢。',
       htmlOnlyTitle: '特殊场景：只保存 HTML 内容',
-      htmlOnlyDesc:
-        '业务把字体和内容分开存储时，回显请使用 text 字段，把 @font-face 与内容 HTML 拼在一起传入。这通常是为了避免把很大的字体 base64 重复保存到每条文本数据里。完整示例见',
-      htmlOnlyLink: '初始化指南 · 场景 4',
+      htmlOnlyDesc: '只保存 HTML 时，回显用 text 传入完整 HTML。自定义字体必须带上 @font-face（base64）。示例见',
+      htmlOnlyLink: '自定义字体',
       htmlOnlyEnd: '。',
       multiFontHtmlTitle: '多字体与 HTML 回显',
       multiFontHtmlDesc:
@@ -2228,7 +2282,7 @@ if (!ok) {
         '初始化多字体：优先把多条 @font-face 和内容 HTML 一起作为 text 传入'
       ],
       saveWarning:
-        '不建议保存 Quill 实例、DOM 或编辑器运行时状态。保存 HtmlText.toJSON() 或整棵 Leafer JSON 即可；回显前确保已导入 HtmlText 并完成 htmlTextManage.init(app) ，这样双击编辑、选中、缩放等能力才能正常工作。特殊 HTML 回显方案只适合已有业务存储拆分的场景；若只保存 HTML 内容，必须保留 <p style="..."> 、 <span style="..."> 等内联样式，并在使用自定义字体时补回全部 @font-face （多字体场景可能有多条）。只剩纯文本时无法恢复字号、字体、描边、颜色、宽高和对齐等视觉效果。',
+        '不要保存 Quill 实例、DOM 或编辑器运行时状态。保存 HtmlText.toJSON() 或整棵 Leafer JSON 即可。回显前先导入 HtmlText 并完成 htmlTextManage.init(app)。只存 HTML 时必须保留内联样式和全部 @font-face；只剩纯文本时无法恢复字号、字体、描边、颜色和对齐。',
       checklistTitle: '保存前检查清单'
     },
     editingGuide: {
@@ -2326,7 +2380,7 @@ if (!ok) {
       introSuffix: '里的「三种操作场景」——大部分看不懂的问题都是没双击或没拖选文字。',
       quickNoteTitle: '快速记：',
       quickNote:
-        '整段改字号 / 行高 / 字重 → 选中节点即可； 某几个字加粗 / 改色 → 双击编辑后拖选再调用； 某几个字改字号 / 字体 / 字间距 → 双击 + 拖选（字号还需 setFeatures({ inlineFontSize: true }) ）。',
+        '整段改字号 / 行高 / 字重 → 选中节点即可； 某几个字加粗 / 改色 → 双击编辑后拖选再调用； 某几个字改字体 / 字间距 → 双击 + 拖选； 某几个字改字号 → 见实验室，还需 setFeatures({ inlineFontSize: true }) 。',
       signatureTitle: '函数签名',
       paramsTitle: '参数说明',
       setHtmlParams: [
@@ -2379,16 +2433,57 @@ if (!ok) {
       letterSpacingTitle: '局部字间距（letterSpacing）',
       letterSpacingDesc:
         'setHTMLText(\'letterSpacing\', n) 在内嵌编辑且有选区时写入 span style="letter-spacing:..." ；否则更新全局 textData.letterSpacing 并清除局部标记。与局部字号类似，全局字间距写在 <p> 上，局部写在 <span> 上。',
-      inlineFontSizeTitle: '局部字号 inlineFontSize（实验功能）',
-      inlineFontSizeWarning:
-        '是唯一仍需 htmlTextManage.setFeatures({ inlineFontSize: true }) 的样式能力。未开启时不影响 fontSize 、局部字体、弧形文字等稳定功能。',
-      inlineFontSizeDesc:
-        '不会替代 fontSize ： fontSize 表示整个文本对象的全局字号， inlineFontSize 只作为 span style="font-size: ..." 保存。调用全局 fontSize 会清除所有局部字号。',
-      enableTitle: '开启方式',
-      usageTitle: '使用方式',
-      limitsTitle: '局部字号的影响与限制',
+      labCalloutTitle: '局部字号：',
+      labCallout: '仍是实验能力，已单独放到',
+      labLink: '实验室',
+      labCalloutSuffix: '，需 setFeatures 开启后才生效。',
       exportCallout:
         '插件导出的 HTML 会保留局部字号 / 局部字体 / 局部字间距，并通过 parseHtmlTextData 反解基础样式。只存 text 回显时，务必保留 <style> 内全部 @font-face 与 <span style> ；第三方复杂 HTML 会尽量兼容，但不保证完整还原。'
+    },
+    apiLab: {
+      title: '实验室',
+      intro: '实验功能默认关闭，不影响局部字体、局部字间距、弧形文字等稳定能力。需要时再显式开启。',
+      warning:
+        "目前仅 inlineFontSize（局部字号）需要 htmlTextManage.setFeatures({ inlineFontSize: true })。未开启时调用 setHTMLText('inlineFontSize', n) 不会生效。",
+      localStylesPrefix: '局部 vs 全局的操作场景、字体和字间距仍在',
+      localStylesLink: '局部与全局样式',
+      localStylesSuffix: '。这里只讲实验开关和局部字号。',
+      setFeaturesTitle: '开启实验功能 setFeatures',
+      setFeaturesDesc: '只打开你需要的开关。当前可选字段仅 inlineFontSize。',
+      inlineFontSizeTitle: '局部字号 inlineFontSize',
+      inlineFontSizeWarning:
+        '不会替代 fontSize。fontSize 是整段全局字号；inlineFontSize 只作为 span style="font-size: ..." 保存。调用全局 fontSize 会清除所有局部字号。',
+      inlineFontSizeDesc:
+        '必须：setFeatures 开启 + 双击进入内嵌编辑 + 拖选一段字。只闪光标、外框选中或多选节点都不会改局部字号。',
+      cautionTitle: '请谨慎使用',
+      caution:
+        '局部字号是实验能力。一段文字出现多种字号后，部分稳定功能会直接不可用。产品不需要混排多字号时，不要开启 setFeatures({ inlineFontSize: true })。',
+      disabledTitle: '开启后这些功能不能用',
+      disabled: [
+        '弧形文字：有局部字号时直接跳过，不会沿弧排列',
+        '锁定比例缩放：多字号文本不参与 lockRatio 收口，拖拽缩放时字号比例不会按锁定比例变化',
+        '多选批量改局部字号：只对当前内嵌编辑选区生效，不能一次改多个节点里的某几个字'
+      ],
+      usageTitle: '使用方式',
+      limitsTitle: '影响与限制'
+    },
+    apiFormula: {
+      title: '拓展插件 · 公式',
+      intro: '公式是独立包',
+      introSuffix: '，不改核心编辑器。两个包一起引用即可。公式用打包进来的 KaTeX，使用方不用再装 KaTeX。',
+      licenseCallout:
+        '本插件 MIT 免费，不校验、不绑定 htmltext-edit 的授权密钥。核心编辑器 @chenyomi/leafer-htmltext-edit 仍按其自身协议授权。',
+      installTitle: '安装',
+      installDesc: '与核心包一起安装。只装公式包也可以，它会带上 peer。',
+      importTitle: '导入顺序',
+      importDesc:
+        '请先导入 leafer-htmltext-edit，再导入公式包。导入公式包时会自动 installHtmlTextFormula()（注册 Quill formula blot、剪贴板、画布测量）。',
+      apiTitle: 'API',
+      insertTitle: '在编辑中插入',
+      insertDesc: '双击进入编辑后，在光标处插入；画布退出编辑后由插件把公式画进 HTMLText。',
+      initTitle: '初始化带公式的文本',
+      initDesc: '用 renderFormulaHtml 生成片段，再放进 HtmlText 的 text。适合「添加公式文本」或回显。',
+      notesTitle: '注意点'
     },
     apiLicense: {
       title: 'API · 授权管理',

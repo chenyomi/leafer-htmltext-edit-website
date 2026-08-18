@@ -26,20 +26,20 @@
         ></video>
 
         <div class="text-center">
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
-            <img style="border-radius: 20px; width: 100%" src="@/assets/shu.png" alt="" />
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.verticalText }}</p>
-          </div>
-          <div class="relative inline-block mx-4 my-6" style="background: #ffffff; border-radius: 20px; width: 400px">
+          <div
+            class="relative inline-block mx-4 my-6"
+            style="background: #ffffff; border-radius: 20px; width: 800px; max-width: 100%"
+          >
             <video
-              src="@/assets/video/lunkuo.mov"
+              :poster="formulaPosterSrc"
+              src="@/assets/video/formula.mp4"
               autoplay
               muted
               loop
               playsinline
               style="border-radius: 20px; width: 100%"
             ></video>
-            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.outline }}</p>
+            <p class="flex-1 w-full absolute">{{ pricing.demoLabels.formula }}</p>
           </div>
         </div>
         <p class="start-building-subtitle mt-10">{{ pricing.playground }}</p>
@@ -183,6 +183,7 @@ import './StartBuilding.css';
 import GradientText from '@/content/TextAnimations/GradientText/GradientText.vue';
 import ElectricBorder from '@/content/Animations/ElectricBorder/ElectricBorder.vue';
 import posterSrc from '@/assets/video/video.png';
+import formulaPosterSrc from '@/assets/video/formula.png';
 import { usePricing } from '@/i18n/pricing';
 
 const pricing = usePricing();

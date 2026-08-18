@@ -70,6 +70,7 @@ export function useDocsContent() {
   const allSectionIds = computed(() => [
     ...doc.value.guideItems.map(i => i.id),
     ...doc.value.apiItems.map(i => i.id),
+    ...doc.value.advancedItems.map(i => i.id),
     ...doc.value.moreItems.map(i => i.id)
   ]);
 

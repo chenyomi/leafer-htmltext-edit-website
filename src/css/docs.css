@@ -491,6 +491,15 @@
   color: #ffd57a;
 }
 
+.callout p {
+  margin: 0.45rem 0 0;
+}
+
+.callout .doc-ul {
+  margin: 0.45rem 0 0;
+  color: inherit;
+}
+
 /* ─── Code tabs ───────────────────────────────────────────────────────────── */
 .code-tabs {
   margin-bottom: 1.5rem;
